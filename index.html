@@ -827,9 +827,16 @@ thead { position:sticky; top:0; z-index:10; }
           </div>
         </div>
         <div class="chart-card">
-          <div class="cc-hdr"><div><div class="cc-title">By Category</div><div class="cc-sub">This month's breakdown</div></div></div>
+          <div class="cc-hdr"><div><div class="cc-title">By Category</div><div class="cc-sub" id="donut-period-sub">This month's breakdown</div></div></div>
           <div class="donut-wrap"><canvas id="donut-canvas" width="110" height="110" style="width:110px!important;height:110px!important;flex-shrink:0"></canvas><div class="donut-leg" id="donut-legend"></div></div>
         </div>
+      </div>
+      <div class="table-card" id="budget-status-card" style="margin-bottom:14px;display:none">
+        <div class="tt">
+          <div class="tt-title">Budget Status <span id="budget-status-period" style="font-size:.62rem;font-weight:400;color:var(--ink3);font-family:var(--fm)">— this month</span></div>
+          <button class="btn-ghost" onclick="goPage('budgets',null)">Manage →</button>
+        </div>
+        <div id="budget-status-bars" style="padding:0 4px"></div>
       </div>
       <div class="table-card">
         <div class="tt"><div class="tt-title">Recent Transactions</div><button class="btn-ghost" onclick="goPage('transactions',null)">View all →</button></div>
@@ -1693,48 +1700,84 @@ async function syncAdvisorHistory() {
 // RENDER ENGINE
 // ═══════════════════════════════════════════════════════════
 function renderAll() {
-  renderStatCards();
-  drawMainChart('week');
-  drawDonutChart();
+  renderStatCards(_chartPeriod);
+  drawMainChart(_chartPeriod);
+  drawDonutChart(_chartPeriod);
   renderRecentTx();
+  renderBudgetStatus(_chartPeriod);
 }
 
-function getStats() {
-  const txs = state.transactions;
+function _periodFilter(period) {
   const now = new Date();
+  if (period === 'week') {
+    const start = new Date(now); start.setDate(start.getDate() - 6);
+    const s = start.toISOString().slice(0,10), e = now.toISOString().slice(0,10);
+    return t => t.date >= s && t.date <= e;
+  }
+  if (period === '3m') {
+    const months = [];
+    for (let i=2;i>=0;i--){const m=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}`);}
+    return t => months.some(m => t.date?.startsWith(m));
+  }
+  // default: month
   const ms = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const prev = `${now.getMonth()===0?now.getFullYear()-1:now.getFullYear()}-${String(now.getMonth()===0?12:now.getMonth()).padStart(2,'0')}`;
-  const mo = txs.filter(t=>t.date?.startsWith(ms));
-  const pmo = txs.filter(t=>t.date?.startsWith(prev));
+  return t => t.date?.startsWith(ms);
+}
+
+function _prevPeriodFilter(period) {
+  const now = new Date();
+  if (period === 'week') {
+    const end = new Date(now); end.setDate(end.getDate() - 7);
+    const start = new Date(end); start.setDate(start.getDate() - 6);
+    const s = start.toISOString().slice(0,10), e = end.toISOString().slice(0,10);
+    return t => t.date >= s && t.date <= e;
+  }
+  if (period === '3m') {
+    const months = [];
+    for (let i=5;i>=3;i--){const m=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}`);}
+    return t => months.some(m => t.date?.startsWith(m));
+  }
+  const pm = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prev = `${pm.getFullYear()}-${String(pm.getMonth()+1).padStart(2,'0')}`;
+  return t => t.date?.startsWith(prev);
+}
+
+const _periodLabel = { week:'Last 7 days', month:'This month', '3m':'Last 3 months' };
+
+function getStats(period = 'month') {
+  const txs = state.transactions;
+  const pf = _periodFilter(period), ppf = _prevPeriodFilter(period);
+  const mo = txs.filter(pf), pmo = txs.filter(ppf);
   const income = mo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const exp = mo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const sav = mo.filter(t=>t.type==='savings').reduce((s,t)=>s+t.amount,0);
-  const pInc = pmo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const pExp = pmo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const exp    = mo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const sav    = mo.filter(t=>t.type==='savings').reduce((s,t)=>s+t.amount,0);
+  const pInc   = pmo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const pExp   = pmo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const totalSaved = txs.filter(t=>t.type==='savings').reduce((s,t)=>s+t.amount,0);
   const incChg = pInc>0?((income-pInc)/pInc*100).toFixed(1):'0';
   const expChg = pExp>0?((exp-pExp)/pExp*100).toFixed(1):'0';
-  return { income, exp, sav, totalSaved, savingsRate: income>0?((sav/income)*100).toFixed(1):0, incChg, expChg, txCount: mo.length };
+  const label  = _periodLabel[period] || 'This month';
+  return { income, exp, sav, totalSaved, savingsRate: income>0?((sav/income)*100).toFixed(1):0, incChg, expChg, txCount: mo.length, label };
 }
 
-function renderStatCards() {
-  const s = getStats();
+function renderStatCards(period = 'month') {
+  const s = getStats(period);
   const fmt = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : n.toString();
   const cards = [
     {
       icon:'↑', iconBg:'var(--teallt)', iconColor:'var(--teal)',
       lbl:'Total Income', val:`KES ${fmt(s.income)}`,
-      sub:'This month',
-      badge: s.incChg >= 0 ? `+${s.incChg}%` : `${s.incChg}%`,
-      bt: s.incChg >= 0 ? 'up' : 'dn',
+      sub: s.label,
+      badge: parseFloat(s.incChg) >= 0 ? `+${s.incChg}%` : `${s.incChg}%`,
+      bt: parseFloat(s.incChg) >= 0 ? 'up' : 'dn',
       accent:'var(--teal)',
     },
     {
       icon:'↓', iconBg:'var(--roselt)', iconColor:'var(--rose)',
       lbl:'Total Expenses', val:`KES ${fmt(s.exp)}`,
-      sub:'This month',
-      badge: s.expChg >= 0 ? `+${s.expChg}%` : `${s.expChg}%`,
-      bt: s.expChg <= 0 ? 'up' : 'dn',
+      sub: s.label,
+      badge: parseFloat(s.expChg) >= 0 ? `+${s.expChg}%` : `${s.expChg}%`,
+      bt: parseFloat(s.expChg) <= 0 ? 'up' : 'dn',
       accent:'var(--rose)',
     },
     {
@@ -1749,7 +1792,7 @@ function renderStatCards() {
       icon:'#', iconBg:'var(--purplt)', iconColor:'var(--purple)',
       lbl:'Transactions', val: s.txCount.toString(),
       sub:`${state.transactions.length} total recorded`,
-      badge:`+${s.txCount}`,
+      badge:`${s.txCount} in period`,
       bt:'up',
       accent:'var(--purple)',
     },
@@ -1765,6 +1808,45 @@ function renderStatCards() {
       <div class="sc-sub">${c.sub}</div>
       <div class="sc-accent" style="background:${c.accent}"></div>
     </div>`).join('');
+}
+
+function renderBudgetStatus(period = 'month') {
+  const card = document.getElementById('budget-status-card');
+  const el   = document.getElementById('budget-status-bars');
+  const lbl  = document.getElementById('budget-status-period');
+  if (!card || !el) return;
+  if (!state.budgets.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  if (lbl) lbl.textContent = '— ' + (_periodLabel[period]||'this month').toLowerCase();
+  const pf = _periodFilter(period);
+  const rows = state.budgets
+    .map(b => {
+      const spent = state.transactions
+        .filter(t => pf(t) && t.category === b.category && t.type === 'expense')
+        .reduce((s,t) => s + t.amount, 0);
+      return { b, spent };
+    })
+    .sort((a,b) => (b.spent/b.b.limit) - (a.spent/a.b.limit));
+  el.innerHTML = rows.map(({b, spent}) => {
+    const pct = b.limit > 0 ? Math.min((spent/b.limit)*100, 100) : 0;
+    const pctNum = Math.round(pct);
+    const color = pct >= 90 ? 'var(--rose)' : pct >= 70 ? 'var(--amber)' : 'var(--teal)';
+    const cc = CATS[b.category] || CATS.other;
+    const remaining = Math.max(b.limit - spent, 0);
+    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="width:7px;height:7px;border-radius:50%;background:${cc.color};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;align-items:baseline">
+          <div style="font-size:.72rem;font-weight:600;color:var(--ink)">${cc.label}</div>
+          <div style="font-size:.62rem;font-family:var(--fm);color:${color};font-weight:700">${pctNum}% · <span style="color:var(--ink3)">KES ${spent.toLocaleString()} / ${b.limit.toLocaleString()}</span></div>
+        </div>
+        <div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden">
+          <div style="height:100%;border-radius:2px;width:${pct}%;background:${color};transition:width .6s ease"></div>
+        </div>
+        <div style="font-size:.6rem;color:var(--ink3);margin-top:3px">${pct<100?`KES ${remaining.toLocaleString()} remaining`:'Over budget'}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── Canvas Charts ─────────────────────────────────────────
@@ -1826,13 +1908,22 @@ function drawMainChart(period) {
   });
 }
 
-function setChartPeriod(btn,p){document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');drawMainChart(p)}
+function setChartPeriod(btn,p){
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  drawMainChart(p);
+  renderStatCards(p);
+  drawDonutChart(p);
+  renderBudgetStatus(p);
+}
 
-function drawDonutChart(){
+function drawDonutChart(period = 'month'){
   const c=document.getElementById('donut-canvas');if(!c)return;
   const ctx=c.getContext('2d');c.width=110;c.height=110;ctx.clearRect(0,0,110,110);
-  const now=new Date();const ms=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const exp=state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='expense');
+  const sub = document.getElementById('donut-period-sub');
+  if(sub) sub.textContent = (_periodLabel[period]||'This month') + "'s breakdown";
+  const pf = _periodFilter(period);
+  const exp=state.transactions.filter(t=>t.type==='expense'&&pf(t));
   const cats={};exp.forEach(t=>{cats[t.category]=(cats[t.category]||0)+t.amount});
   const entries=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const total=entries.reduce((s,[,v])=>s+v,0);
@@ -2125,7 +2216,7 @@ function saveBudget(){
     showToast('Budget created','success');
   }
   Store.set('budgets',state.budgets);closeModal('budget-modal');
-  renderBudgetsPage();
+  renderBudgetsPage(); renderBudgetStatus(_chartPeriod);
   const sb=getSbClient();if(sb)syncNow();
 }
 
