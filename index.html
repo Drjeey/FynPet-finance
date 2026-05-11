@@ -1052,6 +1052,33 @@ thead { position:sticky; top:0; z-index:10; }
 </div><!-- /layout -->
 <div id="advisor-backdrop" onclick="toggleAdvisor()"></div>
 
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal" style="z-index:2000">
+  <div class="modal" style="max-width:380px;width:100%">
+    <div class="modal-hdr" style="margin-bottom:16px">
+      <div>
+        <div class="modal-title">Sign in to sync</div>
+        <div style="font-size:.68rem;color:var(--ink3);margin-top:3px">Save your data securely across devices</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:3px;margin-bottom:18px;background:var(--bg2);border-radius:8px;padding:3px">
+      <button id="auth-tab-in" onclick="setAuthTab('in')" style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)">Sign In</button>
+      <button id="auth-tab-up" onclick="setAuthTab('up')" style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)">Sign Up</button>
+    </div>
+    <div class="form-grp" style="margin-bottom:10px">
+      <div class="form-lbl">Email</div>
+      <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-grp" style="margin-bottom:14px">
+      <div class="form-lbl">Password</div>
+      <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <div id="auth-error" style="display:none;padding:8px 12px;background:var(--roselt);border:1px solid rgba(220,38,38,.15);border-radius:6px;font-size:.68rem;color:var(--rose);margin-bottom:12px"></div>
+    <button class="btn-primary" id="auth-submit-btn" style="width:100%;justify-content:center" onclick="submitAuth()">Sign In</button>
+    <button onclick="skipAuth()" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;font-size:.67rem;color:var(--ink3);cursor:pointer;text-align:center">Continue without signing in (local only)</button>
+  </div>
+</div>
+
 <!-- MODALS -->
 <div class="modal-overlay" id="tx-modal">
   <div class="modal">
@@ -1113,8 +1140,28 @@ async function initFromCloudflare() {
     // Initialize Supabase with values fetched from CF Worker
     if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
       sbClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-      setSyncStatus('syncing', 'Connecting to Supabase…');
-      setTimeout(() => syncNow(), 800);
+      // Listen for sign-in / sign-out events
+      sbClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          const name = session.user.email?.split('@')[0] || 'User';
+          setSyncStatus('syncing', `Syncing as ${name}…`);
+          setTimeout(() => syncNow(), 500);
+          closeModal('auth-modal');
+        }
+        if (event === 'SIGNED_OUT') {
+          setSyncStatus('local', 'Signed out — local only');
+        }
+      });
+      // Check for existing session (returning user)
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (session) {
+        const name = session.user.email?.split('@')[0] || 'User';
+        setSyncStatus('syncing', `Syncing as ${name}…`);
+        setTimeout(() => syncNow(), 800);
+      } else {
+        setSyncStatus('local', 'Sign in to sync');
+        setTimeout(() => openModal('auth-modal'), 1000);
+      }
     }
     updateCloudStatus('claude', true, '✓ Ready');
     updateCloudStatus('sb', cfg.supabaseUrl ? true : false,
@@ -1569,10 +1616,12 @@ async function connectSupabase() {
 
 async function syncNow() {
   const sb = getSbClient();
-  if (!sb) { setSyncStatus('local', 'Local only — configure Supabase in Settings'); return; }
+  if (!sb) { setSyncStatus('local', 'Local only'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { openModal('auth-modal'); setSyncStatus('local', 'Sign in to sync'); return; }
   setSyncStatus('syncing', 'Syncing…');
   try {
-    await pushToSupabase(sb);
+    await pushToSupabase(sb, session.user.id);
     await pullFromSupabase(sb);
     setSyncStatus('connected', `Synced ${new Date().toLocaleTimeString()}`);
   } catch(e) {
@@ -1581,28 +1630,25 @@ async function syncNow() {
   }
 }
 
-async function pushToSupabase(sb) {
-  // Upsert transactions
+async function pushToSupabase(sb, userId) {
   if (state.transactions.length > 0) {
     const rows = state.transactions.map(t => ({
-      id: t.id, user_id: null,
+      id: t.id, user_id: userId,
       description: t.description, amount: t.amount,
       type: t.type, category: t.category,
       date: t.date, notes: t.notes||null,
       source: t.source||'manual', created_at: t.createdAt||new Date().toISOString()
     }));
     const { error } = await sb.from('transactions').upsert(rows, { onConflict: 'id' });
-    if (error && error.code !== '42P01') throw error; // 42P01 = table doesn't exist yet
+    if (error && error.code !== '42P01') throw error;
   }
-  // Upsert budgets
   if (state.budgets.length > 0) {
-    const bRows = state.budgets.map(b => ({ id: b.id, category: b.category, monthly_limit: b.limit, period: b.period||'monthly' }));
+    const bRows = state.budgets.map(b => ({ id: b.id, user_id: userId, category: b.category, monthly_limit: b.limit, period: b.period||'monthly' }));
     const { error } = await sb.from('budgets').upsert(bRows, { onConflict: 'id' });
     if (error && error.code !== '42P01') throw error;
   }
-  // Upsert advisor history
   if (state.advisorHistory.length > 0) {
-    const ahRows = state.advisorHistory.map(h => ({ id: h.id, prompt: h.prompt, response: h.response, created_at: h.timestamp }));
+    const ahRows = state.advisorHistory.map(h => ({ id: h.id, user_id: userId, prompt: h.prompt, response: h.response, created_at: h.timestamp }));
     const { error } = await sb.from('advisor_history').upsert(ahRows, { onConflict: 'id' });
     if (error && error.code !== '42P01') throw error;
   }
@@ -1636,9 +1682,11 @@ async function pullFromSupabase(sb) {
 async function syncAdvisorHistory() {
   const sb = getSbClient();
   if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
   const last = state.advisorHistory.slice(-1)[0];
   if (!last) return;
-  await sb.from('advisor_history').upsert([{ id:last.id, prompt:last.prompt, response:last.response, created_at:last.timestamp }], { onConflict:'id' }).catch(()=>{});
+  await sb.from('advisor_history').upsert([{ id:last.id, user_id:session.user.id, prompt:last.prompt, response:last.response, created_at:last.timestamp }], { onConflict:'id' }).catch(()=>{});
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2224,6 +2272,75 @@ function resetImport(){
   });
   document.getElementById('steps-list').classList.remove('vis');
   document.getElementById('import-btn').disabled=false;
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+let _authTab = 'in';
+
+function setAuthTab(tab) {
+  _authTab = tab;
+  const inBtn = document.getElementById('auth-tab-in');
+  const upBtn = document.getElementById('auth-tab-up');
+  const submitBtn = document.getElementById('auth-submit-btn');
+  const pwInput = document.getElementById('auth-password');
+  if (tab === 'in') {
+    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
+    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
+    submitBtn.textContent = 'Sign In';
+    pwInput.autocomplete = 'current-password';
+  } else {
+    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
+    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
+    submitBtn.textContent = 'Create Account';
+    pwInput.autocomplete = 'new-password';
+  }
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+async function submitAuth() {
+  const sb = getSbClient();
+  if (!sb) { showToast('Supabase not connected', 'error'); return; }
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || !password) { _showAuthError('Enter email and password'); return; }
+  const btn = document.getElementById('auth-submit-btn');
+  btn.textContent = 'Please wait…'; btn.disabled = true;
+  document.getElementById('auth-error').style.display = 'none';
+  try {
+    const result = _authTab === 'in'
+      ? await sb.auth.signInWithPassword({ email, password })
+      : await sb.auth.signUp({ email, password });
+    if (result.error) throw result.error;
+    if (_authTab === 'up') {
+      showToast('Account created! Check your email to confirm.', 'success');
+      btn.textContent = 'Create Account'; btn.disabled = false;
+    }
+    // onAuthStateChange handles the rest on SIGNED_IN event
+  } catch(e) {
+    _showAuthError(e.message || 'Authentication failed');
+    btn.textContent = _authTab === 'in' ? 'Sign In' : 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+function _showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function skipAuth() {
+  closeModal('auth-modal');
+  sbClient = null;
+  setSyncStatus('local', 'Local only');
+}
+
+async function signOut() {
+  const sb = getSbClient();
+  if (sb) await sb.auth.signOut();
+  setSyncStatus('local', 'Signed out');
+  showToast('Signed out', 'info');
 }
 
 // ═══════════════════════════════════════════════════════════
