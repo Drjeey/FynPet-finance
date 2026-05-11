@@ -70,20 +70,25 @@ ALTER TABLE public.import_history    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.advisor_history   ENABLE ROW LEVEL SECURITY;
 
 -- Transactions policies
+-- auth.uid() IS NOT NULL ensures only authenticated users can access rows
 CREATE POLICY "users_own_transactions" ON public.transactions
-  FOR ALL USING (user_id = auth.uid() OR user_id IS NULL);
+  FOR ALL USING (auth.uid() IS NOT NULL AND user_id = auth.uid())
+  WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
 -- Budgets policies
 CREATE POLICY "users_own_budgets" ON public.budgets
-  FOR ALL USING (user_id = auth.uid() OR user_id IS NULL);
+  FOR ALL USING (auth.uid() IS NOT NULL AND user_id = auth.uid())
+  WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
 -- Import history policies
 CREATE POLICY "users_own_imports" ON public.import_history
-  FOR ALL USING (user_id = auth.uid() OR user_id IS NULL);
+  FOR ALL USING (auth.uid() IS NOT NULL AND user_id = auth.uid())
+  WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
 -- Advisor history policies
 CREATE POLICY "users_own_advisor_history" ON public.advisor_history
-  FOR ALL USING (user_id = auth.uid() OR user_id IS NULL);
+  FOR ALL USING (auth.uid() IS NOT NULL AND user_id = auth.uid())
+  WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
 -- ═══════════════════════════════════════════════════════════
 -- HELPFUL VIEWS
