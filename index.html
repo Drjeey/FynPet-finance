@@ -950,67 +950,29 @@ thead { position:sticky; top:0; z-index:10; }
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Configuration</div><div class="ph-sub">API keys, Supabase sync, and FIRE settings</div></div>
+        <div class="ph-left"><div class="ph-title">Configuration</div><div class="ph-sub">Profile, FIRE target, and cloud connection status</div></div>
       </div>
 
       <div class="config-grid">
         <div class="config-card" style="border-left:3px solid var(--blue)">
           <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--blue);background:var(--bluelt);padding:2px 7px;border-radius:4px">API</span>
-            Anthropic Claude</div>
-          <div class="config-sub">Required for AI financial advice and M-Pesa import categorisation.</div>
-          <div class="form-grp" style="margin-bottom:8px">
-            <div class="form-lbl">API Key</div>
-            <div class="key-input-wrap">
-              <input class="form-input" type="password" id="claude-key-input" placeholder="sk-ant-api03-…" style="width:100%">
-              <button class="key-show-btn" onclick="toggleKeyVis('claude-key-input',this)">Show</button>
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--blue);background:var(--bluelt);padding:2px 7px;border-radius:4px">CF</span>
+            Cloudflare Configuration</div>
+          <div class="config-sub">API keys and database credentials are stored securely in Cloudflare Worker secrets — not in your browser.</div>
+          <div style="margin:12px 0 8px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
+              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Claude AI (Anthropic)</div>
+              <div class="sb-key-status none" id="claude-status" style="margin:0">Checking…</div>
             </div>
-            <div class="form-hint">Stored in browser localStorage only. Never sent anywhere except through your proxy to Anthropic.</div>
-          </div>
-          <div class="form-grp" style="margin-bottom:10px">
-            <div class="form-lbl">Proxy URL <span style="color:var(--rose);font-size:.58rem;margin-left:4px">REQUIRED — see note below</span></div>
-            <input class="form-input" type="url" id="proxy-url-input" placeholder="http://localhost:3001/proxy  or  https://your-worker.workers.dev">
-            <div class="form-hint" style="color:var(--rose);margin-top:5px">
-              <strong>Note:</strong> Browsers block direct calls to api.anthropic.com (CORS policy). You must run a proxy. Options below ↓
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
+              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Supabase Database</div>
+              <div class="sb-key-status none" id="sb-status" style="margin:0">Checking…</div>
             </div>
           </div>
-          <div class="sb-key-status none" id="claude-status">No key configured</div>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="btn-primary" style="flex:1;justify-content:center;font-size:.72rem" onclick="saveClaudeKey()">Save Key</button>
-            <button class="btn-secondary" style="font-size:.72rem" onclick="testClaudeKey()">Test</button>
+          <button class="btn-secondary" style="margin-top:4px;font-size:.72rem;width:100%;justify-content:center" onclick="recheckCloudConfig()">↺ Re-check connection</button>
+          <div style="margin-top:12px;padding:10px 12px;background:var(--bluelt);border:1px solid rgba(55,48,163,.12);border-radius:var(--rsm);font-size:.67rem;line-height:1.7;color:var(--ink2)">
+            To update credentials, go to <strong>Cloudflare Dashboard → Workers → fynpet → Settings → Variables</strong> and update <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">ANTHROPIC_API_KEY</code>, <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_URL</code>, or <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_ANON_KEY</code>.
           </div>
-          <!-- Proxy setup instructions -->
-          <div style="margin-top:14px;padding:12px 14px;background:var(--amberlt);border:1px solid rgba(217,119,6,.15);border-radius:8px;font-size:.68rem;line-height:1.7;color:var(--ink2)">
-            <div style="font-weight:700;margin-bottom:7px;color:var(--ink);display:flex;align-items:center;gap:6px"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(217,119,6,.15);color:var(--amber);padding:2px 6px;border-radius:4px">PROXY</span> Setup (choose one)</div>
-            <div><strong>Option A — Local dev (30 seconds):</strong><br>
-            Run <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">node fynpet-proxy.js</code> from the downloaded folder.<br>
-            Set Proxy URL to <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">http://localhost:3001/proxy</code></div>
-            <div style="margin-top:6px"><strong>Option B — Netlify (free, permanent):</strong><br>
-            Deploy this folder to Netlify. The included <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">netlify/functions/claude-proxy.js</code> auto-activates.<br>
-            Set Proxy URL to <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">/.netlify/functions/claude-proxy</code></div>
-            <div style="margin-top:6px"><strong>Option C — Cloudflare Worker (free tier):</strong><br>
-            Paste <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">cf-worker.js</code> into a new Cloudflare Worker. Set that URL.</div>
-          </div>
-        </div>
-
-        <div class="config-card" style="border-left:3px solid var(--teal)">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">DB</span>
-            Supabase Sync</div>
-          <div class="config-sub">Connect to Supabase for cross-device sync and persistent cloud storage.</div>
-          <div class="form-grp" style="margin-bottom:8px">
-            <div class="form-lbl">Supabase URL</div>
-            <input class="form-input" type="url" id="sb-url-input" placeholder="https://xxxx.supabase.co">
-          </div>
-          <div class="form-grp" style="margin-bottom:8px">
-            <div class="form-lbl">Anon Key</div>
-            <div class="key-input-wrap">
-              <input class="form-input" type="password" id="sb-key-input" placeholder="eyJhbGciOiJ…" style="width:100%">
-              <button class="key-show-btn" onclick="toggleKeyVis('sb-key-input',this)">Show</button>
-            </div>
-          </div>
-          <div class="sb-key-status none" id="sb-status">Not connected</div>
-          <button class="btn-primary" style="margin-top:10px;font-size:.72rem;width:100%;justify-content:center" onclick="connectSupabase()">Connect & Test</button>
         </div>
       </div>
 
@@ -1136,6 +1098,49 @@ thead { position:sticky; top:0; z-index:10; }
 // localStorage + Supabase sync + Claude AI Financial Advisor
 // ═══════════════════════════════════════════════════════════
 
+// ── CLOUDFLARE WORKER URL ─────────────────────────────────
+// Set this to your deployed CF Worker URL after running: wrangler deploy
+// e.g. 'https://fynpet.yourname.workers.dev'
+const CF_WORKER_URL = 'https://fynpet.yourname.workers.dev';
+
+async function initFromCloudflare() {
+  try {
+    const res = await fetch(`${CF_WORKER_URL}/config`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const cfg = await res.json();
+    if (cfg.error) throw new Error(cfg.error);
+    window._cfConfig = cfg;
+    // Initialize Supabase with values fetched from CF Worker
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      sbClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      setSyncStatus('syncing', 'Connecting to Supabase…');
+      setTimeout(() => syncNow(), 800);
+    }
+    updateCloudStatus('claude', true, '✓ Ready');
+    updateCloudStatus('sb', cfg.supabaseUrl ? true : false,
+      cfg.supabaseUrl ? '✓ Configured' : '⚠ SUPABASE_URL not set in CF');
+  } catch(e) {
+    updateCloudStatus('claude', false, '✕ CF Worker unreachable');
+    updateCloudStatus('sb', false, '✕ CF Worker unreachable');
+  }
+}
+
+async function recheckCloudConfig() {
+  updateCloudStatus('claude', null, 'Checking…');
+  updateCloudStatus('sb', null, 'Checking…');
+  sbClient = null;
+  await initFromCloudflare();
+}
+
+function updateCloudStatus(service, ok, text) {
+  const id = service === 'claude' ? 'claude-status' : 'sb-status';
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'sb-key-status ' + (ok === true ? 'ok' : ok === false ? 'err' : 'none');
+  el.style.margin = '0';
+}
+
 // ── CONFIG STORE ──────────────────────────────────────────
 const CFG = {
   get: k => localStorage.getItem('fynpet_cfg_'+k) || '',
@@ -1152,9 +1157,10 @@ const Store = {
 // ── SUPABASE CLIENT ────────────────────────────────────────
 let sbClient = null;
 function getSbClient() {
-  const url = CFG.get('sbUrl'), key = CFG.get('sbKey');
-  if (!url || !key) return null;
-  if (!sbClient) sbClient = supabase.createClient(url, key);
+  if (sbClient) return sbClient;
+  const cfg = window._cfConfig;
+  if (!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) return null;
+  sbClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   return sbClient;
 }
 
@@ -1335,18 +1341,6 @@ ${ctx.recentTransactions}
 
 // Attempt order: configured proxy URL → same-origin /api/claude → show instructions
 async function callClaude(userMessage, maxTokens=700) {
-  // Always read fresh from localStorage AND live input field
-  const apiKey = document.getElementById('claude-key-input')?.value.trim()
-               || CFG.get('claudeKey');
-
-  if (!apiKey) {
-    return { error: true, text: ' **No API key found.** Go to **Settings → API & Supabase Config**, paste your `sk-ant-…` key and click **Save Key**.' };
-  }
-
-  // Save it immediately so it persists
-  CFG.set('claudeKey', apiKey);
-
-  const proxyUrl = CFG.get('proxyUrl') || '';
   const ctx = buildFinancialContext();
   const systemPrompt = buildSystemPrompt(ctx);
 
@@ -1357,55 +1351,24 @@ async function callClaude(userMessage, maxTokens=700) {
     messages: [{ role: 'user', content: userMessage }]
   };
 
-  // ── Strategy 1: User-configured proxy URL ─────────────────
-  if (proxyUrl) {
-    try {
-      const res = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey, ...payload })
-      });
-      if (!res.ok) {
-        const e = await res.json().catch(()=>({}));
-        return { error: true, text: `Proxy error ${res.status}: ${e.error?.message || e.message || 'Check proxy URL'}` };
-      }
-      const data = await res.json();
-      return { error: false, text: data.content?.[0]?.text || 'Empty response.' };
-    } catch(e) {
-      return { error: true, text: `Proxy unreachable: ${e.message}` };
-    }
-  }
-
-  // ── Strategy 2: Same-origin /api/claude (Netlify/Vercel) ──
+  // ── Cloudflare Worker proxy ────────────────────────────────
   try {
-    const sameOriginRes = await fetch('/api/claude', {
+    const res = await fetch(CF_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey, ...payload })
+      body: JSON.stringify(payload)
     });
-    if (sameOriginRes.ok) {
-      const data = await sameOriginRes.json();
-      return { error: false, text: data.content?.[0]?.text || 'Empty response.' };
+    if (!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      return { error: true, text: `CF Worker error ${res.status}: ${e.error?.message || 'Check Cloudflare Worker logs'}` };
     }
-  } catch(_) { /* not deployed with Netlify/Vercel, continue */ }
-
-  // ── Strategy 3: Inline Service Worker proxy ───────────────
-  // Registers a SW that intercepts /sw-proxy/claude and adds CORS headers
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    try {
-      const res = await fetch('/sw-proxy/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Api-Key': apiKey },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return { error: false, text: data.content?.[0]?.text || 'Empty response.' };
-      }
-    } catch(_) {}
+    const data = await res.json();
+    return { error: false, text: data.content?.[0]?.text || 'Empty response.' };
+  } catch(e) {
+    return { error: true, text: `CF Worker unreachable: ${e.message}. Check that CF_WORKER_URL is set correctly in index.html.` };
   }
 
-  // ── Strategy 4: Show setup instructions ───────────────────
+  // ── Unreachable: kept for structure ───────────────────────
   return {
     error: true,
     text: `⊘ **CORS restriction detected.**\n\nBrowsers cannot call the Anthropic API directly due to CORS policy. You need a proxy. Choose one:\n\n**Option A — Quickest (local dev):**\nRun \`node fynpet-proxy.js\` alongside this file (included in download), then set Proxy URL to \`http://localhost:3001/proxy\` in Settings.\n\n**Option B — Free hosted:**\nDeploy to Netlify (drag & drop this folder). The included \`netlify/functions/claude-proxy.js\` activates automatically.\n\n**Option C — Cloudflare Workers:**\nPaste the worker code from \`cf-worker.js\` into a new Cloudflare Worker, then set its URL as your Proxy URL in Settings.\n\nYour API key is saved. Once a proxy is running, all features will work.`
@@ -1601,26 +1564,7 @@ function setSyncStatus(status, label) {
 }
 
 async function connectSupabase() {
-  const url = document.getElementById('sb-url-input').value.trim();
-  const key = document.getElementById('sb-key-input').value.trim();
-  if (!url || !key) { showToast('Enter Supabase URL and anon key', 'error'); return; }
-  CFG.set('sbUrl', url); CFG.set('sbKey', key);
-  sbClient = supabase.createClient(url, key);
-  setSyncStatus('syncing', 'Connecting…');
-  try {
-    const { error } = await sbClient.from('transactions').select('id').limit(1);
-    if (error && error.code !== 'PGRST116') throw error;
-    setSyncStatus('connected', 'Supabase connected');
-    document.getElementById('sb-status').className = 'sb-key-status ok';
-    document.getElementById('sb-status').textContent = '✓ Connected successfully';
-    showToast('Supabase connected!', 'success');
-    await syncNow();
-  } catch(e) {
-    setSyncStatus('error', 'Connection failed');
-    document.getElementById('sb-status').className = 'sb-key-status err';
-    document.getElementById('sb-status').textContent = '✕ ' + (e.message || 'Connection failed');
-    showToast('Supabase error: ' + (e.message||'check URL and key'), 'error');
-  }
+  await recheckCloudConfig();
 }
 
 async function syncNow() {
@@ -2178,9 +2122,6 @@ function clearFile(){state.selectedFile=null;document.getElementById('file-previ
 
 async function runImport(){
   if(!state.selectedFile){showToast('Select a PDF first','error');return}
-  const apiKey = document.getElementById('claude-key-input')?.value.trim() || CFG.get('claudeKey');
-  if(!apiKey){showToast('Save your Claude API key in Settings first','error');return}
-  CFG.set('claudeKey', apiKey); // persist immediately
   document.getElementById('import-btn').disabled=true;
   document.getElementById('steps-list').classList.add('vis');
   document.getElementById('import-result').classList.remove('vis');
@@ -2220,7 +2161,7 @@ async function runImport(){
     }
     setS(1,'done');setS(2,'act');await delay(400);setS(2,'done');
     setS(3,'act');
-    const txs=await parseWithClaude(pdfText,apiKey);
+    const txs=await parseWithClaude(pdfText);
     setS(3,'done');setS(4,'act');await delay(500);setS(4,'done');
     setS(5,'act');
     const batchId=uid();
@@ -2241,7 +2182,7 @@ async function runImport(){
   document.getElementById('import-btn').disabled=false;
 }
 
-async function parseWithClaude(text, apiKey){
+async function parseWithClaude(text){
   const sys = `You are a financial transaction parser for M-Pesa (Safaricom Kenya) statements. Extract ALL transactions and return ONLY a valid JSON array — no markdown, no explanation, no preamble. Each object: {"description":"string","amount":number_positive,"type":"income"|"expense"|"savings"|"transfer","category":"food"|"transport"|"utilities"|"entertainment"|"health"|"shopping"|"savings"|"income"|"transfer"|"other","date":"YYYY-MM-DD"}. Kenya context: Naivas/Quickmart→food, Uber/Bolt/Matatu→transport, KPLC/Nairobi Water→utilities, Netflix/DStv→entertainment, Pharmacy→health, M-Shwari/KCB Goal→savings, Salary/wages→income, person-to-person sends→transfer.`;
 
   const payload = {
@@ -2251,31 +2192,14 @@ async function parseWithClaude(text, apiKey){
     messages: [{ role: 'user', content: `Parse all transactions:\n\n${text.slice(0,8000)}` }]
   };
 
-  const proxyUrl = CFG.get('proxyUrl') || '';
-  let res;
+  const res = await fetch(CF_WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
 
-  // Try proxy first (same logic as callClaude)
-  if (proxyUrl) {
-    res = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey, ...payload })
-    });
-  } else {
-    // Try same-origin Netlify/Vercel endpoint
-    try {
-      const r = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey, ...payload })
-      });
-      if (r.ok) res = r;
-    } catch(_) {}
-  }
-
-  if (!res || !res.ok) {
-    const status = res?.status || 'blocked';
-    throw new Error(`Claude API unavailable (${status}). Configure a proxy URL in Settings → API & Supabase Config.`);
+  if (!res.ok) {
+    throw new Error(`CF Worker error (${res.status}). Check Cloudflare Worker logs.`);
   }
 
   const data = await res.json();
@@ -2320,25 +2244,6 @@ function toggleKeyVis(inputId,btn){
   inp.type=inp.type==='password'?'text':'password';
   btn.textContent=inp.type==='password'?'Show':'Hide';
 }
-async function testClaudeKey(){
-  // Save live inputs before testing
-  const key = document.getElementById('claude-key-input')?.value.trim() || CFG.get('claudeKey');
-  const proxy = document.getElementById('proxy-url-input')?.value.trim() || CFG.get('proxyUrl');
-  if (!key) { showToast('Enter your API key first', 'error'); return; }
-  CFG.set('claudeKey', key);
-  if (proxy) CFG.set('proxyUrl', proxy);
-  const el = document.getElementById('claude-status');
-  el.className = 'sb-key-status none'; el.textContent = 'Testing connection…';
-  const result = await callClaude('Reply with exactly: CONNECTION_OK', 30);
-  if (result.error) {
-    el.className = 'sb-key-status err';
-    el.textContent = '✕ ' + result.text.slice(0, 120);
-  } else {
-    el.className = 'sb-key-status ok';
-    el.textContent = '✓ Claude API connected successfully!';
-    showToast('Claude API connected ✓', 'success');
-  }
-}
 
 // ═══════════════════════════════════════════════════════════
 // EXPORT CSV
@@ -2371,60 +2276,17 @@ function goPage(id,navEl){
 }
 
 function loadSettingsPage() {
-  // Populate all fields from stored config
-  const fields = [
-    ['claude-key-input', 'claudeKey'],
-    ['proxy-url-input',  'proxyUrl'],
-    ['sb-url-input',     'sbUrl'],
-    ['sb-key-input',     'sbKey'],
-    ['cfg-name',         'name'],
-    ['cfg-role',         'role'],
-    ['cfg-fire',         'fireTarget'],
-  ];
-  fields.forEach(([id, key]) => {
+  // Populate profile and FIRE fields
+  [['cfg-name','name'],['cfg-role','role'],['cfg-fire','fireTarget']].forEach(([id,key]) => {
     const el = document.getElementById(id);
     if (el) { const v = CFG.get(key); if (v) el.value = v; }
   });
-
-  // Update status badges
-  const ck = CFG.get('claudeKey');
-  const pu = CFG.get('proxyUrl');
-  const cs = document.getElementById('claude-status');
-  if (ck && pu) {
-    cs.className = 'sb-key-status ok';
-    cs.textContent = '✓ Key + proxy configured';
-  } else if (ck) {
-    cs.className = 'sb-key-status none';
-    cs.textContent = '⚠️ Key saved — proxy URL still needed';
-  } else {
-    cs.className = 'sb-key-status none';
-    cs.textContent = 'No key configured';
-  }
-
-  if (CFG.get('sbUrl') && CFG.get('sbKey')) {
-    const sb = document.getElementById('sb-status');
-    sb.className = 'sb-key-status ok';
-    sb.textContent = '✓ Supabase configured';
-  }
+  // Reflect current cloud connection state
+  const cfg = window._cfConfig;
+  updateCloudStatus('claude', cfg ? true : false, cfg ? '✓ Ready' : '✕ Not connected');
+  updateCloudStatus('sb', cfg?.supabaseUrl ? true : false, cfg?.supabaseUrl ? '✓ Connected' : '✕ Not connected');
 }
 
-function saveClaudeKey() {
-  const key = document.getElementById('claude-key-input').value.trim();
-  const proxy = document.getElementById('proxy-url-input').value.trim();
-  if (!key) { showToast('Paste your sk-ant-… API key first', 'error'); return; }
-  CFG.set('claudeKey', key);
-  if (proxy) CFG.set('proxyUrl', proxy);
-  const cs = document.getElementById('claude-status');
-  if (key && proxy) {
-    cs.className = 'sb-key-status ok';
-    cs.textContent = '✓ Key + proxy saved';
-    showToast('API key & proxy URL saved ✓', 'success');
-  } else {
-    cs.className = 'sb-key-status none';
-    cs.textContent = '⚠️ Key saved — add proxy URL to enable AI';
-    showToast('Key saved — add proxy URL to enable AI', 'info');
-  }
-}
 
 // ═══════════════════════════════════════════════════════════
 // HELPERS
@@ -2482,27 +2344,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Main render
   renderAll();
 
-  // Connect Supabase if already configured
-  if (CFG.get('sbUrl') && CFG.get('sbKey')) {
-    getSbClient();
-    setSyncStatus('syncing', 'Connecting to Supabase…');
-    setTimeout(() => syncNow(), 800);
-  }
+  // Fetch config (Supabase URL/key, API readiness) from Cloudflare Worker on boot
+  initFromCloudflare();
 
-  // Prime the advisor message queue (shown when user opens panel)
-  // The welcome message is injected into the chat container so it's
-  // ready when the panel opens — no API call needed for this.
+  // Prime the advisor welcome message (no API call — just a greeting)
   const ctx = buildFinancialContext();
   const hasData = ctx.summary.totalTransactions > 0;
-  const hasKey = !!(CFG.get('claudeKey'));
-  const hasProxy = !!(CFG.get('proxyUrl'));
   let welcomeMsg;
-  if (hasData && hasKey && hasProxy) {
+  if (hasData) {
     welcomeMsg = `Hi **${ctx.userName}**!  I have your financial data loaded — **${ctx.summary.totalTransactions} transactions** on record.\n\nThis month: Income **KES ${ctx.summary.thisMonth.income.toLocaleString()}**, Expenses **KES ${ctx.summary.thisMonth.expenses.toLocaleString()}**, Savings rate **${ctx.summary.thisMonth.savingsRate}**.\n\nAsk me anything or tap a quick prompt below.`;
-  } else if (hasData && !hasProxy) {
-    welcomeMsg = `Hi **${ctx.userName}**!  Your financial data is loaded (**${ctx.summary.totalTransactions} transactions**).\n\n **Proxy URL not configured.** Go to **Settings → API & Supabase Config** to set up a proxy — this is required for AI responses due to browser security rules. Your API key is safe; only a lightweight relay is needed.`;
-  } else if (!hasKey) {
-    welcomeMsg = `Hi **${ctx.userName}**!  I'm Fyn, your AI financial advisor.\n\n **No API key yet.** Go to **Settings → API & Supabase Config** and paste your **Claude API key** + set a **Proxy URL**. Once configured, I'll analyse your finances in real-time.`;
   } else {
     welcomeMsg = `Hi **${ctx.userName}**!  I'm Fyn, your AI financial advisor.\n\nNo transactions yet. Add some manually or **import your M-Pesa statement** to get started. Once you have data, I'll give you personalised financial advice.`;
   }
