@@ -755,6 +755,85 @@ thead { position:sticky; top:0; z-index:10; }
   content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
   background:linear-gradient(90deg, transparent, var(--border), transparent);
 }
+
+/* ═══ MOBILE RESPONSIVE ════════════════════════════════════ */
+#mob-overlay { display:none }
+#mob-nav     { display:none }
+.mob-ham     { display:none }
+
+@media (max-width: 768px) {
+  html, body { overflow:auto; }
+  #layout { display:flex; flex-direction:column; height:100vh; width:100vw; overflow:hidden; }
+
+  /* Sidebar becomes a slide-in drawer */
+  #sidebar {
+    position:fixed; top:0; left:0; bottom:0; width:260px; z-index:500;
+    transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  #sidebar.mob-open { transform:translateX(0); }
+
+  /* Overlay behind drawer */
+  #mob-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(28,25,23,.4); z-index:499; backdrop-filter:blur(3px);
+  }
+  #mob-overlay.show { display:block; }
+
+  /* Hamburger button */
+  .mob-ham {
+    display:flex; width:36px; height:36px; border-radius:8px;
+    background:var(--surface2); border:1px solid var(--border);
+    align-items:center; justify-content:center;
+    cursor:pointer; font-size:.85rem; flex-shrink:0; order:-1;
+  }
+
+  /* Topbar responsive */
+  #main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+  #topbar { padding:0 12px; gap:8px; height:54px; flex-shrink:0; }
+  .tb-search { width:140px; }
+  #tb-date-label { display:none; }
+  .tb-user .tb-ui { display:none; }
+
+  /* Content area with bottom nav clearance */
+  #content { flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom:68px; }
+  .page { padding:14px 12px; }
+
+  /* Page header stacks on mobile */
+  .page-header { flex-direction:column; align-items:flex-start; gap:10px; }
+  .ph-acts { width:100%; justify-content:flex-end; }
+
+  /* Grid adjustments */
+  .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+  .charts-row { grid-template-columns:1fr; gap:12px; margin-bottom:14px; }
+  .budget-grid { grid-template-columns:1fr; }
+  .an-grid { grid-template-columns:1fr; }
+
+  /* Table header wrapping */
+  .tt { flex-wrap:wrap; gap:8px; padding:12px 14px; }
+  .filter-row { flex-wrap:wrap; }
+  .search-wrap input { width:100px; }
+  table { font-size:.72rem; }
+  th, td { padding:8px 10px; }
+
+  /* Gamification badges 3-col on mobile */
+  #gamification-card [style*="repeat(6,1fr)"] { grid-template-columns:repeat(3,1fr) !important; }
+
+  /* Bottom nav */
+  #mob-nav {
+    display:flex; position:fixed; bottom:0; left:0; right:0; z-index:400;
+    background:var(--ink); border-top:1px solid rgba(255,255,255,.08);
+    padding:6px 0 env(safe-area-inset-bottom, 10px);
+    align-items:center; justify-content:space-around;
+  }
+  .mn-item {
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:5px 8px; border-radius:8px; cursor:pointer;
+    color:rgba(255,255,255,.35); font-size:.55rem; font-weight:500;
+    min-width:52px; transition:all .15s;
+  }
+  .mn-item.on  { color:white; }
+  .mn-item .mn-ic { font-family:var(--fm); font-size:1.1rem; line-height:1; }
+}
 </style>
 </head>
 <body>
@@ -794,12 +873,13 @@ thead { position:sticky; top:0; z-index:10; }
 <!-- ═══ MAIN ═══════════════════════════════════ -->
 <div id="main">
   <div id="topbar">
+    <div class="mob-ham" onclick="toggleMobSidebar()">☰</div>
     <div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
     <div class="tb-search"><span class="tb-search-icon">⌕</span><input type="text" placeholder="Search transactions…" oninput="searchTx(this.value)"></div>
     <div class="ib" title="Export CSV" onclick="exportCSV()" style="font-family:var(--fm);font-size:.9rem;font-weight:600;color:var(--ink2)">↑</div>
     <div class="ib" onclick="toggleAdvisor()" title="AI Advisor" style="font-family:var(--fm);font-weight:700;font-size:.75rem;background:var(--bluebg);border-color:rgba(55,48,163,.2);color:var(--blue)">AI</div>
     <div class="ib" title="Sync now" onclick="syncNow()" id="sync-btn" style="font-family:var(--fm);font-size:.9rem;color:var(--ink2)">⟳</div>
-    <div class="tb-user">
+    <div class="tb-user" title="Sign out" onclick="if(confirm('Sign out?'))signOut()">
       <div class="tb-av" id="tb-av">J</div>
       <div class="tb-ui"><div class="tun" id="tb-name">Jeremy</div><div class="tur" id="tb-role">Admin</div></div>
     </div>
@@ -838,6 +918,7 @@ thead { position:sticky; top:0; z-index:10; }
         </div>
         <div id="budget-status-bars" style="padding:0 4px"></div>
       </div>
+      <div id="gamification-card" style="display:none;margin-bottom:14px"></div>
       <div class="table-card">
         <div class="tt"><div class="tt-title">Recent Transactions</div><button class="btn-ghost" onclick="goPage('transactions',null)">View all →</button></div>
         <div id="recent-tx"></div>
@@ -1006,6 +1087,36 @@ thead { position:sticky; top:0; z-index:10; }
           <button class="btn-primary" style="margin-top:12px;font-size:.72rem;width:100%;justify-content:center" onclick="saveAllConfig()">Save Settings</button>
         </div>
       </div>
+
+      <div class="config-grid" style="margin-top:16px">
+        <div class="config-card" style="border-left:3px solid var(--teal)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">FX</span>
+            Exchange Rates to KES</div>
+          <div class="config-sub">Used to normalize foreign currency transactions to KES for calculations.</div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-grp"><div class="form-lbl">1 USD =</div><input class="form-input" type="number" id="cfg-rate-usd" placeholder="130" oninput="saveConfig('rate_USD',parseFloat(this.value)||130)"></div>
+            <div class="form-grp"><div class="form-lbl">1 EUR =</div><input class="form-input" type="number" id="cfg-rate-eur" placeholder="145" oninput="saveConfig('rate_EUR',parseFloat(this.value)||145)"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><div class="form-lbl">1 GBP =</div><input class="form-input" type="number" id="cfg-rate-gbp" placeholder="165" oninput="saveConfig('rate_GBP',parseFloat(this.value)||165)"></div>
+            <div class="form-grp"><div class="form-lbl">1 TZS =</div><input class="form-input" type="number" id="cfg-rate-tzs" placeholder="0.045" step="0.001" oninput="saveConfig('rate_TZS',parseFloat(this.value)||0.045)"></div>
+          </div>
+        </div>
+        <div class="config-card" style="border-left:3px solid var(--purple)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--purple);background:var(--purplt);padding:2px 7px;border-radius:4px">ℹ</span>
+            About FynPet</div>
+          <div class="config-sub">Personal finance intelligence built for Kenya.</div>
+          <div style="font-size:.7rem;color:var(--ink2);line-height:1.75;margin-top:8px">
+            <div>💡 Import M-Pesa statements for automatic AI categorisation</div>
+            <div>🔒 Your data is encrypted and stored only in your Supabase database</div>
+            <div>🤖 AI advisor powered by Claude Sonnet</div>
+            <div style="margin-top:10px;font-size:.62rem;color:var(--ink3)">v5.0 · FynPet</div>
+          </div>
+          <button class="btn-danger-sm" style="margin-top:14px" onclick="if(confirm('Clear ALL local data?')){localStorage.clear();location.reload()}">Clear local data</button>
+        </div>
+      </div>
     </div>
 
   </div><!-- /content -->
@@ -1057,6 +1168,19 @@ thead { position:sticky; top:0; z-index:10; }
 </div>
 
 </div><!-- /layout -->
+
+<!-- ═══ MOBILE DRAWER OVERLAY ═══════════════════════════════ -->
+<div id="mob-overlay" onclick="toggleMobSidebar()"></div>
+
+<!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════════ -->
+<div id="mob-nav">
+  <div class="mn-item on" onclick="mobGoPage('dashboard',this)"><span class="mn-ic">⊞</span>Home</div>
+  <div class="mn-item" onclick="mobGoPage('transactions',this)"><span class="mn-ic">≡</span>Txns</div>
+  <div class="mn-item" onclick="mobGoPage('budgets',this)"><span class="mn-ic">◫</span>Budget</div>
+  <div class="mn-item" onclick="mobGoPage('analytics',this)"><span class="mn-ic">∿</span>Analytics</div>
+  <div class="mn-item" onclick="mobGoPage('mpesa',this)"><span class="mn-ic">⇅</span>Import</div>
+</div>
+
 <div id="advisor-backdrop" onclick="toggleAdvisor()"></div>
 
 <!-- AUTH MODAL -->
@@ -1091,7 +1215,7 @@ thead { position:sticky; top:0; z-index:10; }
   <div class="modal">
     <div class="modal-hdr"><div class="modal-title" id="tx-modal-title">Add Transaction</div><div class="modal-close" onclick="closeModal('tx-modal')">✕</div></div>
     <div class="form-row">
-      <div class="form-grp"><div class="form-lbl">Amount (KES)</div><input class="form-input" type="number" id="tx-amount" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="form-grp"><div class="form-lbl">Amount</div><div style="display:flex;gap:6px"><input class="form-input" type="number" id="tx-amount" placeholder="0.00" min="0" step="0.01" style="flex:1;min-width:0"><select class="form-input" id="tx-currency" style="width:76px;flex-shrink:0;padding-left:8px"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select></div></div>
       <div class="form-grp"><div class="form-lbl">Type</div><select class="form-input" id="tx-type"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select></div>
     </div>
     <div class="form-row full"><div class="form-grp"><div class="form-lbl">Description</div><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary…"></div></div>
@@ -1705,6 +1829,69 @@ function renderAll() {
   drawDonutChart(_chartPeriod);
   renderRecentTx();
   renderBudgetStatus(_chartPeriod);
+  renderGamification();
+}
+
+// ─── Gamification ────────────────────────────────────────────
+function calcSavingsStreak(){
+  const now=new Date();
+  let streak=0;
+  for(let i=0;i<12;i++){
+    const m=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const ms=`${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}`;
+    if(state.transactions.some(t=>t.date?.startsWith(ms)&&t.type==='savings'&&t.amount>0))streak++;
+    else break;
+  }
+  return streak;
+}
+
+function renderGamification(){
+  const card=document.getElementById('gamification-card');
+  if(!card)return;
+  if(!state.transactions.length){card.style.display='none';return;}
+  card.style.display='';
+  const streak=calcSavingsStreak();
+  const totalSaved=state.transactions.filter(t=>t.type==='savings').reduce((s,t)=>s+toKes(t.amount,t.currency),0);
+  const now=new Date();
+  const thisMs=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const prevDate=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const prevMs=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+  const thisExp=state.transactions.filter(t=>t.date?.startsWith(thisMs)&&t.type==='expense').reduce((s,t)=>s+toKes(t.amount,t.currency),0);
+  const prevExp=state.transactions.filter(t=>t.date?.startsWith(prevMs)&&t.type==='expense').reduce((s,t)=>s+toKes(t.amount,t.currency),0);
+  const spendDiff=prevExp>0?((thisExp-prevExp)/prevExp*100).toFixed(1):null;
+  const badges=[
+    {icon:'★',lbl:'First Step',desc:'Added a transaction',done:state.transactions.length>0},
+    {icon:'↑',lbl:'Data Rich',desc:'Imported M-Pesa',done:state.transactions.some(t=>t.source==='import')},
+    {icon:'◆',lbl:'Saver',desc:'KES 10k saved',done:totalSaved>=10000},
+    {icon:'⟳',lbl:'Streak',desc:'3-month savings',done:streak>=3},
+    {icon:'◫',lbl:'Planner',desc:'Budget created',done:state.budgets.length>0},
+    {icon:'◈',lbl:'Builder',desc:'KES 100k saved',done:totalSaved>=100000},
+  ];
+  const earned=badges.filter(b=>b.done).length;
+  const spendColor=spendDiff!==null?(parseFloat(spendDiff)>0?'var(--rose)':'var(--teal)'):'var(--ink3)';
+  const spendArrow=spendDiff!==null?(parseFloat(spendDiff)>0?'↑ More':'↓ Less'):'—';
+  card.innerHTML=`<div class="table-card">
+    <div class="tt"><div class="tt-title">Milestones</div><div style="font-size:.63rem;color:var(--ink3);font-family:var(--fm)">${earned}/${badges.length} earned</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
+      <div style="padding:14px 18px;border-right:1px solid var(--border)">
+        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">Savings Streak</div>
+        <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${streak>0?'var(--teal)':'var(--ink3)'};line-height:1">${streak}<span style="font-size:.75rem;font-weight:400;margin-left:4px">mo</span></div>
+        <div style="font-size:.61rem;color:var(--ink3);margin-top:4px">${streak>=3?'Outstanding!':streak>=1?'Keep going!':'Start saving this month'}</div>
+      </div>
+      <div style="padding:14px 18px">
+        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">vs Last Month</div>
+        <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${spendColor};line-height:1">${spendDiff!==null?(parseFloat(spendDiff)>0?'+':'')+spendDiff+'%':'—'}</div>
+        <div style="font-size:.61rem;color:var(--ink3);margin-top:4px">${spendDiff!==null?spendArrow+' than last month':'No prior data'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:14px 18px">
+      ${badges.map(b=>`<div style="text-align:center;padding:10px 4px;border-radius:8px;background:${b.done?'var(--bluelt)':'var(--surface2)'};border:1px solid ${b.done?'rgba(55,48,163,.2)':'var(--border)'};transition:all .2s" title="${b.desc}">
+        <div style="font-size:1rem;margin-bottom:4px;opacity:${b.done?1:.3}">${b.icon}</div>
+        <div style="font-size:.6rem;font-weight:700;color:${b.done?'var(--blue)':'var(--ink3)'};margin-bottom:1px;line-height:1.2">${b.lbl}</div>
+        <div style="font-size:.54rem;color:var(--ink3);line-height:1.2">${b.desc}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function _periodFilter(period) {
@@ -1955,6 +2142,11 @@ function drawDonutChart(period = 'month'){
 }
 
 // ─── Transaction table renderer ────────────────────────────
+function toKes(amount,currency){
+  if(!currency||currency==='KES')return amount;
+  const rates={USD:CFG.getNum('rate_USD',130),EUR:CFG.getNum('rate_EUR',145),GBP:CFG.getNum('rate_GBP',165),TZS:CFG.getNum('rate_TZS',0.045),UGX:CFG.getNum('rate_UGX',0.034)};
+  return amount*(rates[currency]||1);
+}
 function txRow(tx,actions=true){
   const c=CATS[tx.category]||CATS.other;
   const isPos=tx.type==='income'||tx.type==='savings';
@@ -1962,6 +2154,8 @@ function txRow(tx,actions=true){
   const amtSign=isPos?'+':'−';
   const srcLabel=tx.source==='ai'?'AI':tx.source==='import'?'Import':'Manual';
   const srcClass=tx.source==='ai'?'ai':tx.source==='import'?'import':'manual';
+  const cur=tx.currency&&tx.currency!=='KES'?tx.currency:'KES';
+  const amtDisplay=cur==='KES'?`${amtSign}KES ${tx.amount.toLocaleString()}`:`${amtSign}${cur} ${tx.amount.toLocaleString()} <span style="font-size:.58rem;color:var(--ink3);font-weight:400">≈ KES ${toKes(tx.amount,cur).toLocaleString()}</span>`;
   return `<tr>
     <td><div style="display:flex;align-items:center;gap:10px">
       <div class="td-ico" style="background:${c.bg};position:relative;overflow:hidden">
@@ -1970,7 +2164,7 @@ function txRow(tx,actions=true){
       <div><div class="td-main">${escHtml(tx.description)}</div><div class="td-sub">${tx.date||''}</div></div>
     </div></td>
     <td><div class="cat-pill" style="background:${c.bg};color:${c.color};font-family:var(--fm)">${c.label}</div></td>
-    <td><div class="td-mono ${amtClass}">${amtSign}KES ${tx.amount.toLocaleString()}</div></td>
+    <td><div class="td-mono ${amtClass}">${amtDisplay}</div></td>
     <td><div class="st-pill ${srcClass}">${srcLabel}</div></td>
     ${actions?`<td><div class="row-acts">
       <div class="ra" onclick="openEditTx('${tx.id}')" title="Edit" style="font-size:.9rem">✎</div>
@@ -1990,11 +2184,14 @@ function renderTxPage(){
   let filtered=[...state.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(state.ui.txFilter!=='all')filtered=filtered.filter(t=>t.type===state.ui.txFilter);
   if(state.ui.txSearch){const q=state.ui.txSearch.toLowerCase();filtered=filtered.filter(t=>(t.description||'').toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q))}
-  document.getElementById('tx-count-sub').textContent=`${filtered.length} transaction${filtered.length!==1?'s':''}`;
+  const allCount=state.transactions.length;
+  document.getElementById('tx-count-sub').textContent=(state.ui.txFilter==='all'&&!state.ui.txSearch)?`${allCount} transaction${allCount!==1?'s':''}` : `${filtered.length} of ${allCount} shown`;
   const{txPage,perPage}=state.ui,total=filtered.length,pages=Math.max(1,Math.ceil(total/perPage));
   const start=(txPage-1)*perPage,end=Math.min(start+perPage,total),paged=filtered.slice(start,end);
   const el=document.getElementById('full-tx-table');
-  if(!paged.length){el.innerHTML=`<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">∅</div><div class="empty-title">No transactions found</div><div class="empty-sub">${state.ui.txSearch?'Try a different search.':'Add your first transaction.'}</div></div>`;
+  const _emptyMsg=state.ui.txFilter!=='all'?`No ${state.ui.txFilter} transactions found.`:state.ui.txSearch?'Try a different search.':allCount>0?'All transactions loaded.':'Add your first transaction to get started.';
+  const _clearBtn=state.ui.txFilter!=='all'?`<button class="btn-ghost" style="padding:3px 10px;font-size:.65rem;margin-top:10px" onclick="document.querySelector('#tx-filter-row .fb').click()">Show all types</button>`:'';
+  if(!paged.length){el.innerHTML=`<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">∅</div><div class="empty-title">No transactions found</div><div class="empty-sub">${_emptyMsg}${_clearBtn}</div></div>`;
   }else{el.innerHTML=`<table><thead><tr><th>Transaction</th><th>Category</th><th>Amount</th><th>Source</th><th>Actions</th></tr></thead><tbody>${paged.map(t=>txRow(t)).join('')}</tbody></table>`}
   document.getElementById('tx-pg-info').textContent=total>0?`Showing ${start+1}–${end} of ${total}`:'No results';
   document.getElementById('tx-pag').innerHTML=`<button class="pg" onclick="setTxPage(${txPage-1})" ${txPage<=1?'disabled':''}>‹</button>${Array.from({length:pages},(_,i)=>`<button class="pg ${txPage===i+1?'on':''}" onclick="setTxPage(${i+1})">${i+1}</button>`).join('')}<button class="pg" onclick="setTxPage(${txPage+1})" ${txPage>=pages?'disabled':''}>›</button>`;
@@ -2144,6 +2341,7 @@ function openAddTx(){
   document.getElementById('tx-type').value='expense';
   document.getElementById('tx-cat').value='food';
   document.getElementById('tx-date').valueAsDate=new Date();
+  document.getElementById('tx-currency').value='KES';
   openModal('tx-modal');
 }
 function openEditTx(id){
@@ -2157,6 +2355,7 @@ function openEditTx(id){
   document.getElementById('tx-type').value=tx.type;
   document.getElementById('tx-date').value=tx.date;
   document.getElementById('tx-notes').value=tx.notes||'';
+  document.getElementById('tx-currency').value=tx.currency||'KES';
   openModal('tx-modal');
 }
 function saveTx(){
@@ -2166,15 +2365,16 @@ function saveTx(){
   const type=document.getElementById('tx-type').value;
   const date=document.getElementById('tx-date').value;
   const notes=document.getElementById('tx-notes').value.trim();
+  const currency=(document.getElementById('tx-currency')?.value||'KES').toUpperCase();
   if(!amount||amount<=0){showToast('Enter a valid amount','error');return}
   if(!description){showToast('Enter a description','error');return}
   if(!date){showToast('Select a date','error');return}
   if(state.ui.editTxId){
     const idx=state.transactions.findIndex(t=>t.id===state.ui.editTxId);
-    if(idx!==-1)state.transactions[idx]={...state.transactions[idx],amount,description,category,type,date,notes};
+    if(idx!==-1)state.transactions[idx]={...state.transactions[idx],amount,description,category,type,date,notes,currency};
     showToast('Transaction updated','success');
   }else{
-    state.transactions.push({id:uid(),amount,description,category,type,date,notes,source:'manual',createdAt:new Date().toISOString()});
+    state.transactions.push({id:uid(),amount,description,category,type,date,notes,currency,source:'manual',createdAt:new Date().toISOString()});
     showToast('Transaction added','success');
   }
   Store.set('transactions',state.transactions);
@@ -2490,8 +2690,8 @@ function toggleKeyVis(inputId,btn){
 // ═══════════════════════════════════════════════════════════
 function exportCSV(){
   if(!state.transactions.length){showToast('No transactions to export','info');return}
-  const hdr=['Date','Description','Category','Type','Amount','Source','Notes'];
-  const rows=state.transactions.map(t=>[t.date,`"${(t.description||'').replace(/"/g,'""')}"`,t.category,t.type,t.amount,t.source,`"${(t.notes||'').replace(/"/g,'""')}"`]);
+  const hdr=['Date','Description','Category','Type','Amount','Currency','Amount (KES)','Source','Notes'];
+  const rows=state.transactions.map(t=>[t.date,`"${(t.description||'').replace(/"/g,'""')}"`,t.category,t.type,t.amount,t.currency||'KES',toKes(t.amount,t.currency).toFixed(2),t.source,`"${(t.notes||'').replace(/"/g,'""')}"`]);
   const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`fynpet-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
@@ -2501,14 +2701,37 @@ function exportCSV(){
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
+function toggleMobSidebar(){
+  document.getElementById('sidebar').classList.toggle('mob-open');
+  document.getElementById('mob-overlay').classList.toggle('show');
+}
+function mobGoPage(id,el){
+  document.querySelectorAll('.mn-item').forEach(i=>i.classList.remove('on'));
+  el.classList.add('on');
+  // close drawer if open
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('mob-overlay').classList.remove('show');
+  goPage(id, null);
+}
+
 function goPage(id,navEl){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+id)?.classList.add('on');
   if(navEl)navEl.classList.add('on');
+  // Sync mobile bottom nav highlight
+  document.querySelectorAll('.mn-item').forEach(mn=>{
+    const mnPage=mn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    mn.classList.toggle('on', mnPage===id);
+  });
   const titles={dashboard:'Dashboard',transactions:'Transactions',budgets:'Budgets',analytics:'Analytics',mpesa:'M-Pesa Import',settings:'API & Settings'};
   document.getElementById('tb-title').childNodes[0].textContent=(titles[id]||id)+' ';
-  if(id==='transactions')renderTxPage();
+  if(id==='transactions'){
+    state.ui.txFilter='all';state.ui.txSearch='';state.ui.txPage=1;
+    document.querySelectorAll('#tx-filter-row .fb').forEach((b,i)=>b.classList.toggle('on',i===0));
+    const srch=document.getElementById('tx-search');if(srch)srch.value='';
+    renderTxPage();
+  }
   if(id==='budgets')renderBudgetsPage();
   if(id==='analytics')renderAnalytics();
   if(id==='mpesa')renderImportHistory();
@@ -2516,8 +2739,10 @@ function goPage(id,navEl){
 }
 
 function loadSettingsPage() {
-  // Populate profile and FIRE fields
-  [['cfg-name','name'],['cfg-role','role'],['cfg-fire','fireTarget']].forEach(([id,key]) => {
+  // Populate profile, FIRE, and exchange rate fields
+  [['cfg-name','name'],['cfg-role','role'],['cfg-fire','fireTarget'],
+   ['cfg-rate-usd','rate_USD'],['cfg-rate-eur','rate_EUR'],['cfg-rate-gbp','rate_GBP'],['cfg-rate-tzs','rate_TZS']
+  ].forEach(([id,key]) => {
     const el = document.getElementById(id);
     if (el) { const v = CFG.get(key); if (v) el.value = v; }
   });
