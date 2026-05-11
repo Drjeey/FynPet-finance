@@ -2230,14 +2230,49 @@ async function runImport(){
   document.getElementById('import-btn').disabled=false;
 }
 
-async function parseWithClaude(text){
+async function parseWithClaude(text) {
+  const CHUNK_SIZE = 6000;
+  const chunks = [];
+  let remaining = text.trim();
+
+  // Split at newline boundaries so no transaction is cut in half
+  while (remaining.length > 0) {
+    if (remaining.length <= CHUNK_SIZE) {
+      chunks.push(remaining);
+      break;
+    }
+    const lastNl = remaining.lastIndexOf('\n', CHUNK_SIZE);
+    const end = lastNl > CHUNK_SIZE * 0.5 ? lastNl : CHUNK_SIZE;
+    chunks.push(remaining.slice(0, end));
+    remaining = remaining.slice(end).trimStart();
+  }
+
+  const allTxs = [];
+  const seen = new Set();
+  const step3El = document.getElementById('stp3');
+
+  for (let i = 0; i < chunks.length; i++) {
+    if (step3El) step3El.lastChild.textContent = ` Claude AI — chunk ${i+1} of ${chunks.length}…`;
+    const txs = await _parseChunk(chunks[i]);
+    for (const tx of txs) {
+      // Deduplicate: same date + amount + first 35 chars of description
+      const key = `${tx.date}|${tx.amount}|${(tx.description||'').slice(0,35)}`;
+      if (!seen.has(key)) { seen.add(key); allTxs.push(tx); }
+    }
+  }
+
+  if (step3El) step3El.lastChild.textContent = ' Claude AI categorising transactions';
+  return allTxs;
+}
+
+async function _parseChunk(text) {
   const sys = `You are a financial transaction parser for M-Pesa (Safaricom Kenya) statements. Extract ALL transactions and return ONLY a valid JSON array — no markdown, no explanation, no preamble. Each object: {"description":"string","amount":number_positive,"type":"income"|"expense"|"savings"|"transfer","category":"food"|"transport"|"utilities"|"entertainment"|"health"|"shopping"|"savings"|"income"|"transfer"|"other","date":"YYYY-MM-DD"}. Kenya context: Naivas/Quickmart→food, Uber/Bolt/Matatu→transport, KPLC/Nairobi Water→utilities, Netflix/DStv→entertainment, Pharmacy→health, M-Shwari/KCB Goal→savings, Salary/wages→income, person-to-person sends→transfer.`;
 
   const payload = {
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
+    max_tokens: 8192,
     system: sys,
-    messages: [{ role: 'user', content: `Parse all transactions:\n\n${text.slice(0,8000)}` }]
+    messages: [{ role: 'user', content: `Parse all transactions:\n\n${text}` }]
   };
 
   const res = await fetch(CF_WORKER_URL, {
@@ -2246,13 +2281,10 @@ async function parseWithClaude(text){
     body: JSON.stringify(payload)
   });
 
-  if (!res.ok) {
-    throw new Error(`CF Worker error (${res.status}). Check Cloudflare Worker logs.`);
-  }
-
+  if (!res.ok) throw new Error(`CF Worker error (${res.status})`);
   const data = await res.json();
-  const raw = data.content?.[0]?.text || '[]';
-  try { return JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+  const raw = (data.content?.[0]?.text || '[]').replace(/```json|```/g,'').trim();
+  try { return JSON.parse(raw); }
   catch { return []; }
 }
 
