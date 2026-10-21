@@ -6,7 +6,7 @@ A step-by-step plan for turning FynPet into a secure, reliable, mobile-first app
 
 The original completion notes below record earlier work; they are not evidence of a current production deployment.
 
-- Local Git now has a baseline commit and a calculation-fix branch. The user supplied `https://github.com/Drjeey/FynPet-finance`; its history was fetched, and publishing/review remains pending.
+- Local Git has a baseline commit and the published `review/netlify-currency-foundation` branch. Git is signed in as Drjeey; [draft PR #2](https://github.com/Drjeey/FynPet-finance/pull/2) is open. Review, merge and deployment remain pending.
 - Six AI tests and six database tests passed before changes. Eight calculation tests have been added for B1 (20 automated tests total).
 - B1 implementation is ready locally: a pure calculation module, saved KES conversions, UGX settings, consistent currency totals, Nairobi calendar periods, and emergency coverage using three completed months.
 - Browser checks passed under the configured CSP with isolated sample data: dashboard/advisor/budget agreement, analytics, date defaults, rates, creating transactions, reload persistence, and chart period after resize.

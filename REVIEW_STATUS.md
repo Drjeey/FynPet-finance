@@ -8,7 +8,9 @@ The application root is the inner `FynPet-finance-main` directory. The parent co
 
 A local Git repository now contains a baseline of the application, documentation, migration and tests. Work for B1 was isolated on `fix/currency-calculations`. `.env`, `node_modules/` and generated vendor assets are ignored. The unrelated `awx.py` AWS document generator is identical to the existing GitHub copy and is preserved unchanged.
 
-The user identified `https://github.com/Drjeey/FynPet-finance`. It is public, and its default branch is `main`. The remote is configured and its history has been fetched. GitHub main still contains the older Cloudflare implementation, so `review/netlify-currency-foundation` includes the already-present local Netlify migration alongside B1, based on GitHub main's actual history. The GitHub connector reports read access only. A Git push was also attempted: GitHub returned HTTP 403 because this computer authenticates as `jeremykasule-gif`, which lacks write access to `Drjeey/FynPet-finance`. No branch was published and no merge into main was performed. Authenticate Git as an account with repository write access, or grant the current account collaborator access, then push the prepared branch.
+The user identified `https://github.com/Drjeey/FynPet-finance`. It is public, and its default branch is `main`. GitHub main still contains the older Cloudflare implementation, so `review/netlify-currency-foundation` includes the already-present local Netlify migration alongside B1, based on GitHub main's actual history.
+
+Git is now authenticated as **Drjeey**. The branch was published successfully and [draft PR #2](https://github.com/Drjeey/FynPet-finance/pull/2) is open. No merge into main or production deployment has been performed. The earlier Git authentication blocker is resolved; the separate Codex GitHub integration still has read-only access.
 
 ## B1: shared calculations
 
@@ -32,7 +34,7 @@ Implemented locally:
 
 ## Remaining priorities
 
-1. Publish the review branch to the supplied GitHub repository, then review the PR and deploy preview. The user has no Netlify project for FynPet yet; create one from the supplied repository.
+1. Review draft PR #2 and its deploy preview once Netlify is configured. The user has no Netlify project for FynPet yet; create one from the supplied repository.
 2. The user will manually create a separate FynPet Supabase project in a different account. The connected **FP-AFRICA STRIDE APP** project is unrelated and was not modified.
 3. Verify migration, authentication settings, two-user isolation and AI configuration in the intended hosted environment.
 4. FynPet will use Netlify, not Cloudflare. Verify retirement/key rotation only if an old worker was actually deployed; this review has not verified its live state.
