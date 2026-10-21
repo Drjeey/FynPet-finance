@@ -1,7 +1,17 @@
 [build]
-  publish = "."
+  # Copies pinned browser libraries (PDF.js, supabase-js) into public/vendor/.
+  command   = "npm run build"
+  # Only public/ is served. Function source, package files and .env are never published.
+  publish   = "public"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Front end and API share one origin, so no CORS headers are needed (or wanted).
 [[headers]]
   for = "/*"
   [headers.values]
@@ -9,10 +19,11 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # Scripts only from this site: no inline scripts or handlers, no CDNs.
+    # Inline styles are still allowed (the page uses style attributes throughout).
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
 
 [[headers]]
-  for = "/.netlify/functions/*"
+  for = "/vendor/*"
   [headers.values]
-    Access-Control-Allow-Origin = "https://fynpet.com"
-    Access-Control-Allow-Headers = "Content-Type"
-    Access-Control-Allow-Methods = "POST, OPTIONS"
+    Cache-Control = "public, max-age=86400"

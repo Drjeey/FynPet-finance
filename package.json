@@ -1,0 +1,25 @@
+{
+  "name": "fynpet",
+  "version": "5.1.0",
+  "private": true,
+  "type": "module",
+  "description": "FynPet personal finance app: static front end in public/, Netlify Functions in netlify/functions/.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && netlify dev",
+    "check": "node --check public/app.js && node --check public/calc.js && node --check netlify/functions/ai.mjs && node --check netlify/functions/config.mjs",
+    "test": "node --test --experimental-test-module-mocks \"tests/**/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.131.0",
+    "@netlify/blobs": "11.1.3"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@supabase/supabase-js": "2.117.2",
+    "pdfjs-dist": "6.4.299"
+  }
+}
