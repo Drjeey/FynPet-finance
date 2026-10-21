@@ -4,6 +4,7 @@
 
 - Repository: [Drjeey/FynPet-finance](https://github.com/Drjeey/FynPet-finance).
 - Hosting/API: Netlify. No Cloudflare configuration is needed.
+- Existing production site: [fynpet.netlify.app](https://fynpet.netlify.app/). Use this project; do not create a duplicate.
 - Database/accounts: a dedicated Supabase project that the user will create in a different account.
 - The existing connected FP-AFRICA STRIDE APP project must not be used for FynPet.
 
@@ -24,9 +25,11 @@ The sibling `REVIEW_OUTPUT` directory contains an earlier patch and Git bundle a
 
 Supabase describes frontend versus privileged keys in its [API-key documentation](https://supabase.com/docs/guides/getting-started/api-keys).
 
-## 3. Create the Netlify project
+## 3. Connect the existing Netlify project
 
-Import the existing GitHub repository into a new Netlify project. For a preview, select the published review branch; switch the production branch to main after review and merge. Netlify supports importing an existing repository as described in its [setup guide](https://docs.netlify.com/start/quickstarts/deploy-from-repository/).
+Open the existing project that owns `https://fynpet.netlify.app/`. Under Project configuration > Developer settings > Continuous deployment > Repository, check that it is linked to `Drjeey/FynPet-finance`; link that repository if it is currently a manual-upload project. Keep `main` as the production branch and use a Deploy Preview for draft PR #2. Do not deploy the review branch directly to production before review. See [Netlify repository linking](https://docs.netlify.com/build/git-workflows/repo-permissions-linking/) and [Deploy Previews](https://docs.netlify.com/deploy/deploy-types/deploy-previews/).
+
+Verified on 21 October 2026: the homepage returns HTTP 200, references the legacy Cloudflare worker, and does not serve the new external app script. `/api/config` returns HTTP 404, and neither response included the new Content-Security-Policy header. This is evidence that the new implementation is not live yet; it does not establish the project's Git-link or account settings.
 
 Use these values from this project's `netlify.toml`:
 
@@ -54,13 +57,13 @@ Enter secret values directly in Netlify rather than posting them in chat or comm
 
 ## 4. Connect authentication to the new site
 
-Once Netlify supplies the site URL, set it as the Supabase Auth Site URL and allow the intended callback URLs. Add preview URLs only for environments you intend to test. Enable email confirmation and apply the password requirements from A2 in the development plan. [Supabase redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
+Set `https://fynpet.netlify.app` as the Supabase Auth Site URL and allow the intended callback URLs. Add preview URLs only for environments you intend to test. Enable email confirmation and apply the password requirements from A2 in the development plan. [Supabase redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
 
 ## 5. Acceptance checks
 
 - `/api/config` returns the intended project URL and AI availability. Never expect a privileged key in this response.
 - Two test accounts can each create data and can see only their own records.
-- Sign-in/confirmation returns to the new Netlify URL.
+- Sign-in/confirmation returns to `https://fynpet.netlify.app`.
 - Advisor requests succeed only after sign-in and consent.
 - Test a redacted, password-protected real M-Pesa statement; inspect the imported rows before trusting totals.
 - Check the interface on a real phone.

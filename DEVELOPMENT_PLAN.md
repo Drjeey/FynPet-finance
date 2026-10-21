@@ -13,7 +13,7 @@ The original completion notes below record earlier work; they are not evidence o
 - B4 overlaps implemented locally: real weekday labels, complete monthly chart buckets, three months in 3M, and the correct donut period after resize. Hosted and real-phone acceptance remain pending.
 - B5 already includes budget uniqueness checks on edit. Other B5 tasks remain open.
 - B2 sync remains the next major correctness task: deleted rows can return, stale clients can overwrite edits, and failed sign-out sync can lose unsynced cache data.
-- There is no FynPet Netlify project yet. Deployment, hosted account settings, legacy key rotation (if applicable), and real password-protected M-Pesa imports remain unverified.
+- The user confirmed the existing Netlify site at `https://fynpet.netlify.app/`. Its homepage responds, but `/api/config` returns 404 and the HTML still references the legacy worker. Use the existing project for Git linking and previews; the new implementation is not live yet. Hosted account settings, legacy key rotation (if applicable), and real M-Pesa imports remain unverified.
 - The user will set up a separate FynPet Supabase project manually in a different account. The connected **FP-AFRICA STRIDE APP** project was not modified.
 - See [REVIEW_STATUS.md](REVIEW_STATUS.md) for evidence and remaining setup details.
 
@@ -48,7 +48,7 @@ Local initialization and the baseline commit are complete. The user supplied the
 **Done when:** the repository is on GitHub and `.env` / `node_modules` are not in it.
 
 ### ☐ 0.3 Connect Netlify to Git and set environment variables 👤 ⏱ 30 min
-1. There is no Netlify project yet. Import `Drjeey/FynPet-finance` as a new project, using the tested review branch for preview or `main` after review/merge. See [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md).
+1. Use the existing `fynpet.netlify.app` project. Verify/link `Drjeey/FynPet-finance`, keep production on `main`, and enable a Deploy Preview for PR #2. See [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md).
 2. **Site configuration → Environment variables → Add a variable:**
    - `ANTHROPIC_API_KEY`: check **Contains secret values**; scope **Functions**.
    - `SUPABASE_URL`, `SUPABASE_ANON_KEY`: scope **Functions** (values come from step A1).

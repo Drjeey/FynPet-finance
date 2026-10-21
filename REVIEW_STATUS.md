@@ -34,7 +34,7 @@ Implemented locally:
 
 ## Remaining priorities
 
-1. Review draft PR #2 and its deploy preview once Netlify is configured. The user has no Netlify project for FynPet yet; create one from the supplied repository.
+1. Use the existing Netlify project at `https://fynpet.netlify.app/`; verify/link `Drjeey/FynPet-finance` and enable a preview for draft PR #2. Public checks on 21 October 2026 found HTTP 200 for the homepage, a legacy worker reference, HTTP 404 for `/api/config`, and no new CSP header. The new implementation is not live yet; Git-link and account settings are not publicly verified.
 2. The user will manually create a separate FynPet Supabase project in a different account. The connected **FP-AFRICA STRIDE APP** project is unrelated and was not modified.
 3. Verify migration, authentication settings, two-user isolation and AI configuration in the intended hosted environment.
 4. FynPet will use Netlify, not Cloudflare. Verify retirement/key rotation only if an old worker was actually deployed; this review has not verified its live state.
