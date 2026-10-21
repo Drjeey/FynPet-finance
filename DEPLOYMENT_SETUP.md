@@ -11,6 +11,14 @@
 
 GitHub main is older than this local project. The publication branch includes the local Netlify migration, corrected database migration, security changes, tests and calculation fixes. Review it before merging into main.
 
+The local branch is `review/netlify-currency-foundation`. Publishing was blocked by GitHub: this computer's Git credentials belong to `jeremykasule-gif`, which has no write access to `Drjeey/FynPet-finance` (HTTP 403). Sign in to Git with a permitted account, or grant that account write access. Then push this branch from the application root and open a pull request targeting main:
+
+```powershell
+git push -u origin review/netlify-currency-foundation
+```
+
+The sibling `REVIEW_OUTPUT` directory contains a patch and Git bundle for transferring the prepared changes if needed. The working files and local Git branches also retain the changes.
+
 ## 2. Create FynPet in the intended Supabase account
 
 1. Create a new, empty project for FynPet in that account.

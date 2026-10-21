@@ -8,7 +8,7 @@ The application root is the inner `FynPet-finance-main` directory. The parent co
 
 A local Git repository now contains a baseline of the application, documentation, migration and tests. Work for B1 was isolated on `fix/currency-calculations`. `.env`, `node_modules/` and generated vendor assets are ignored. The unrelated `awx.py` AWS document generator is identical to the existing GitHub copy and is preserved unchanged.
 
-The user identified `https://github.com/Drjeey/FynPet-finance`. It is public, and its default branch is `main`. The remote is configured and its history has been fetched. GitHub main still contains the older Cloudflare implementation, so the publication branch includes the already-present local Netlify migration alongside B1. The GitHub connector reports read access only. No merge into main has been performed.
+The user identified `https://github.com/Drjeey/FynPet-finance`. It is public, and its default branch is `main`. The remote is configured and its history has been fetched. GitHub main still contains the older Cloudflare implementation, so `review/netlify-currency-foundation` includes the already-present local Netlify migration alongside B1, based on GitHub main's actual history. The GitHub connector reports read access only. A Git push was also attempted: GitHub returned HTTP 403 because this computer authenticates as `jeremykasule-gif`, which lacks write access to `Drjeey/FynPet-finance`. No branch was published and no merge into main was performed. Authenticate Git as an account with repository write access, or grant the current account collaborator access, then push the prepared branch.
 
 ## B1: shared calculations
 
