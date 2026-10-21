@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FynPet — Financial Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="vendor/supabase.js" defer></script>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   FYNPET v5 — REFINED EDITORIAL DESIGN SYSTEM
+   Tone: Luxury financial publication × Bloomberg terminal
+   Signature: Every number is a typographic statement.
+   Palette: Warm cream · Deep charcoal · Indigo accent · Warm emerald
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Warm cream palette — replaces cold lavender-grey */
+  --bg:        #F5F2EE;
+  --bg2:       #EDE9E3;
+  --surface:   #FDFCFA;
+  --surface2:  #F9F7F4;
+  --surface3:  #F3F0EC;
+
+  /* Borders — warm-tinted, not cold grey */
+  --border:    #E4DDD4;
+  --border2:   #D4CBC0;
+  --border3:   #C8BFB4;
+
+  /* Ink — charcoal, not pure black */
+  --ink:   #1C1917;
+  --ink2:  #57534E;
+  --ink3:  #A8A29E;
+  --ink4:  #D6D3D1;
+
+  /* Brand — deep indigo, not electric blue */
+  --blue:   #3730A3;
+  --blue2:  #312E81;
+  --blue3:  #4338CA;
+  --bluebg: rgba(55,48,163,.07);
+  --bluelt: #EEF2FF;
+  --bluemd: rgba(55,48,163,.12);
+
+  /* Emerald — warm green, not teal */
+  --teal:   #059669;
+  --tealbg: rgba(5,150,105,.08);
+  --teallt: #ECFDF5;
+
+  /* Coral rose */
+  --rose:   #DC2626;
+  --rosebg: rgba(220,38,38,.07);
+  --roselt: #FEF2F2;
+
+  /* Amber */
+  --amber:   #D97706;
+  --amberbg: rgba(217,119,6,.08);
+  --amberlt: #FFFBEB;
+
+  /* Purple */
+  --purple:  #7C3AED;
+  --purpbg:  rgba(124,58,237,.07);
+  --purplt:  #F5F3FF;
+
+  /* Typography */
+  --fd: 'DM Serif Display', Georgia, serif;
+  --fb: 'DM Sans', system-ui, sans-serif;
+  --fm: 'IBM Plex Mono', monospace;
+
+  /* Geometry — sharper, more editorial */
+  --r:   10px;
+  --rsm:  6px;
+  --rxl: 16px;
+
+  /* Shadows — warm-tinted */
+  --shadow:  0 1px 2px rgba(28,25,23,.04), 0 4px 12px rgba(28,25,23,.06);
+  --shadow2: 0 8px 24px rgba(28,25,23,.10), 0 2px 8px rgba(28,25,23,.06);
+  --shadow3: 0 20px 60px rgba(28,25,23,.16);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(--ink); font-size:14px; overflow:hidden; -webkit-font-smoothing:antialiased; }
+
+/* ═══ SCROLLBAR ═══════════════════════════════════════════ */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:var(--border3); }
+
+/* ═══ LAYOUT ═══════════════════════════════════════════════ */
+#layout { display:grid; grid-template-columns:240px 1fr; grid-template-rows:100vh; height:100vh; width:100vw; position:relative; }
+
+/* ═══ SIDEBAR ══════════════════════════════════════════════ */
+#sidebar {
+  background:var(--ink);  /* Dark sidebar — high contrast editorial */
+  display:flex; flex-direction:column; overflow:hidden;
+  position:relative;
+}
+/* Subtle noise texture on sidebar */
+#sidebar::before {
+  content:''; position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0;
+}
+#sidebar > * { position:relative; z-index:1; }
+
+.sb-logo {
+  padding:22px 20px 18px;
+  display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.sb-logo-icon {
+  width:36px; height:36px; border-radius:9px;
+  background:linear-gradient(135deg, var(--blue3), #6366f1);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; color:white; flex-shrink:0;
+  box-shadow:0 4px 12px rgba(55,48,163,.4);
+}
+.sb-logo-text { font-family:var(--fd); font-size:1.2rem; color:white; letter-spacing:-.01em; }
+.sb-logo-text em { color:rgba(255,255,255,.45); font-style:normal; }
+
+/* Sync status — minimal inline tag */
+.sb-sync-status {
+  padding:10px 20px 8px;
+  display:flex; align-items:center; gap:6px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.sync-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sync-dot.connected { background:#34D399; box-shadow:0 0 6px rgba(52,211,153,.6); }
+.sync-dot.local     { background:#FBBF24; }
+.sync-dot.syncing   { background:#818CF8; animation:pulse .9s ease-in-out infinite; }
+.sync-dot.error     { background:#F87171; }
+#sync-label { font-size:.62rem; font-weight:500; color:rgba(255,255,255,.35); letter-spacing:.03em; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* Nav */
+.sb-nav { flex:1; padding:14px 12px; overflow-y:auto; scrollbar-width:none; }
+.sb-nav::-webkit-scrollbar { display:none; }
+.sb-sec {
+  font-size:.58rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.12em; color:rgba(255,255,255,.25);
+  padding:10px 8px 5px; margin-top:6px;
+}
+.ni {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:8px;
+  color:rgba(255,255,255,.5); font-size:.82rem; font-weight:500;
+  cursor:pointer; transition:all .15s; margin-bottom:1px;
+  position:relative;
+}
+.ni:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); }
+.ni.on {
+  background:rgba(255,255,255,.1);
+  color:white; font-weight:600;
+}
+.ni.on::before {
+  content:''; position:absolute; left:0; top:50%;
+  transform:translateY(-50%);
+  width:3px; height:18px; border-radius:0 2px 2px 0;
+  background:linear-gradient(to bottom, #818CF8, #6366f1);
+}
+.ni .icon { width:16px; text-align:center; font-size:.85rem; flex-shrink:0; opacity:.7; }
+.ni.on .icon { opacity:1; }
+.ni-badge { margin-left:auto; background:#EF4444; color:white; font-size:.52rem; font-weight:700; padding:1px 6px; border-radius:10px; }
+
+/* Upgrade card */
+.sb-foot { padding:12px; border-top:1px solid rgba(255,255,255,.07); }
+.upgrade-card {
+  background:linear-gradient(135deg, rgba(99,102,241,.25), rgba(55,48,163,.4));
+  border:1px solid rgba(129,140,248,.2);
+  border-radius:var(--r); padding:14px; color:white; text-align:center;
+  backdrop-filter:blur(8px);
+}
+.uc-title { font-family:var(--fd); font-size:.9rem; font-weight:400; font-style:italic; margin-bottom:3px; }
+.uc-sub { font-size:.63rem; opacity:.6; margin-bottom:10px; font-weight:400; }
+.uc-btn {
+  width:100%; background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:5px; padding:7px;
+  font-family:var(--fb); font-size:.72rem; font-weight:600;
+  color:white; cursor:pointer;
+  transition:all .15s;
+}
+.uc-btn:hover { background:rgba(255,255,255,.2); }
+
+/* ═══ TOPBAR ════════════════════════════════════════════════ */
+#main { display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+#topbar {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  display:flex; align-items:center; gap:14px;
+  height:60px; flex-shrink:0;
+  /* Warm inset shadow to separate from content */
+  box-shadow:0 1px 0 var(--border);
+}
+.tb-title { font-family:var(--fd); font-size:1.15rem; font-weight:400; font-style:italic; flex:1; color:var(--ink); }
+.tb-title em { font-style:normal; color:var(--ink3); font-size:.72rem; font-weight:400; margin-left:10px; font-family:var(--fb); letter-spacing:.02em; }
+.tb-search {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:40px; padding:7px 14px; width:220px;
+  transition:all .15s;
+}
+.tb-search:focus-within { border-color:var(--blue3); background:var(--surface); box-shadow:0 0 0 3px var(--bluebg); }
+.tb-search input { background:none; border:none; outline:none; font-family:var(--fb); font-size:.75rem; color:var(--ink); width:100%; }
+.tb-search input::placeholder { color:var(--ink3); }
+.tb-search-icon { color:var(--ink3); font-size:.82rem; flex-shrink:0; }
+.ib {
+  width:34px; height:34px; border-radius:8px;
+  background:var(--surface2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:.82rem; transition:all .15s; position:relative;
+}
+.ib:hover { border-color:var(--border2); background:var(--surface); box-shadow:var(--shadow); }
+.ib:active { transform:scale(.95); }
+.ndot { position:absolute; top:5px; right:5px; width:6px; height:6px; border-radius:50%; background:var(--rose); border:1.5px solid var(--surface); }
+.tb-user { display:flex; align-items:center; gap:9px; cursor:pointer; padding:5px 10px; border-radius:8px; transition:background .15s; }
+.tb-user:hover { background:var(--surface2); }
+.tb-av {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--ink); /* Dark avatar — editorial */
+  display:flex; align-items:center; justify-content:center;
+  color:var(--bg); font-size:.7rem; font-weight:700; flex-shrink:0;
+  font-family:var(--fm);
+}
+.tb-ui .tun { font-size:.78rem; font-weight:600; line-height:1.2; color:var(--ink); }
+.tb-ui .tur { font-size:.6rem; color:var(--ink3); font-weight:400; }
+
+/* Content area */
+#content { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+.page { display:none; padding:28px 32px; animation:fadeUp .22s ease; }
+.page.on { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══ AI ADVISOR PANEL ══════════════════════════════════════ */
+#advisor-panel {
+  position:fixed; top:0; right:0; bottom:0;
+  width:380px; max-width:100vw;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  box-shadow:-8px 0 32px rgba(28,25,23,.10);
+  z-index:200;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+#advisor-panel.open { transform:translateX(0); }
+#advisor-backdrop { display:none; position:fixed; inset:0; background:rgba(28,25,23,.3); z-index:199; backdrop-filter:blur(3px); }
+#advisor-backdrop.show { display:block; }
+@media(min-width:1300px) {
+  #advisor-panel.open { transform:translateX(0); }
+  #main.panel-open { margin-right:380px; transition:margin-right .28s cubic-bezier(.4,0,.2,1); }
+  #advisor-backdrop.show { display:none; }
+}
+
+.ib.ai-active { background:var(--bluebg)!important; border-color:rgba(55,48,163,.25)!important; color:var(--blue)!important; }
+.ap-header {
+  padding:18px 20px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  background:linear-gradient(to bottom, var(--surface), var(--surface2));
+}
+.ap-title-row { display:flex; align-items:center; gap:8px; }
+.ai-pulse { width:8px; height:8px; border-radius:50%; background:var(--teal); animation:pulse 2.5s ease-in-out infinite; flex-shrink:0; }
+.ap-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; color:var(--ink); }
+.ap-sub { font-size:.6rem; color:var(--ink3); margin-top:2px; font-weight:400; letter-spacing:.02em; }
+.ap-close { width:28px; height:28px; border-radius:6px; background:var(--surface3); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.72rem; color:var(--ink3); transition:all .13s; }
+.ap-close:hover { background:var(--roselt); border-color:rgba(220,38,38,.2); color:var(--rose); }
+
+.ap-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; background:var(--surface2); }
+.ap-tab { flex:1; padding:10px 6px; font-size:.68rem; font-weight:600; text-align:center; cursor:pointer; color:var(--ink3); border-bottom:2px solid transparent; transition:all .15s; letter-spacing:.02em; }
+.ap-tab.on { color:var(--blue); border-bottom-color:var(--blue); background:var(--surface); }
+
+/* Chat messages */
+.ap-messages { flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:14px; scrollbar-width:thin; }
+.msg { display:flex; gap:9px; animation:msgIn .28s ease; }
+@keyframes msgIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.msg.user { flex-direction:row-reverse; }
+.msg-av { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; flex-shrink:0; margin-top:2px; font-family:var(--fm); }
+.msg-av.ai { background:var(--ink); color:var(--bg); }
+.msg-av.user { background:var(--blue); color:white; }
+.msg-bubble { max-width:82%; padding:11px 14px; border-radius:14px; font-size:.79rem; line-height:1.68; position:relative; }
+.msg-bubble.ai { background:var(--surface2); border:1px solid var(--border); border-radius:4px 14px 14px 14px; color:var(--ink); }
+.msg-bubble.user { background:var(--blue); color:white; border-radius:14px 4px 14px 14px; }
+.msg-bubble.ai strong { color:var(--blue); font-weight:700; }
+.msg-bubble.ai .amt { font-family:var(--fm); font-weight:600; font-size:.76rem; color:var(--ink); background:var(--surface3); padding:0px 4px; border-radius:3px; }
+.msg-bubble.ai .positive { color:var(--teal); font-weight:700; }
+.msg-bubble.ai .negative { color:var(--rose); font-weight:700; }
+.msg-bubble.ai .warning { color:var(--amber); font-weight:700; }
+.msg-time { font-size:.58rem; color:var(--ink3); margin-top:5px; }
+.msg-bubble.user + .msg-time, .msg.user .msg-time { text-align:right; color:rgba(255,255,255,.5); }
+
+.typing-indicator { display:flex; align-items:center; gap:5px; padding:12px 14px; }
+.typing-dot { width:6px; height:6px; border-radius:50%; background:var(--ink3); animation:td 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+.insight-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px; margin-top:6px; }
+.ic-header { display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+.ic-icon { font-size:.9rem; }
+.ic-title { font-size:.75rem; font-weight:600; }
+.ic-metric { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); }
+.ic-metric:last-child { border-bottom:none; }
+.ic-metric-name { font-size:.68rem; color:var(--ink2); }
+.ic-metric-val { font-family:var(--fm); font-size:.72rem; font-weight:600; }
+.ic-metric-val.good{color:var(--teal)}.ic-metric-val.warn{color:var(--amber)}.ic-metric-val.bad{color:var(--rose)}
+
+.quick-prompts { padding:10px 16px; display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid var(--border); flex-shrink:0; background:var(--surface2); }
+.qp-btn {
+  padding:5px 12px; border-radius:20px;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--ink2); font-size:.65rem; font-weight:500;
+  cursor:pointer; transition:all .13s; font-family:var(--fb);
+}
+.qp-btn:hover { border-color:var(--blue3); color:var(--blue); background:var(--bluelt); }
+
+.ap-input-wrap { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:flex-end; flex-shrink:0; background:var(--surface); }
+.ap-textarea {
+  flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:9px 13px; font-family:var(--fb); font-size:.79rem; color:var(--ink);
+  outline:none; resize:none; min-height:36px; max-height:120px; line-height:1.5;
+  transition:border-color .15s; scrollbar-width:none;
+}
+.ap-textarea:focus { border-color:var(--blue3); background:var(--surface); box-shadow:0 0 0 3px var(--bluebg); }
+.ap-textarea::placeholder { color:var(--ink3); }
+.ap-send {
+  width:36px; height:36px; border-radius:9px;
+  background:var(--ink); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--bg); font-size:.9rem; transition:all .15s; flex-shrink:0;
+}
+.ap-send:hover { background:var(--blue); transform:translateY(-1px); box-shadow:0 4px 12px rgba(55,48,163,.3); }
+.ap-send:disabled { opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
+
+.insights-tab-content { padding:16px 18px; overflow-y:auto; flex:1; }
+.ins-section { margin-bottom:18px; }
+.ins-sec-title { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:9px; }
+.ins-metric-card { background:var(--surface2); border-radius:var(--r); padding:12px 14px; margin-bottom:7px; display:flex; align-items:center; gap:12px; border:1px solid var(--border); }
+.imc-icon { font-size:1rem; flex-shrink:0; }
+.imc-info { flex:1; }
+.imc-name { font-size:.75rem; font-weight:600; margin-bottom:2px; color:var(--ink); }
+.imc-val { font-family:var(--fm); font-size:.72rem; font-weight:600; }
+.imc-sub { font-size:.6rem; color:var(--ink3); margin-top:1px; }
+.imc-val.good{color:var(--teal)}.imc-val.warn{color:var(--amber)}.imc-val.bad{color:var(--rose)}
+.imc-status { padding:3px 9px; border-radius:20px; font-size:.6rem; font-weight:700; flex-shrink:0; }
+.history-item { padding:10px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
+.history-item:hover { background:var(--surface2); }
+.hi-prompt { font-size:.75rem; font-weight:500; color:var(--ink); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hi-meta { font-size:.6rem; color:var(--ink3); display:flex; align-items:center; gap:6px; }
+.hi-topic { background:var(--bluebg); color:var(--blue); padding:1px 6px; border-radius:4px; font-weight:600; }
+
+/* ═══ PAGE COMPONENTS ══════════════════════════════════════ */
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; }
+.ph-title {
+  font-family:var(--fd); font-size:2rem; font-weight:400; font-style:italic;
+  letter-spacing:-.02em; margin-bottom:4px; color:var(--ink);
+  line-height:1.1;
+}
+.ph-sub { font-size:.72rem; color:var(--ink3); font-weight:400; letter-spacing:.02em; }
+.ph-acts { display:flex; gap:8px; }
+
+/* Buttons — editorial style */
+.btn-primary {
+  background:var(--ink); color:var(--bg);
+  border:none; border-radius:var(--rsm); padding:9px 18px;
+  font-family:var(--fb); font-size:.77rem; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; gap:6px;
+  transition:all .18s; letter-spacing:.01em;
+}
+.btn-primary:hover { background:var(--blue); transform:translateY(-1px); box-shadow:0 4px 14px rgba(55,48,163,.3); }
+.btn-primary:active { transform:scale(.97); }
+.btn-secondary {
+  background:var(--surface); color:var(--ink2);
+  border:1px solid var(--border); border-radius:var(--rsm); padding:9px 16px;
+  font-family:var(--fb); font-size:.77rem; font-weight:500;
+  cursor:pointer; display:flex; align-items:center; gap:6px;
+  transition:all .15s;
+}
+.btn-secondary:hover { background:var(--surface2); border-color:var(--border2); color:var(--ink); }
+.btn-ghost { background:none; border:none; font-family:var(--fb); font-size:.73rem; font-weight:600; color:var(--blue); cursor:pointer; padding:6px 10px; }
+.btn-danger-sm {
+  background:var(--rosebg); color:var(--rose);
+  border:1px solid rgba(220,38,38,.15); border-radius:5px; padding:5px 10px;
+  font-family:var(--fb); font-size:.68rem; font-weight:600; cursor:pointer; transition:all .13s;
+}
+.btn-danger-sm:hover { background:var(--rose); color:white; }
+
+/* ═══ STAT CARDS ════════════════════════════════════════════ */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.stat-card {
+  background:var(--surface); border-radius:var(--rxl);
+  border:1px solid var(--border); padding:22px 22px 20px;
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+  transition:box-shadow .2s, transform .2s; cursor:pointer;
+}
+.stat-card:hover { box-shadow:var(--shadow2); transform:translateY(-2px); }
+.sc-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.sc-ic { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.sc-badge { display:flex; align-items:center; gap:3px; padding:3px 9px; border-radius:20px; font-size:.6rem; font-weight:700; font-family:var(--fm); }
+.sc-badge.up { background:var(--teallt); color:var(--teal); }
+.sc-badge.dn { background:var(--roselt); color:var(--rose); }
+.sc-badge.neutral { background:var(--surface2); color:var(--ink3); }
+.sc-lbl { font-size:.68rem; color:var(--ink3); font-weight:400; margin-bottom:5px; letter-spacing:.03em; text-transform:uppercase; }
+.sc-val {
+  font-family:var(--fm); font-size:1.55rem; font-weight:600;
+  letter-spacing:-.02em; line-height:1; margin-bottom:5px; color:var(--ink);
+}
+.sc-sub { font-size:.63rem; color:var(--ink3); font-weight:400; }
+/* Accent bar at bottom of card */
+.sc-accent { position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 var(--rxl) var(--rxl); opacity:.7; }
+
+/* ═══ CHART CARDS ════════════════════════════════════════════ */
+.charts-row { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:24px; }
+.chart-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--rxl); padding:22px; box-shadow:var(--shadow);
+}
+.cc-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:3px; }
+.cc-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; color:var(--ink); }
+.cc-sub { font-size:.63rem; color:var(--ink3); margin-bottom:18px; font-weight:400; }
+.period-btns { display:flex; gap:3px; }
+.pb {
+  padding:4px 10px; border-radius:5px; font-size:.62rem; font-weight:600;
+  border:1px solid var(--border); color:var(--ink3);
+  cursor:pointer; background:transparent; font-family:var(--fb); transition:all .13s;
+  letter-spacing:.02em;
+}
+.pb.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+/* Donut */
+.donut-wrap { display:flex; align-items:center; gap:18px; }
+.donut-leg { flex:1; display:flex; flex-direction:column; gap:8px; }
+.dl-row { display:flex; align-items:center; justify-content:space-between; }
+.dl-l { display:flex; align-items:center; gap:8px; font-size:.7rem; color:var(--ink2); font-weight:500; }
+.dl-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }  /* Square dots — editorial */
+.dl-r { font-family:var(--fm); font-size:.68rem; font-weight:600; color:var(--ink); }
+
+/* ═══ DATA TABLE ════════════════════════════════════════════ */
+.table-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--rxl); box-shadow:var(--shadow); overflow:hidden;
+}
+.tt {
+  padding:16px 22px; display:flex; align-items:center; gap:12px;
+  border-bottom:1px solid var(--border); background:var(--surface);
+}
+.tt-title { font-family:var(--fd); font-size:.95rem; font-weight:400; font-style:italic; flex:1; color:var(--ink); }
+.filter-row { display:flex; gap:4px; }
+.fb {
+  padding:4px 11px; border-radius:20px; font-size:.65rem; font-weight:500;
+  border:1px solid var(--border); color:var(--ink3);
+  cursor:pointer; background:transparent; font-family:var(--fb); transition:all .13s;
+}
+.fb.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.search-wrap {
+  display:flex; align-items:center; gap:5px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:20px; padding:5px 12px;
+  transition:all .15s;
+}
+.search-wrap:focus-within { border-color:var(--border2); background:var(--surface); }
+.search-wrap input { background:none; border:none; outline:none; font-family:var(--fb); font-size:.72rem; color:var(--ink); width:140px; }
+.search-wrap input::placeholder { color:var(--ink3); }
+
+table { width:100%; border-collapse:collapse; }
+thead tr { border-bottom:1px solid var(--border); background:var(--surface2); }
+th {
+  padding:10px 14px; text-align:left;
+  font-size:.62rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--ink3); white-space:nowrap;
+}
+tbody tr { border-bottom:1px solid var(--border); transition:background .12s; cursor:pointer; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--surface2); }
+td { padding:11px 14px; font-size:.79rem; vertical-align:middle; }
+.td-ico { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
+.td-main { font-weight:600; font-size:.8rem; margin-bottom:1px; color:var(--ink); }
+.td-sub { font-size:.62rem; color:var(--ink3); }
+.td-mono { font-family:var(--fm); font-weight:600; font-size:.8rem; }
+.td-mono.pos{color:var(--teal)}.td-mono.neg{color:var(--rose)}
+.cat-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:.62rem; font-weight:600; }
+.st-pill { padding:3px 9px; border-radius:5px; font-size:.62rem; font-weight:600; }
+.st-pill.manual { background:var(--teallt); color:var(--teal); }
+.st-pill.ai { background:var(--purplt); color:var(--purple); }
+.st-pill.import { background:var(--bluelt); color:var(--blue); }
+.row-acts { display:flex; gap:5px; opacity:0; transition:opacity .13s; }
+tbody tr:hover .row-acts { opacity:1; }
+.ra {
+  width:26px; height:26px; border-radius:5px; border:1px solid var(--border);
+  background:var(--surface); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; font-size:.65rem; transition:all .12s;
+}
+.ra:hover { border-color:var(--border2); box-shadow:var(--shadow); }
+.ra.del:hover { background:var(--rose); color:white; border-color:var(--rose); }
+.tf { padding:11px 22px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); background:var(--surface2); }
+.tf-info { font-size:.65rem; color:var(--ink3); font-family:var(--fm); }
+.pag { display:flex; gap:3px; }
+.pg {
+  width:28px; height:28px; border-radius:5px; border:1px solid var(--border);
+  background:var(--surface); cursor:pointer; font-size:.7rem; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink2); transition:all .12s; font-family:var(--fm);
+}
+.pg:hover { border-color:var(--ink); color:var(--ink); }
+.pg.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.pg:disabled { opacity:.3; cursor:not-allowed; }
+
+/* Empty state */
+.empty { text-align:center; padding:56px 20px; }
+.empty-icon { font-size:2.5rem; margin-bottom:14px; opacity:.5; }
+.empty-title { font-family:var(--fd); font-size:1.1rem; font-weight:400; font-style:italic; margin-bottom:6px; color:var(--ink2); }
+.empty-sub { font-size:.76rem; color:var(--ink3); margin-bottom:20px; line-height:1.65; max-width:300px; margin-left:auto; margin-right:auto; }
+
+/* ═══ BUDGET CARDS ══════════════════════════════════════════ */
+.budget-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.bc {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl);
+  padding:20px; box-shadow:var(--shadow); transition:all .2s;
+}
+.bc:hover { box-shadow:var(--shadow2); transform:translateY(-2px); }
+.bc.over-budget { border-color:rgba(220,38,38,.25); background:linear-gradient(to bottom, var(--surface), #FEF9F9); }
+.bc-hdr { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.bc-ic { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+.bc-name { font-size:.83rem; font-weight:600; color:var(--ink); }
+.bc-lmt { font-size:.62rem; color:var(--ink3); margin-top:1px; font-family:var(--fm); }
+.bc-amts { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+.bc-spent { font-family:var(--fm); font-size:1.2rem; font-weight:600; color:var(--ink); }
+.bc-spent.over { color:var(--rose); }
+.bc-rem { font-size:.7rem; font-weight:600; }
+.bc-rem.ok { color:var(--teal); }.bc-rem.bad { color:var(--rose); }
+.bc-track { height:5px; background:var(--bg2); border-radius:3px; overflow:hidden; margin-bottom:6px; }
+.bc-fill { height:100%; border-radius:3px; transition:width .8s ease; }
+.bc-meta { display:flex; justify-content:space-between; font-size:.6rem; color:var(--ink3); font-family:var(--fm); margin-bottom:14px; }
+.bc-acts { display:flex; gap:7px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* ═══ ANALYTICS PAGE ════════════════════════════════════════ */
+.an-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.metric-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:20px; box-shadow:var(--shadow); }
+.mc-icon { font-size:1.1rem; margin-bottom:10px; }
+.mc-lbl { font-size:.62rem; color:var(--ink3); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin-bottom:5px; }
+.mc-val { font-family:var(--fm); font-size:1.15rem; font-weight:600; margin-bottom:3px; color:var(--ink); }
+.mc-sub { font-size:.63rem; color:var(--ink3); }
+.mc-val.good{color:var(--teal)}.mc-val.warn{color:var(--amber)}.mc-val.bad{color:var(--rose)}
+
+.fire-card {
+  background:linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border:1px solid rgba(217,119,6,.2); border-radius:var(--rxl);
+  padding:22px; margin-bottom:16px;
+}
+.fire-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.fire-title { display:flex; align-items:center; gap:8px; font-family:var(--fd); font-size:1rem; font-style:italic; font-weight:400; color:var(--ink); }
+.fire-tag { background:rgba(217,119,6,.12); color:var(--amber); font-size:.58rem; font-weight:700; padding:2px 8px; border-radius:5px; text-transform:uppercase; letter-spacing:.06em; font-family:var(--fm); }
+.fire-trk { height:8px; background:rgba(217,119,6,.15); border-radius:4px; overflow:hidden; margin-bottom:8px; }
+.fire-fill { height:100%; background:linear-gradient(90deg, var(--amber), #F59E0B); border-radius:4px; transition:width 1s ease; }
+.fire-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:14px; }
+.fs { text-align:center; }
+.fs-v { font-family:var(--fm); font-size:.95rem; font-weight:600; color:var(--ink); }
+.fs-l { font-size:.58rem; color:var(--ink3); margin-top:3px; text-transform:uppercase; letter-spacing:.06em; }
+
+/* ═══ MPESA IMPORT PAGE ═════════════════════════════════════ */
+.import-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.drop-zone {
+  background:linear-gradient(135deg, #F0F4FF, #EDF9F5);
+  border:1.5px dashed rgba(55,48,163,.2); border-radius:var(--rxl);
+  padding:36px 24px; text-align:center; cursor:pointer; transition:all .18s;
+  display:block;
+}
+.drop-zone:hover, .drop-zone.drag { border-color:var(--blue); background:var(--bluebg); }
+.dz-icon { font-size:2.5rem; margin-bottom:14px; }
+.dz-title { font-family:var(--fd); font-size:1.1rem; font-style:italic; font-weight:400; margin-bottom:6px; color:var(--ink); }
+.dz-sub { font-size:.73rem; color:var(--ink2); line-height:1.65; margin-bottom:16px; }
+.file-preview { display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:10px 14px; margin-top:12px; }
+.file-preview.vis { display:flex; }
+.fp-icon { font-size:1.1rem; }
+.fp-info { flex:1; min-width:0; }
+.fp-name { font-size:.76rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
+.fp-size { font-size:.61rem; color:var(--ink3); font-family:var(--fm); }
+.fp-rm { cursor:pointer; color:var(--ink3); font-size:.76rem; padding:3px; border-radius:3px; }
+.fp-rm:hover { color:var(--rose); }
+
+.import-form { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:24px; box-shadow:var(--shadow); }
+.priv-notice { background:var(--amberlt); border:1px solid rgba(217,119,6,.18); border-radius:8px; padding:11px 14px; display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-size:.68rem; color:var(--ink2); line-height:1.55; }
+.steps-list { background:var(--surface2); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-top:12px; display:none; }
+.steps-list.vis { display:block; }
+.step { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.74rem; color:var(--ink3); border-bottom:1px solid var(--border); transition:color .2s; }
+.step:last-child { border-bottom:none; }
+.step.act { color:var(--ink); }
+.step.done { color:var(--teal); }
+.step-dot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.58rem; font-weight:700; flex-shrink:0; background:var(--border); color:var(--ink3); }
+.step.act .step-dot { background:var(--bluebg); color:var(--blue); animation:spin 1s linear infinite; }
+.step.done .step-dot { background:var(--teallt); color:var(--teal); animation:none; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.import-result { background:var(--teallt); border:1px solid rgba(5,150,105,.18); border-radius:var(--r); padding:16px; margin-top:12px; display:none; }
+.import-result.vis { display:block; }
+.ir-title { font-size:.8rem; font-weight:700; color:var(--teal); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.ir-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.ir-stat { text-align:center; background:var(--surface); border-radius:7px; padding:10px 6px; border:1px solid var(--border); }
+.ir-sv { font-family:var(--fm); font-size:1.1rem; font-weight:700; color:var(--ink); }
+.ir-sl { font-size:.6rem; color:var(--ink3); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
+
+/* ═══ SETTINGS PAGE ═════════════════════════════════════════ */
+.config-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:22px; box-shadow:var(--shadow); margin-bottom:16px; }
+.config-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; margin-bottom:4px; color:var(--ink); }
+.config-sub { font-size:.7rem; color:var(--ink3); margin-bottom:18px; font-weight:400; line-height:1.5; }
+.key-input-wrap { position:relative; }
+.key-input-wrap input { padding-right:72px; }
+.key-show-btn { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:.62rem; font-weight:600; cursor:pointer; color:var(--ink2); transition:all .13s; }
+.key-show-btn:hover { border-color:var(--border2); color:var(--ink); }
+.sb-key-status { display:flex; align-items:center; gap:7px; font-size:.68rem; padding:8px 11px; border-radius:7px; margin-top:8px; font-weight:500; }
+.sb-key-status.ok { background:var(--teallt); color:var(--teal); }
+.sb-key-status.err { background:var(--roselt); color:var(--rose); }
+.sb-key-status.none { background:var(--surface2); color:var(--ink3); border:1px solid var(--border); }
+.config-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+
+/* ═══ MODAL ═════════════════════════════════════════════════ */
+.modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,.45); backdrop-filter:blur(6px); z-index:1000; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; animation:mfade .2s ease; }
+@keyframes mfade { from{opacity:0} to{opacity:1} }
+.modal {
+  background:var(--surface); border-radius:var(--rxl); padding:28px;
+  width:500px; max-width:96vw; max-height:92vh; overflow-y:auto;
+  box-shadow:var(--shadow3); animation:mslide .24s ease;
+  border:1px solid var(--border); scrollbar-width:thin;
+}
+@keyframes mslide { from{transform:scale(.96) translateY(10px)} to{transform:scale(1) translateY(0)} }
+.modal-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+.modal-title { font-family:var(--fd); font-size:1.2rem; font-weight:400; font-style:italic; color:var(--ink); }
+.modal-close { width:28px; height:28px; border-radius:6px; background:var(--surface2); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.8rem; color:var(--ink3); transition:all .12s; }
+.modal-close:hover { background:var(--roselt); color:var(--rose); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.form-row.full { grid-template-columns:1fr; }
+.form-grp { display:flex; flex-direction:column; gap:5px; }
+.form-lbl { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); }
+.form-input {
+  background:var(--surface2); border:1px solid var(--border); border-radius:7px;
+  padding:9px 12px; font-family:var(--fb); font-size:.82rem; color:var(--ink);
+  outline:none; transition:all .15s; width:100%;
+}
+.form-input:focus { border-color:var(--blue3); box-shadow:0 0 0 3px var(--bluebg); background:var(--surface); }
+.form-input::placeholder { color:var(--ink4); }
+select.form-input { cursor:pointer; }
+.modal-acts { display:flex; gap:9px; justify-content:flex-end; margin-top:22px; padding-top:18px; border-top:1px solid var(--border); }
+.confirm-modal { width:360px; text-align:center; }
+.cm-icon { font-size:2.2rem; margin-bottom:12px; }
+.cm-title { font-family:var(--fd); font-size:1.1rem; font-weight:400; font-style:italic; margin-bottom:6px; color:var(--ink); }
+.cm-sub { font-size:.75rem; color:var(--ink2); margin-bottom:22px; line-height:1.65; }
+
+/* ═══ TOAST ═════════════════════════════════════════════════ */
+#toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--ink); color:var(--bg);
+  border-radius:10px; padding:12px 18px;
+  font-size:.77rem; font-weight:600; font-family:var(--fb);
+  box-shadow:0 8px 28px rgba(28,25,23,.35);
+  z-index:2000; display:none; align-items:center; gap:9px;
+  animation:tslide .2s ease; max-width:340px;
+  border:1px solid rgba(255,255,255,.08);
+}
+#toast.show { display:flex; }
+@keyframes tslide { from{transform:translateX(16px);opacity:0} to{transform:translateX(0);opacity:1} }
+#toast.success .ti { color:#34D399; }
+#toast.error .ti   { color:#F87171; }
+#toast.info .ti    { color:#818CF8; }
+
+/* ═══ FORM HELPERS ══════════════════════════════════════════ */
+.form-hint { font-size:.62rem; color:var(--ink3); margin-top:4px; line-height:1.5; }
+
+/* ═══ STAGGERED REVEAL ANIMATIONS ══════════════════════════ */
+/* Stat cards stagger in on page load */
+.stats-grid .stat-card:nth-child(1) { animation:cardIn .3s ease both; animation-delay:.05s; }
+.stats-grid .stat-card:nth-child(2) { animation:cardIn .3s ease both; animation-delay:.1s; }
+.stats-grid .stat-card:nth-child(3) { animation:cardIn .3s ease both; animation-delay:.15s; }
+.stats-grid .stat-card:nth-child(4) { animation:cardIn .3s ease both; animation-delay:.2s; }
+@keyframes cardIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* Budget cards stagger */
+.budget-grid .bc:nth-child(1){animation:cardIn .3s ease both .05s}
+.budget-grid .bc:nth-child(2){animation:cardIn .3s ease both .1s}
+.budget-grid .bc:nth-child(3){animation:cardIn .3s ease both .15s}
+.budget-grid .bc:nth-child(4){animation:cardIn .3s ease both .2s}
+.budget-grid .bc:nth-child(5){animation:cardIn .3s ease both .25s}
+.budget-grid .bc:nth-child(6){animation:cardIn .3s ease both .3s}
+
+/* Number counter animation feel */
+.sc-val { transition:color .2s; }
+.stat-card:hover .sc-val { color:var(--blue); }
+
+/* Table row entrance */
+tbody tr { animation:rowIn .18s ease both; }
+tbody tr:nth-child(1){animation-delay:.02s}tbody tr:nth-child(2){animation-delay:.04s}
+tbody tr:nth-child(3){animation-delay:.06s}tbody tr:nth-child(4){animation-delay:.08s}
+tbody tr:nth-child(5){animation-delay:.10s}tbody tr:nth-child(6){animation-delay:.12s}
+@keyframes rowIn { from{opacity:0;transform:translateX(-4px)} to{opacity:1;transform:translateX(0)} }
+
+/* Chart cards slide in */
+.charts-row .chart-card:first-child { animation:cardIn .32s ease both .08s; }
+.charts-row .chart-card:last-child  { animation:cardIn .32s ease both .14s; }
+
+/* FIRE card subtle pulse on load */
+.fire-fill { animation:firePulse .8s ease .6s both; }
+@keyframes firePulse { from{opacity:.4} to{opacity:1} }
+
+/* Focus ring on inputs */
+.form-input:focus, .ap-textarea:focus, .tb-search:focus-within {
+  transition:border-color .15s, box-shadow .15s;
+}
+
+/* Button press micro-interaction */
+.btn-primary:active, .btn-secondary:active { transform:scale(.97); }
+
+/* Nav item hover text slide */
+.ni .icon { transition:transform .15s; }
+.ni:hover .icon { transform:translateX(2px); }
+
+/* Progress bar shimmer on budgets */
+@keyframes shimmer {
+  from { background-position:-200px 0; }
+  to   { background-position:200px 0; }
+}
+
+/* Scrollbar in content area */
+#content::-webkit-scrollbar { width:4px; }
+#content::-webkit-scrollbar-track { background:transparent; }
+#content::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* Table header sticky */
+thead { position:sticky; top:0; z-index:10; }
+
+/* Modal overlay blur transition */
+.modal-overlay { transition:opacity .2s; }
+
+/* Sidebar active indicator animation */
+.ni.on::before { transition:height .2s cubic-bezier(.4,0,.2,1); }
+
+/* Page header divider */
+.page-header { padding-bottom:20px; border-bottom:1px solid var(--border); }
+
+/* Chart card bottom legend alignment */
+.chart-legend-row {
+  display:flex; gap:16px; margin-top:12px; padding-top:10px;
+  border-top:1px solid var(--border);
+}
+.cl-item { display:flex; align-items:center; gap:6px; font-size:.63rem; color:var(--ink2); }
+.cl-dot  { width:8px; height:3px; border-radius:1px; flex-shrink:0; }
+
+/* Stat card accent bottom bar animation */
+.sc-accent { transition:opacity .2s; }
+.stat-card:hover .sc-accent { opacity:1 !important; }
+
+/* Advisor panel header gradient border */
+.ap-header::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ═══ MOBILE RESPONSIVE ════════════════════════════════════ */
+#mob-overlay { display:none }
+#mob-nav     { display:none }
+.mob-ham     { display:none }
+
+@media (max-width: 768px) {
+  html, body { overflow:auto; }
+  #layout { display:flex; flex-direction:column; height:100vh; width:100vw; overflow:hidden; }
+
+  /* Sidebar becomes a slide-in drawer */
+  #sidebar {
+    position:fixed; top:0; left:0; bottom:0; width:260px; z-index:500;
+    transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  #sidebar.mob-open { transform:translateX(0); }
+
+  /* Overlay behind drawer */
+  #mob-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(28,25,23,.4); z-index:499; backdrop-filter:blur(3px);
+  }
+  #mob-overlay.show { display:block; }
+
+  /* Hamburger button */
+  .mob-ham {
+    display:flex; width:36px; height:36px; border-radius:8px;
+    background:var(--surface2); border:1px solid var(--border);
+    align-items:center; justify-content:center;
+    cursor:pointer; font-size:.85rem; flex-shrink:0; order:-1;
+  }
+
+  /* Topbar responsive */
+  #main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+  #topbar { padding:0 12px; gap:8px; height:54px; flex-shrink:0; }
+  .tb-search { width:140px; }
+  #tb-date-label { display:none; }
+  .tb-user .tb-ui { display:none; }
+
+  /* Content area with bottom nav clearance */
+  #content { flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom:68px; }
+  .page { padding:14px 12px; }
+
+  /* Page header stacks on mobile */
+  .page-header { flex-direction:column; align-items:flex-start; gap:10px; }
+  .ph-acts { width:100%; justify-content:flex-end; }
+
+  /* Grid adjustments */
+  .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+  .charts-row { grid-template-columns:1fr; gap:12px; margin-bottom:14px; }
+  .budget-grid { grid-template-columns:1fr; }
+  .an-grid { grid-template-columns:1fr; }
+
+  /* Table header wrapping */
+  .tt { flex-wrap:wrap; gap:8px; padding:12px 14px; }
+  .filter-row { flex-wrap:wrap; }
+  .search-wrap input { width:100px; }
+  table { font-size:.72rem; }
+  th, td { padding:8px 10px; }
+
+  /* Gamification badges 3-col on mobile */
+  #gamification-card [style*="repeat(6,1fr)"] { grid-template-columns:repeat(3,1fr) !important; }
+
+  /* Bottom nav */
+  #mob-nav {
+    display:flex; position:fixed; bottom:0; left:0; right:0; z-index:400;
+    background:var(--ink); border-top:1px solid rgba(255,255,255,.08);
+    padding:6px 0 env(safe-area-inset-bottom, 10px);
+    align-items:center; justify-content:space-around;
+  }
+  .mn-item {
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:5px 8px; border-radius:8px; cursor:pointer;
+    color:rgba(255,255,255,.35); font-size:.55rem; font-weight:500;
+    min-width:52px; transition:all .15s;
+  }
+  .mn-item.on  { color:white; }
+  .mn-item .mn-ic { font-family:var(--fm); font-size:1.1rem; line-height:1; }
+}
+</style>
+</head>
+<body>
+<div id="layout">
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon" style="font-family:var(--fm);font-size:.9rem;font-weight:700;letter-spacing:-.05em">Fp</div>
+    <div class="sb-logo-text">Fyn<em>Pet</em></div>
+  </div>
+  <div class="sb-sync-status" id="sync-status">
+    <div class="sync-dot local" id="sync-dot"></div>
+    <span id="sync-label">Local only</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Menu</div>
+    <div class="ni on" data-click="goPage" data-click-args='["dashboard","$el"]'><span class="icon" style="font-family:var(--fm)">⊞</span>Dashboard</div>
+    <div class="ni" data-click="goPage" data-click-args='["transactions","$el"]'><span class="icon" style="font-family:var(--fm)">≡</span>Transactions</div>
+    <div class="ni" data-click="goPage" data-click-args='["budgets","$el"]'><span class="icon" style="font-family:var(--fm)">◫</span>Budgets</div>
+    <div class="ni" data-click="goPage" data-click-args='["analytics","$el"]'><span class="icon" style="font-family:var(--fm)">∿</span>Analytics</div>
+    <div class="sb-sec">Financial</div>
+    <div class="ni" data-click="goPage" data-click-args='["mpesa","$el"]'><span class="icon" style="font-family:var(--fm)">⇅</span>M-Pesa Import<span class="ni-badge" id="import-badge" style="display:none">New</span></div>
+    <div class="sb-sec">Settings</div>
+    <div class="ni" data-click="goPage" data-click-args='["settings","$el"]'><span class="icon" style="font-family:var(--fm)">◌</span>API & Config</div>
+    <div class="ni" data-click="toggleAdvisor"><span class="icon" style="font-family:var(--fm)">◉</span>AI Advisor</div>
+  </nav>
+  <div class="sb-foot">
+    <div class="upgrade-card">
+      <div class="uc-title">FynPet Pro</div>
+      <div class="uc-sub">Full AI analysis + unlimited sync</div>
+      <button class="uc-btn">Upgrade $9/mo</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══════════════════════════════════ -->
+<div id="main">
+  <div id="topbar">
+    <div class="mob-ham" data-click="toggleMobSidebar">☰</div>
+    <div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
+    <div class="tb-search"><span class="tb-search-icon">⌕</span><input type="text" placeholder="Search transactions…" data-input="searchTx" data-input-args='["$value"]'></div>
+    <div class="ib" title="Export CSV" data-click="exportCSV" style="font-family:var(--fm);font-size:.9rem;font-weight:600;color:var(--ink2)">↑</div>
+    <div class="ib" data-click="toggleAdvisor" title="AI Advisor" style="font-family:var(--fm);font-weight:700;font-size:.75rem;background:var(--bluebg);border-color:rgba(55,48,163,.2);color:var(--blue)">AI</div>
+    <div class="ib" title="Sync now" data-click="syncNow" id="sync-btn" style="font-family:var(--fm);font-size:.9rem;color:var(--ink2)">⟳</div>
+    <div class="tb-user" title="Sign out" data-click="confirmSignOut">
+      <div class="tb-av" id="tb-av">J</div>
+      <div class="tb-ui"><div class="tun" id="tb-name">Jeremy</div><div class="tur" id="tb-role">Admin</div></div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="page-dashboard">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">Financial Report</div><div class="ph-sub" id="dash-sub"></div></div>
+        <div class="ph-acts">
+          <button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'>Import M-Pesa</button>
+          <button class="btn-primary" data-click="openAddTx">+ Add Transaction</button>
+        </div>
+      </div>
+      <div class="stats-grid" id="stat-cards"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="cc-hdr"><div><div class="cc-title">Cash Flow</div><div class="cc-sub">Income vs Expenses over time</div></div><div class="period-btns"><button class="pb on" data-click="setChartPeriod" data-click-args='["$el","week"]'>7D</button><button class="pb" data-click="setChartPeriod" data-click-args='["$el","month"]'>1M</button><button class="pb" data-click="setChartPeriod" data-click-args='["$el","3m"]'>3M</button></div></div>
+          <canvas id="main-canvas" height="130"></canvas>
+          <div class="chart-legend-row">
+            <div class="cl-item"><div class="cl-dot" style="background:var(--blue)"></div>Income</div>
+            <div class="cl-item"><div class="cl-dot" style="background:var(--rose)"></div>Expenses</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="cc-hdr"><div><div class="cc-title">By Category</div><div class="cc-sub" id="donut-period-sub">This month's breakdown</div></div></div>
+          <div class="donut-wrap"><canvas id="donut-canvas" width="110" height="110" style="width:110px!important;height:110px!important;flex-shrink:0"></canvas><div class="donut-leg" id="donut-legend"></div></div>
+        </div>
+      </div>
+      <div class="table-card" id="budget-status-card" style="margin-bottom:14px;display:none">
+        <div class="tt">
+          <div class="tt-title">Budget Status <span id="budget-status-period" style="font-size:.62rem;font-weight:400;color:var(--ink3);font-family:var(--fm)">— this month</span></div>
+          <button class="btn-ghost" data-click="goPage" data-click-args='["budgets",null]'>Manage →</button>
+        </div>
+        <div id="budget-status-bars" style="padding:0 4px"></div>
+      </div>
+      <div id="gamification-card" style="display:none;margin-bottom:14px"></div>
+      <div class="table-card">
+        <div class="tt"><div class="tt-title">Recent Transactions</div><button class="btn-ghost" data-click="goPage" data-click-args='["transactions",null]'>View all →</button></div>
+        <div id="recent-tx"></div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="page" id="page-transactions">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">Transactions</div><div class="ph-sub" id="tx-count-sub">Loading…</div></div>
+        <div class="ph-acts"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-primary" data-click="openAddTx">＋ Add</button></div>
+      </div>
+      <div class="table-card">
+        <div class="tt">
+          <div class="tt-title">All Transactions</div>
+          <div class="filter-row" id="tx-filter-row">
+            <button class="fb on" data-click="setTxFilter" data-click-args='["all","$el"]'>All</button>
+            <button class="fb" data-click="setTxFilter" data-click-args='["income","$el"]'>Income</button>
+            <button class="fb" data-click="setTxFilter" data-click-args='["expense","$el"]'>Expenses</button>
+            <button class="fb" data-click="setTxFilter" data-click-args='["savings","$el"]'>Savings</button>
+            <button class="fb" data-click="setTxFilter" data-click-args='["transfer","$el"]'>Transfers</button>
+          </div>
+          <div class="search-wrap"><span style="color:var(--ink3);font-size:.75rem"><span style="font-family:var(--fm);font-size:.8rem;color:var(--ink3)">⌕</span></span><input type="text" id="tx-search" placeholder="Search…" data-input="searchTx" data-input-args='["$value"]'></div>
+        </div>
+        <div id="full-tx-table"></div>
+        <div class="tf"><div class="tf-info" id="tx-pg-info"></div><div class="pag" id="tx-pag"></div></div>
+      </div>
+    </div>
+
+    <!-- BUDGETS -->
+    <div class="page" id="page-budgets">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">Budgets</div><div class="ph-sub">Monthly category spending limits</div></div>
+        <div class="ph-acts"><button class="btn-primary" data-click="openAddBudget">+ New Budget</button></div>
+      </div>
+      <div class="stats-grid" id="budget-stats" style="grid-template-columns:repeat(3,1fr)"></div>
+      <div class="budget-grid" id="budget-grid" style="margin-top:18px"></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">Analytics</div><div class="ph-sub">Deep financial insights & projections</div></div>
+        <div class="ph-acts"><button class="btn-primary" data-click="runAiAnalysis">Get AI Analysis</button></div>
+      </div>
+      <div class="fire-card">
+        <div class="fire-hdr"><div class="fire-title">FIRE Progress</div><div class="fire-tag">Financial Independence</div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--ink2);font-family:var(--fm);margin-bottom:5px"><span id="fire-saved-lbl">KES 0 saved</span><span id="fire-target-lbl">Target: KES 3,000,000</span></div>
+        <div class="fire-trk"><div class="fire-fill" id="fire-fill" style="width:0%"></div></div>
+        <div class="fire-stats" id="fire-stats"></div>
+      </div>
+      <div class="an-grid">
+        <div class="chart-card"><div class="cc-title" style="margin-bottom:3px">6-Month Savings Trend</div><div class="cc-sub">Net savings per month</div><canvas id="trend-canvas" height="150"></canvas></div>
+        <div class="chart-card"><div class="cc-title" style="margin-bottom:3px">Financial Health Score</div><div class="cc-sub">Key metrics breakdown</div><div id="health-factors" style="margin-top:12px;display:flex;flex-direction:column;gap:9px"></div></div>
+      </div>
+      <div class="table-card" style="margin-top:14px">
+        <div class="tt"><div class="tt-title">Monthly Summary</div></div>
+        <table><thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Saved</th><th>Rate</th><th>Net</th></tr></thead>
+        <tbody id="monthly-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MPESA IMPORT -->
+    <div class="page" id="page-mpesa">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">M-Pesa Import</div><div class="ph-sub">Upload your Safaricom statement for AI-powered extraction</div></div>
+      </div>
+      <div class="import-layout">
+        <div>
+          <label class="drop-zone" id="drop-zone" for="pdf-file" data-dragover="dzDrag" data-dragover-args='["$event",true]' data-dragleave="dzDrag" data-dragleave-args='["$event",false]' data-drop="dzDrop" data-drop-args='["$event"]'>
+            <div class="dz-icon" style="font-family:var(--fm);font-size:2.8rem;font-weight:300;color:var(--ink3)">↑</div>
+            <div class="dz-title">Drop M-Pesa PDF here</div>
+            <div class="dz-sub">Safaricom monthly statements. Password-protected files supported — enter your National ID below.</div>
+            <button class="btn-primary" type="button" data-click="choosePdf">Choose File</button>
+          </label>
+          <input type="file" id="pdf-file" accept=".pdf" style="display:none" data-change="handlePDF" data-change-args='["$el"]'>
+          <div class="file-preview" id="file-preview">
+            <div class="fp-icon" style="font-family:var(--fm);font-size:.9rem;color:var(--ink3)">—</div>
+            <div class="fp-info"><div class="fp-name" id="fp-name"></div><div class="fp-size" id="fp-size"></div></div>
+            <div class="fp-rm" data-click="clearFile" title="Remove">✕</div>
+          </div>
+          <div class="priv-notice">
+            <span>⊠</span>
+            <div><strong>How your statement is handled.</strong> The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through our server to Anthropic's Claude to be categorised. Phone numbers are removed first. Anthropic does not train on this data.</div>
+          </div>
+        </div>
+        <div class="import-form">
+          <div style="font-family:var(--fd);font-size:.95rem;font-weight:800;margin-bottom:14px">Import Settings</div>
+          <div class="form-grp" style="margin-bottom:10px">
+            <div class="form-lbl">PDF Password (if protected)</div>
+            <input class="form-input" type="password" id="pdf-pw" placeholder="National ID number (M-Pesa default)">
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><div class="form-lbl">Date From</div><input class="form-input" type="date" id="imp-from"></div>
+            <div class="form-grp"><div class="form-lbl">Date To</div><input class="form-input" type="date" id="imp-to"></div>
+          </div>
+          <button class="btn-primary" style="width:100%;justify-content:center;padding:11px;margin-bottom:12px" id="import-btn" data-click="runImport">Import & Analyse</button>
+          <div class="steps-list" id="steps-list">
+            <div class="step" id="stp1"><div class="step-dot">1</div>Decrypting PDF</div>
+            <div class="step" id="stp2"><div class="step-dot">2</div>Extracting transaction text</div>
+            <div class="step" id="stp3"><div class="step-dot">3</div>Claude AI categorising transactions</div>
+            <div class="step" id="stp4"><div class="step-dot">4</div>Running financial analysis</div>
+            <div class="step" id="stp5"><div class="step-dot">5</div>Saving to Supabase & local cache</div>
+          </div>
+          <div class="import-result" id="import-result">
+            <div class="ir-title"><span style="font-family:var(--fm);font-size:.7rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px;margin-right:6px">DONE</span>Import Complete</div>
+            <div class="ir-stats" id="ir-stats"></div>
+          </div>
+        </div>
+      </div>
+      <div class="table-card" style="margin-top:18px">
+        <div class="tt"><div class="tt-title">Import History</div></div>
+        <div id="import-history"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-title">Configuration</div><div class="ph-sub">Profile, FIRE target, and cloud connection status</div></div>
+      </div>
+
+      <div class="config-grid">
+        <div class="config-card" style="border-left:3px solid var(--blue)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--blue);background:var(--bluelt);padding:2px 7px;border-radius:4px">NET</span>
+            Server Configuration</div>
+          <div class="config-sub">The AI key is stored in Netlify environment variables on the server — never in your browser. AI features require signing in.</div>
+          <div style="margin:12px 0 8px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
+              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Claude AI (Anthropic)</div>
+              <div class="sb-key-status none" id="claude-status" style="margin:0">Checking…</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
+              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Supabase Database</div>
+              <div class="sb-key-status none" id="sb-status" style="margin:0">Checking…</div>
+            </div>
+          </div>
+          <button class="btn-secondary" style="margin-top:4px;font-size:.72rem;width:100%;justify-content:center" data-click="recheckCloudConfig">↺ Re-check connection</button>
+          <div style="margin-top:12px;padding:10px 12px;background:var(--bluelt);border:1px solid rgba(55,48,163,.12);border-radius:var(--rsm);font-size:.67rem;line-height:1.7;color:var(--ink2)">
+            To update credentials, go to <strong>Netlify → Site configuration → Environment variables</strong>, update <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">ANTHROPIC_API_KEY</code>, <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_URL</code>, or <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_ANON_KEY</code>.
+          </div>
+        </div>
+      </div>
+
+      <div class="config-grid">
+        <div class="config-card" style="border-left:3px solid var(--ink3)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--ink2);background:var(--bg2);padding:2px 7px;border-radius:4px">USR</span>
+            Profile</div>
+          <div class="config-sub">Your identity shown in the dashboard.</div>
+          <div class="form-row">
+            <div class="form-grp"><div class="form-lbl">Name</div><input class="form-input" type="text" id="cfg-name" placeholder="Jeremy" data-input="saveConfig" data-input-args='["name","$value"]'></div>
+            <div class="form-grp"><div class="form-lbl">Role</div><input class="form-input" type="text" id="cfg-role" placeholder="Admin" data-input="saveConfig" data-input-args='["role","$value"]'></div>
+          </div>
+        </div>
+        <div class="config-card" style="border-left:3px solid var(--amber)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--amber);background:var(--amberlt);padding:2px 7px;border-radius:4px">FIRE</span>
+            Independence Target</div>
+          <div class="config-sub">Your Financial Independence number (25× annual expenses).</div>
+          <div class="form-grp">
+            <div class="form-lbl">Target Amount (KES)</div>
+            <input class="form-input" type="number" id="cfg-fire" placeholder="3000000" data-input="saveConfig" data-input-args='["fireTarget","$float:3000000"]'>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;font-size:.72rem;width:100%;justify-content:center" data-click="saveAllConfig">Save Settings</button>
+        </div>
+      </div>
+
+      <div class="config-grid" style="margin-top:16px">
+        <div class="config-card" style="border-left:3px solid var(--teal)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">FX</span>
+            Exchange Rates to KES</div>
+          <div class="config-sub">Editable estimates, not live rates. The KES conversion is saved with each transaction; changing rates affects new or edited transactions.</div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-grp"><div class="form-lbl">1 USD =</div><input class="form-input" type="number" id="cfg-rate-usd" placeholder="130" data-input="saveConfig" data-input-args='["rate_USD","$value"]'></div>
+            <div class="form-grp"><div class="form-lbl">1 EUR =</div><input class="form-input" type="number" id="cfg-rate-eur" placeholder="145" data-input="saveConfig" data-input-args='["rate_EUR","$value"]'></div>
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><div class="form-lbl">1 GBP =</div><input class="form-input" type="number" id="cfg-rate-gbp" placeholder="165" data-input="saveConfig" data-input-args='["rate_GBP","$value"]'></div>
+            <div class="form-grp"><div class="form-lbl">1 TZS =</div><input class="form-input" type="number" id="cfg-rate-tzs" placeholder="0.045" step="0.001" data-input="saveConfig" data-input-args='["rate_TZS","$value"]'></div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="form-grp"><label class="form-lbl" for="cfg-rate-ugx">1 UGX =</label><input class="form-input" type="number" id="cfg-rate-ugx" placeholder="0.034" min="0.000001" step="any" data-input="saveConfig" data-input-args='["rate_UGX","$value"]'></div>
+          </div>
+        </div>
+        <div class="config-card" style="border-left:3px solid var(--purple)">
+          <div class="config-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--purple);background:var(--purplt);padding:2px 7px;border-radius:4px">ℹ</span>
+            About FynPet</div>
+          <div class="config-sub">Personal finance intelligence built for Kenya.</div>
+          <div style="font-size:.7rem;color:var(--ink2);line-height:1.75;margin-top:8px">
+            <div>💡 Import M-Pesa statements for automatic AI categorisation</div>
+            <div>💾 Data is kept in this browser; when you sign in it also syncs to your FynPet account (Supabase, encrypted in transit)</div>
+            <div>🤖 AI features send a summary of your finances to Anthropic's Claude, only after you agree</div>
+            <div style="margin-top:10px;font-size:.62rem;color:var(--ink3)">v5.0 · FynPet</div>
+          </div>
+          <button class="btn-danger-sm" style="margin-top:14px" data-click="clearLocalData">Clear local data</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ AI ADVISOR PANEL ═══════════════════════════════════ -->
+<div id="advisor-panel">
+  <div class="ap-header">
+    <div>
+      <div class="ap-title-row"><div class="ai-pulse"></div><div class="ap-title">Fyn Intelligence</div></div>
+      <div class="ap-sub">AI financial advisor · powered by Claude</div>
+    </div>
+    <div class="ap-close" data-click="toggleAdvisor">✕</div>
+  </div>
+  <div class="ap-tabs">
+    <div class="ap-tab on" data-click="setAdvTab" data-click-args='["chat","$el"]'>Chat</div>
+    <div class="ap-tab" data-click="setAdvTab" data-click-args='["insights","$el"]'>Insights</div>
+    <div class="ap-tab" data-click="setAdvTab" data-click-args='["history","$el"]'>History</div>
+  </div>
+
+  <!-- Chat tab -->
+  <div id="adv-chat-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+    <div class="ap-messages" id="ap-messages">
+      <div style="text-align:center;padding:32px 20px 20px">
+        <div style="font-family:var(--fm);font-size:2rem;font-weight:300;color:var(--ink3);margin-bottom:14px;letter-spacing:-.05em">Ai</div>
+        <div style="font-family:var(--fd);font-size:1.05rem;font-style:italic;font-weight:400;margin-bottom:6px;color:var(--ink)">Your Financial Advisor</div>
+        <div style="font-size:.72rem;color:var(--ink3);line-height:1.65;max-width:240px;margin:0 auto;font-weight:400">Real-time analysis of your transactions, budgets and cash flow. Ask anything.</div>
+      </div>
+    </div>
+    <div class="quick-prompts" id="quick-prompts">
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["Analyse my cash flow this month"]'>Cash flow</div>
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["Am I on track with my budgets?"]'>Budget check</div>
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["What are my top 3 spending problems?"]'>Spending issues</div>
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["How much should I save each month to reach my FIRE target?"]'>FIRE advice</div>
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["Give me a 3-month action plan to improve my finances"]'>Action plan</div>
+      <div class="qp-btn" data-click="sendQuick" data-click-args='["Which categories should I cut to save more?"]'>Where to cut</div>
+    </div>
+    <div class="ap-input-wrap">
+      <textarea class="ap-textarea" id="ap-input" placeholder="Ask about your finances…" rows="1" data-keydown="handleAdvisorKey" data-keydown-args='["$event"]' data-input="autoResize" data-input-args='["$el"]'></textarea>
+      <button class="ap-send" id="ap-send" data-click="sendAdvisorMessage">↑</button>
+    </div>
+  </div>
+
+  <!-- Insights tab -->
+  <div id="adv-insights-tab" class="insights-tab-content" style="display:none;overflow-y:auto"></div>
+
+  <!-- History tab -->
+  <div id="adv-history-tab" style="display:none;overflow-y:auto;flex:1"></div>
+</div>
+
+</div><!-- /layout -->
+
+<!-- ═══ MOBILE DRAWER OVERLAY ═══════════════════════════════ -->
+<div id="mob-overlay" data-click="toggleMobSidebar"></div>
+
+<!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════════ -->
+<div id="mob-nav">
+  <div class="mn-item on" data-click="mobGoPage" data-click-args='["dashboard","$el"]'><span class="mn-ic">⊞</span>Home</div>
+  <div class="mn-item" data-click="mobGoPage" data-click-args='["transactions","$el"]'><span class="mn-ic">≡</span>Txns</div>
+  <div class="mn-item" data-click="mobGoPage" data-click-args='["budgets","$el"]'><span class="mn-ic">◫</span>Budget</div>
+  <div class="mn-item" data-click="mobGoPage" data-click-args='["analytics","$el"]'><span class="mn-ic">∿</span>Analytics</div>
+  <div class="mn-item" data-click="mobGoPage" data-click-args='["mpesa","$el"]'><span class="mn-ic">⇅</span>Import</div>
+</div>
+
+<div id="advisor-backdrop" data-click="toggleAdvisor"></div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal" style="z-index:2000">
+  <div class="modal" style="max-width:380px;width:100%">
+    <div class="modal-hdr" style="margin-bottom:16px">
+      <div>
+        <div class="modal-title">Sign in to sync</div>
+        <div style="font-size:.68rem;color:var(--ink3);margin-top:3px">Save your data securely across devices</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:3px;margin-bottom:18px;background:var(--bg2);border-radius:8px;padding:3px">
+      <button id="auth-tab-in" data-click="setAuthTab" data-click-args='["in"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)">Sign In</button>
+      <button id="auth-tab-up" data-click="setAuthTab" data-click-args='["up"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)">Sign Up</button>
+    </div>
+    <div class="form-grp" style="margin-bottom:10px">
+      <div class="form-lbl">Email</div>
+      <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-grp" style="margin-bottom:14px">
+      <div class="form-lbl">Password</div>
+      <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" data-keydown="submitOnEnter">
+    </div>
+    <div id="auth-error" style="display:none;padding:8px 12px;background:var(--roselt);border:1px solid rgba(220,38,38,.15);border-radius:6px;font-size:.68rem;color:var(--rose);margin-bottom:12px"></div>
+    <button class="btn-primary" id="auth-submit-btn" style="width:100%;justify-content:center" data-click="submitAuth">Sign In</button>
+    <button data-click="skipAuth" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;font-size:.67rem;color:var(--ink3);cursor:pointer;text-align:center">Continue without signing in (local only)</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="tx-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="tx-modal-title">Add Transaction</div><div class="modal-close" data-click="closeModal" data-click-args='["tx-modal"]'>✕</div></div>
+    <div class="form-row">
+      <div class="form-grp"><div class="form-lbl">Amount</div><div style="display:flex;gap:6px"><input class="form-input" type="number" id="tx-amount" placeholder="0.00" min="0" step="0.01" style="flex:1;min-width:0"><select class="form-input" id="tx-currency" style="width:76px;flex-shrink:0;padding-left:8px"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select></div></div>
+      <div class="form-grp"><div class="form-lbl">Type</div><select class="form-input" id="tx-type"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select></div>
+    </div>
+    <div class="form-row full"><div class="form-grp"><div class="form-lbl">Description</div><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary…"></div></div>
+    <div class="form-row">
+      <div class="form-grp"><div class="form-lbl">Category</div><select class="form-input" id="tx-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="income">Income</option><option value="transfer">Transfer</option><option value="other">Other</option></select></div>
+      <div class="form-grp"><div class="form-lbl">Date</div><input class="form-input" type="date" id="tx-date"></div>
+    </div>
+    <div class="form-row full"><div class="form-grp"><div class="form-lbl">Notes (optional)</div><input class="form-input" type="text" id="tx-notes" placeholder="Optional notes…"></div></div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["tx-modal"]'>Cancel</button><button class="btn-primary" id="tx-save-btn" data-click="saveTx">Add Transaction</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="budget-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="budget-modal-title">New Budget</div><div class="modal-close" data-click="closeModal" data-click-args='["budget-modal"]'>✕</div></div>
+    <div class="form-row">
+      <div class="form-grp"><div class="form-lbl">Category</div><select class="form-input" id="b-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="other">Other</option></select></div>
+      <div class="form-grp"><div class="form-lbl">Monthly Limit (KES)</div><input class="form-input" type="number" id="b-limit" placeholder="0.00" min="0"></div>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget">Save Budget</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ai-consent-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr"><div class="modal-title">Before you use AI features</div></div>
+    <div style="font-size:.78rem;line-height:1.7;color:var(--ink2);display:flex;flex-direction:column;gap:10px">
+      <p>FynPet's advisor and statement import use <strong>Claude, by Anthropic</strong>. To answer you, we send:</p>
+      <ul style="padding-left:18px;display:flex;flex-direction:column;gap:4px">
+        <li>your name in FynPet, monthly totals, budgets and your 10 most recent transactions (advisor)</li>
+        <li>the text of statements you import: dates, amounts, merchant and counterparty names (import)</li>
+      </ul>
+      <p>Phone numbers are removed first. Anthropic processes the data to produce the answer and does not use it to train models. You can keep using FynPet without AI features.</p>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>I agree</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal confirm-modal">
+    <div class="cm-icon" style="font-family:var(--fm);font-size:2rem;color:var(--rose)">—</div>
+    <div class="cm-title" id="cm-title">Delete?</div>
+    <div class="cm-sub" id="cm-sub">This cannot be undone.</div>
+    <div class="modal-acts" style="justify-content:center"><button class="btn-secondary" data-click="closeModal" data-click-args='["confirm-modal"]'>Cancel</button><button class="btn-danger-sm" style="padding:8px 20px" id="cm-ok">Delete</button></div>
+  </div>
+</div>
+
+<div id="toast"><span class="ti" id="ti">✓</span><span id="tm">Saved</span></div>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
