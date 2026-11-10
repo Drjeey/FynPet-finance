@@ -15,3 +15,8 @@ export function error(status, message) {
 export function env(name, fallback = '') {
   return process.env[name] ?? fallback;
 }
+
+// Browser-safe Supabase key. Prefer current publishable keys; support legacy anon keys.
+export function supabasePublicKey() {
+  return env('SUPABASE_PUBLISHABLE_KEY') || env('SUPABASE_ANON_KEY');
+}

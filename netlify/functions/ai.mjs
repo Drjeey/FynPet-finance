@@ -6,7 +6,7 @@
 //  - Per-IP rate limit (config below) + per-user daily quota (Netlify Blobs).
 //  - Output size, model and effort are fixed server-side.
 import Anthropic from '@anthropic-ai/sdk';
-import { json, error, env } from '../lib/http.mjs';
+import { json, error, env, supabasePublicKey } from '../lib/http.mjs';
 import { getUser, consumeDailyQuota } from '../lib/auth.mjs';
 
 const TYPES = ['income', 'expense', 'savings', 'transfer'];
@@ -146,8 +146,8 @@ async function handleImport(body) {
 }
 
 export default async (req) => {
-  if (!env('ANTHROPIC_API_KEY') || !env('SUPABASE_URL') || !env('SUPABASE_ANON_KEY')) {
-    return error(503, 'AI is not configured on the server. Set ANTHROPIC_API_KEY, SUPABASE_URL and SUPABASE_ANON_KEY in Netlify.');
+  if (!env('ANTHROPIC_API_KEY') || !env('SUPABASE_URL') || !supabasePublicKey()) {
+    return error(503, 'AI is not configured on the server. Set ANTHROPIC_API_KEY, SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in Netlify.');
   }
 
   let user;

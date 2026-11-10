@@ -42,7 +42,7 @@ netlify.toml                  Build, functions, security headers and Content-Sec
 ## How a request flows
 
 ```
-Browser ──GET  /api/config──▶ config.mjs ──▶ returns SUPABASE_URL, SUPABASE_ANON_KEY
+Browser ──GET  /api/config──▶ config.mjs ──▶ returns SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY
 Browser ──sign in──────────▶ Supabase Auth ──▶ access token
 Browser ──POST /api/ai (Bearer token)──▶ ai.mjs
             1. verifies the token with Supabase Auth           (401 if missing/invalid)
@@ -64,19 +64,11 @@ Set these in **Netlify → Site configuration → Environment variables**. For l
 |---|---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Functions | Mark as **secret**. Never put it in the HTML. |
 | `SUPABASE_URL` | Yes | Functions | `https://<project-ref>.supabase.co` |
-| `SUPABASE_ANON_KEY` | Yes | Functions | The public **anon** key, never the `service_role` key |
+| `SUPABASE_PUBLISHABLE_KEY` | Yes | Functions | Public `sb_publishable_...` key. A legacy `SUPABASE_ANON_KEY` also works, but do not set both. Never use a secret or `service_role` key. |
 | `ANTHROPIC_MODEL` | No | Functions | Default `claude-opus-5-5` |
 | `AI_DAILY_LIMIT` | No | Functions | AI requests per user per day. Default `60` |
 
-To set them with the Netlify CLI instead (after `netlify link`):
-
-```bash
-netlify env:set ANTHROPIC_API_KEY "sk-ant-..." --secret --context production deploy-preview --scope functions
-netlify env:set SUPABASE_URL "https://xxxx.supabase.co" --scope functions
-netlify env:set SUPABASE_ANON_KEY "eyJ..." --scope functions
-```
-
-After changing a variable, redeploy so the functions pick it up.
+Set the variables for both **Deploy previews** and **Production** in Netlify. After changing a variable, redeploy so the functions pick it up. Do not paste API keys into shell commands, Git commits, or chat.
 
 ---
 
@@ -102,7 +94,7 @@ The existing [fynpet Netlify project](https://app.netlify.com/projects/fynpet/ov
 
 1. Create the separate FynPet Supabase project and apply `supabase/migrations/001_init.sql` there.
 2. Set the environment variables above on the existing Netlify project. Use its **Environment variables** page; never put secrets in Git or browser code.
-3. Rebuild the deploy preview and check `/api/config` there. It should report `"aiEnabled": true` and the intended Supabase URL once configured. The anon key is public, but the service role key must never be used here.
+3. Rebuild the deploy preview and check `/api/config` there. It should report `"aiEnabled": true` and the intended Supabase URL once all three required variables are configured. The public key is returned to the browser by design.
 4. Test sign-in, sync, AI consent/chat, and an M-Pesa import with a redacted statement on the preview. Check a real phone as well.
 5. Merge the reviewed PR and publish the production deploy when those checks pass. Verify the live site and `/api/config` after release.
 
@@ -111,8 +103,8 @@ The existing [fynpet Netlify project](https://app.netlify.com/projects/fynpet/ov
 1. Create a project on [supabase.com](https://supabase.com). A region near Kenya, such as `eu-west`, keeps latency down.
 2. In the **SQL Editor**, run `supabase/migrations/001_init.sql` once, on a new, empty project.
 3. Under **Advisors → Security Advisor**, confirm there are no errors.
-4. Under **Authentication → URL configuration**, set the Site URL to your Netlify URL.
-5. Copy the **Project URL** and **anon public** key into the Netlify environment variables.
+4. Under **Authentication → URL Configuration**, set the Site URL to `https://fynpet.netlify.app/` and add `https://deploy-preview-2--fynpet.netlify.app/` as an additional Redirect URL. FynPet sends confirmation emails back to the origin where sign-up started, so this exact preview URL allows preview sign-up without opening redirects to other sites.
+5. Copy the **Project URL** and **publishable** key (`sb_publishable_...`) into the Netlify environment variables. Keep the secret key out of this app.
 
 ## Currency calculations
 
@@ -133,7 +125,7 @@ Note that the transaction text, which includes merchant and counterparty names, 
 
 | Symptom | Cause / fix |
 |---|---|
-| Settings shows "AI ✕ Not configured" | `ANTHROPIC_API_KEY` or `SUPABASE_URL` is missing in Netlify. Set it and redeploy. |
+| Settings shows "AI ✕ Not configured" | One of `ANTHROPIC_API_KEY`, `SUPABASE_URL`, or the public Supabase key is missing in Netlify. Set it and redeploy. |
 | "Sign in to use AI features" | AI requires a Supabase account. Use the sign-in dialog. |
 | "Daily AI limit reached" | Raise `AI_DAILY_LIMIT`, or wait for the midnight UTC reset. |
 | "The AI took too long to respond" | Netlify functions stop at 60 s. Retry, or import a shorter statement period. |

@@ -18,8 +18,9 @@ async function initCloudConfig() {
     const cfg = await res.json();
     window._cloudConfig = cfg;
     // Initialize Supabase with values from Netlify environment variables
-    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
-      sbClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const publicKey = cfg.supabasePublicKey || cfg.supabaseAnonKey;
+    if (cfg.supabaseUrl && publicKey) {
+      sbClient = supabase.createClient(cfg.supabaseUrl, publicKey);
       // Listen for sign-in / sign-out events
       sbClient.auth.onAuthStateChange((event, session) => {
         // Defer: supabase-js warns against awaiting its own calls inside this callback.
@@ -39,8 +40,8 @@ async function initCloudConfig() {
       showLocalProfile();
     }
     updateCloudStatus('claude', cfg.aiEnabled, cfg.aiEnabled ? '✓ Ready (sign in to use)' : '⚠ Not configured in Netlify');
-    updateCloudStatus('sb', cfg.supabaseUrl ? true : false,
-      cfg.supabaseUrl ? '✓ Configured' : '⚠ SUPABASE_URL not set in Netlify');
+    updateCloudStatus('sb', Boolean(cfg.supabaseUrl && publicKey),
+      cfg.supabaseUrl && publicKey ? '✓ Available — sign in to sync' : '⚠ Supabase URL or public key not set in Netlify');
   } catch(e) {
     showLocalProfile();
     updateCloudStatus('claude', false, '✕ Server unreachable');
@@ -190,8 +191,9 @@ let sbClient = null;
 function getSbClient() {
   if (sbClient) return sbClient;
   const cfg = window._cloudConfig;
-  if (!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) return null;
-  sbClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  const publicKey = cfg?.supabasePublicKey || cfg?.supabaseAnonKey;
+  if (!cfg?.supabaseUrl || !publicKey) return null;
+  sbClient = supabase.createClient(cfg.supabaseUrl, publicKey);
   return sbClient;
 }
 
@@ -1383,7 +1385,7 @@ async function submitAuth() {
   try {
     const result = _authTab === 'in'
       ? await sb.auth.signInWithPassword({ email, password })
-      : await sb.auth.signUp({ email, password });
+      : await sb.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
     if (result.error) throw result.error;
     if (_authTab === 'up') {
       showToast('Account created! Check your email to confirm.', 'success');
@@ -1569,7 +1571,8 @@ function loadSettingsPage() {
   // Reflect current cloud connection state
   const cfg = window._cloudConfig;
   updateCloudStatus('claude', cfg?.aiEnabled ? true : false, cfg?.aiEnabled ? '✓ Ready (sign in to use)' : '✕ Not configured');
-  updateCloudStatus('sb', cfg?.supabaseUrl ? true : false, cfg?.supabaseUrl ? 'Available — sign in to sync' : 'Not available in this environment');
+  const publicKey = cfg?.supabasePublicKey || cfg?.supabaseAnonKey;
+  updateCloudStatus('sb', Boolean(cfg?.supabaseUrl && publicKey), cfg?.supabaseUrl && publicKey ? 'Available — sign in to sync' : 'Not available in this environment');
 }
 
 

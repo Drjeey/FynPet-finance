@@ -1,14 +1,14 @@
 // GET /api/config — public client configuration read from Netlify environment variables.
-// The Supabase anon key is designed to be public; access control is enforced by RLS.
-import { json, env } from '../lib/http.mjs';
+// The publishable key is browser-safe; access control is enforced by RLS.
+import { json, env, supabasePublicKey } from '../lib/http.mjs';
 
 export default async () => {
   const supabaseUrl = env('SUPABASE_URL');
-  const supabaseAnonKey = env('SUPABASE_ANON_KEY');
+  const publicKey = supabasePublicKey();
   return json(200, {
     supabaseUrl: supabaseUrl || null,
-    supabaseAnonKey: supabaseAnonKey || null,
-    aiEnabled: Boolean(env('ANTHROPIC_API_KEY')) && Boolean(supabaseUrl),
+    supabasePublicKey: publicKey || null,
+    aiEnabled: Boolean(env('ANTHROPIC_API_KEY') && supabaseUrl && publicKey),
   }, { 'Cache-Control': 'public, max-age=300' });
 };
 

@@ -1,5 +1,5 @@
 import { getStore } from '@netlify/blobs';
-import { env } from './http.mjs';
+import { env, supabasePublicKey } from './http.mjs';
 
 // Verifies the caller's Supabase access token by asking Supabase Auth who it belongs to.
 // Returns the user object, or null when the token is missing, expired or invalid.
@@ -8,7 +8,7 @@ export async function getUser(req) {
   if (!match) return null;
 
   const res = await fetch(`${env('SUPABASE_URL')}/auth/v1/user`, {
-    headers: { apikey: env('SUPABASE_ANON_KEY'), Authorization: `Bearer ${match[1]}` },
+    headers: { apikey: supabasePublicKey(), Authorization: `Bearer ${match[1]}` },
     signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) return null;
