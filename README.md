@@ -98,14 +98,13 @@ npm test                    # function + database tests, fully offline (no API c
 
 ## Deploying
 
-Deploy from Git. Drag-and-drop no longer works because the functions have npm dependencies.
+The existing [fynpet Netlify project](https://app.netlify.com/projects/fynpet/overview) is already linked to `Drjeey/FynPet-finance`. Pull request #2 builds at [its deploy preview](https://deploy-preview-2--fynpet.netlify.app/). Production auto publishing is locked, so preview pushes do not replace [fynpet.netlify.app](https://fynpet.netlify.app/).
 
-1. Push the repository to GitHub (or GitLab or Bitbucket).
-2. In Netlify, choose **Add new project → Import an existing project**, then pick the repository. `netlify.toml` already sets publish = `public` and functions = `netlify/functions`.
-3. Add the environment variables above and deploy.
-4. Check that `https://<your-site>/api/config` returns `"aiEnabled": true`.
-
-Alternatively, deploy from your machine: `npx netlify-cli deploy --build --prod`.
+1. Create the separate FynPet Supabase project and apply `supabase/migrations/001_init.sql` there.
+2. Set the environment variables above on the existing Netlify project. Use its **Environment variables** page; never put secrets in Git or browser code.
+3. Rebuild the deploy preview and check `/api/config` there. It should report `"aiEnabled": true` and the intended Supabase URL once configured. The anon key is public, but the service role key must never be used here.
+4. Test sign-in, sync, AI consent/chat, and an M-Pesa import with a redacted statement on the preview. Check a real phone as well.
+5. Merge the reviewed PR and publish the production deploy when those checks pass. Verify the live site and `/api/config` after release.
 
 ## Supabase setup
 
