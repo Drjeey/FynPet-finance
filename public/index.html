@@ -6,7 +6,7 @@
 <title>FynPet — Financial Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Source+Serif+4:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <script src="vendor/supabase.js" defer></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
@@ -127,18 +127,18 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 .sync-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.sync-dot.connected { background:#34D399; box-shadow:0 0 6px rgba(52,211,153,.6); }
+.sync-dot.connected { background:var(--teal); }
 .sync-dot.local     { background:#FBBF24; }
 .sync-dot.syncing   { background:#818CF8; animation:pulse .9s ease-in-out infinite; }
 .sync-dot.error     { background:#F87171; }
-#sync-label { font-size:.62rem; font-weight:500; color:rgba(255,255,255,.35); letter-spacing:.03em; }
+#sync-label { font-size:.75rem; font-weight:500; color:rgba(255,255,255,.35); letter-spacing:.03em; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
 /* Nav */
 .sb-nav { flex:1; padding:14px 12px; overflow-y:auto; scrollbar-width:none; }
 .sb-nav::-webkit-scrollbar { display:none; }
 .sb-sec {
-  font-size:.58rem; font-weight:600; text-transform:uppercase;
+  font-size:.75rem; font-weight:600; text-transform:uppercase;
   letter-spacing:.12em; color:rgba(255,255,255,.25);
   padding:10px 8px 5px; margin-top:6px;
 }
@@ -162,7 +162,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 }
 .ni .icon { width:16px; text-align:center; font-size:.85rem; flex-shrink:0; opacity:.7; }
 .ni.on .icon { opacity:1; }
-.ni-badge { margin-left:auto; background:#EF4444; color:white; font-size:.52rem; font-weight:700; padding:1px 6px; border-radius:10px; }
+.ni-badge { margin-left:auto; background:#EF4444; color:white; font-size:.75rem; font-weight:700; padding:1px 6px; border-radius:10px; }
 
 /* Upgrade card */
 .sb-foot { padding:12px; border-top:1px solid rgba(255,255,255,.07); }
@@ -173,12 +173,12 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   backdrop-filter:blur(8px);
 }
 .uc-title { font-family:var(--fd); font-size:.9rem; font-weight:400; font-style:italic; margin-bottom:3px; }
-.uc-sub { font-size:.63rem; opacity:.6; margin-bottom:10px; font-weight:400; }
+.uc-sub { font-size:.75rem; opacity:.6; margin-bottom:10px; font-weight:400; }
 .uc-btn {
   width:100%; background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.2);
   border-radius:5px; padding:7px;
-  font-family:var(--fb); font-size:.72rem; font-weight:600;
+  font-family:var(--fb); font-size:.75rem; font-weight:600;
   color:white; cursor:pointer;
   transition:all .15s;
 }
@@ -196,7 +196,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   box-shadow:0 1px 0 var(--border);
 }
 .tb-title { font-family:var(--fd); font-size:1.15rem; font-weight:400; font-style:italic; flex:1; color:var(--ink); }
-.tb-title em { font-style:normal; color:var(--ink3); font-size:.72rem; font-weight:400; margin-left:10px; font-family:var(--fb); letter-spacing:.02em; }
+.tb-title em { font-style:normal; color:var(--ink3); font-size:.75rem; font-weight:400; margin-left:10px; font-family:var(--fb); letter-spacing:.02em; }
 .tb-search {
   display:flex; align-items:center; gap:8px;
   background:var(--surface2); border:1px solid var(--border);
@@ -222,11 +222,11 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   width:32px; height:32px; border-radius:50%;
   background:var(--ink); /* Dark avatar — editorial */
   display:flex; align-items:center; justify-content:center;
-  color:var(--bg); font-size:.7rem; font-weight:700; flex-shrink:0;
+  color:var(--bg); font-size:.75rem; font-weight:700; flex-shrink:0;
   font-family:var(--fm);
 }
 .tb-ui .tun { font-size:.78rem; font-weight:600; line-height:1.2; color:var(--ink); }
-.tb-ui .tur { font-size:.6rem; color:var(--ink3); font-weight:400; }
+.tb-ui .tur { font-size:.75rem; color:var(--ink3); font-weight:400; }
 
 /* Content area */
 #content { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
@@ -266,12 +266,12 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .ap-title-row { display:flex; align-items:center; gap:8px; }
 .ai-pulse { width:8px; height:8px; border-radius:50%; background:var(--teal); animation:pulse 2.5s ease-in-out infinite; flex-shrink:0; }
 .ap-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; color:var(--ink); }
-.ap-sub { font-size:.6rem; color:var(--ink3); margin-top:2px; font-weight:400; letter-spacing:.02em; }
-.ap-close { width:28px; height:28px; border-radius:6px; background:var(--surface3); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.72rem; color:var(--ink3); transition:all .13s; }
+.ap-sub { font-size:.75rem; color:var(--ink3); margin-top:2px; font-weight:400; letter-spacing:.02em; }
+.ap-close { width:28px; height:28px; border-radius:6px; background:var(--surface3); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.75rem; color:var(--ink3); transition:all .13s; }
 .ap-close:hover { background:var(--roselt); border-color:rgba(220,38,38,.2); color:var(--rose); }
 
 .ap-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; background:var(--surface2); }
-.ap-tab { flex:1; padding:10px 6px; font-size:.68rem; font-weight:600; text-align:center; cursor:pointer; color:var(--ink3); border-bottom:2px solid transparent; transition:all .15s; letter-spacing:.02em; }
+.ap-tab { flex:1; padding:10px 6px; font-size:.75rem; font-weight:600; text-align:center; cursor:pointer; color:var(--ink3); border-bottom:2px solid transparent; transition:all .15s; letter-spacing:.02em; }
 .ap-tab.on { color:var(--blue); border-bottom-color:var(--blue); background:var(--surface); }
 
 /* Chat messages */
@@ -279,7 +279,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .msg { display:flex; gap:9px; animation:msgIn .28s ease; }
 @keyframes msgIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 .msg.user { flex-direction:row-reverse; }
-.msg-av { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; flex-shrink:0; margin-top:2px; font-family:var(--fm); }
+.msg-av { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; margin-top:2px; font-family:var(--fm); }
 .msg-av.ai { background:var(--ink); color:var(--bg); }
 .msg-av.user { background:var(--blue); color:white; }
 .msg-bubble { max-width:82%; padding:11px 14px; border-radius:14px; font-size:.79rem; line-height:1.68; position:relative; }
@@ -290,7 +290,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .msg-bubble.ai .positive { color:var(--teal); font-weight:700; }
 .msg-bubble.ai .negative { color:var(--rose); font-weight:700; }
 .msg-bubble.ai .warning { color:var(--amber); font-weight:700; }
-.msg-time { font-size:.58rem; color:var(--ink3); margin-top:5px; }
+.msg-time { font-size:.75rem; color:var(--ink3); margin-top:5px; }
 .msg-bubble.user + .msg-time, .msg.user .msg-time { text-align:right; color:rgba(255,255,255,.5); }
 
 .typing-indicator { display:flex; align-items:center; gap:5px; padding:12px 14px; }
@@ -304,15 +304,15 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .ic-title { font-size:.75rem; font-weight:600; }
 .ic-metric { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); }
 .ic-metric:last-child { border-bottom:none; }
-.ic-metric-name { font-size:.68rem; color:var(--ink2); }
-.ic-metric-val { font-family:var(--fm); font-size:.72rem; font-weight:600; }
+.ic-metric-name { font-size:.75rem; color:var(--ink2); }
+.ic-metric-val { font-family:var(--fm); font-size:.75rem; font-weight:600; }
 .ic-metric-val.good{color:var(--teal)}.ic-metric-val.warn{color:var(--amber)}.ic-metric-val.bad{color:var(--rose)}
 
 .quick-prompts { padding:10px 16px; display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid var(--border); flex-shrink:0; background:var(--surface2); }
 .qp-btn {
   padding:5px 12px; border-radius:20px;
   border:1px solid var(--border); background:var(--surface);
-  color:var(--ink2); font-size:.65rem; font-weight:500;
+  color:var(--ink2); font-size:.75rem; font-weight:500;
   cursor:pointer; transition:all .13s; font-family:var(--fb);
 }
 .qp-btn:hover { border-color:var(--blue3); color:var(--blue); background:var(--bluelt); }
@@ -337,19 +337,19 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 
 .insights-tab-content { padding:16px 18px; overflow-y:auto; flex:1; }
 .ins-section { margin-bottom:18px; }
-.ins-sec-title { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:9px; }
+.ins-sec-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:9px; }
 .ins-metric-card { background:var(--surface2); border-radius:var(--r); padding:12px 14px; margin-bottom:7px; display:flex; align-items:center; gap:12px; border:1px solid var(--border); }
 .imc-icon { font-size:1rem; flex-shrink:0; }
 .imc-info { flex:1; }
 .imc-name { font-size:.75rem; font-weight:600; margin-bottom:2px; color:var(--ink); }
-.imc-val { font-family:var(--fm); font-size:.72rem; font-weight:600; }
-.imc-sub { font-size:.6rem; color:var(--ink3); margin-top:1px; }
+.imc-val { font-family:var(--fm); font-size:.75rem; font-weight:600; }
+.imc-sub { font-size:.75rem; color:var(--ink3); margin-top:1px; }
 .imc-val.good{color:var(--teal)}.imc-val.warn{color:var(--amber)}.imc-val.bad{color:var(--rose)}
-.imc-status { padding:3px 9px; border-radius:20px; font-size:.6rem; font-weight:700; flex-shrink:0; }
+.imc-status { padding:3px 9px; border-radius:20px; font-size:.75rem; font-weight:700; flex-shrink:0; }
 .history-item { padding:10px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
 .history-item:hover { background:var(--surface2); }
 .hi-prompt { font-size:.75rem; font-weight:500; color:var(--ink); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hi-meta { font-size:.6rem; color:var(--ink3); display:flex; align-items:center; gap:6px; }
+.hi-meta { font-size:.75rem; color:var(--ink3); display:flex; align-items:center; gap:6px; }
 .hi-topic { background:var(--bluebg); color:var(--blue); padding:1px 6px; border-radius:4px; font-weight:600; }
 
 /* ═══ PAGE COMPONENTS ══════════════════════════════════════ */
@@ -359,7 +359,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   letter-spacing:-.02em; margin-bottom:4px; color:var(--ink);
   line-height:1.1;
 }
-.ph-sub { font-size:.72rem; color:var(--ink3); font-weight:400; letter-spacing:.02em; }
+.ph-sub { font-size:.75rem; color:var(--ink3); font-weight:400; letter-spacing:.02em; }
 .ph-acts { display:flex; gap:8px; }
 
 /* Buttons — editorial style */
@@ -380,11 +380,11 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   transition:all .15s;
 }
 .btn-secondary:hover { background:var(--surface2); border-color:var(--border2); color:var(--ink); }
-.btn-ghost { background:none; border:none; font-family:var(--fb); font-size:.73rem; font-weight:600; color:var(--blue); cursor:pointer; padding:6px 10px; }
+.btn-ghost { background:none; border:none; font-family:var(--fb); font-size:.75rem; font-weight:600; color:var(--blue); cursor:pointer; padding:6px 10px; }
 .btn-danger-sm {
   background:var(--rosebg); color:var(--rose);
   border:1px solid rgba(220,38,38,.15); border-radius:5px; padding:5px 10px;
-  font-family:var(--fb); font-size:.68rem; font-weight:600; cursor:pointer; transition:all .13s;
+  font-family:var(--fb); font-size:.75rem; font-weight:600; cursor:pointer; transition:all .13s;
 }
 .btn-danger-sm:hover { background:var(--rose); color:white; }
 
@@ -399,16 +399,16 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .stat-card:hover { box-shadow:var(--shadow2); transform:translateY(-2px); }
 .sc-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
 .sc-ic { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-.sc-badge { display:flex; align-items:center; gap:3px; padding:3px 9px; border-radius:20px; font-size:.6rem; font-weight:700; font-family:var(--fm); }
+.sc-badge { display:flex; align-items:center; gap:3px; padding:3px 9px; border-radius:20px; font-size:.75rem; font-weight:700; font-family:var(--fm); }
 .sc-badge.up { background:var(--teallt); color:var(--teal); }
 .sc-badge.dn { background:var(--roselt); color:var(--rose); }
 .sc-badge.neutral { background:var(--surface2); color:var(--ink3); }
-.sc-lbl { font-size:.68rem; color:var(--ink3); font-weight:400; margin-bottom:5px; letter-spacing:.03em; text-transform:uppercase; }
+.sc-lbl { font-size:.75rem; color:var(--ink3); font-weight:400; margin-bottom:5px; letter-spacing:.03em; text-transform:uppercase; }
 .sc-val {
   font-family:var(--fm); font-size:1.55rem; font-weight:600;
   letter-spacing:-.02em; line-height:1; margin-bottom:5px; color:var(--ink);
 }
-.sc-sub { font-size:.63rem; color:var(--ink3); font-weight:400; }
+.sc-sub { font-size:.75rem; color:var(--ink3); font-weight:400; }
 /* Accent bar at bottom of card */
 .sc-accent { position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 var(--rxl) var(--rxl); opacity:.7; }
 
@@ -420,10 +420,10 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 }
 .cc-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:3px; }
 .cc-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; color:var(--ink); }
-.cc-sub { font-size:.63rem; color:var(--ink3); margin-bottom:18px; font-weight:400; }
+.cc-sub { font-size:.75rem; color:var(--ink3); margin-bottom:18px; font-weight:400; }
 .period-btns { display:flex; gap:3px; }
 .pb {
-  padding:4px 10px; border-radius:5px; font-size:.62rem; font-weight:600;
+  padding:4px 10px; border-radius:5px; font-size:.75rem; font-weight:600;
   border:1px solid var(--border); color:var(--ink3);
   cursor:pointer; background:transparent; font-family:var(--fb); transition:all .13s;
   letter-spacing:.02em;
@@ -434,9 +434,9 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .donut-wrap { display:flex; align-items:center; gap:18px; }
 .donut-leg { flex:1; display:flex; flex-direction:column; gap:8px; }
 .dl-row { display:flex; align-items:center; justify-content:space-between; }
-.dl-l { display:flex; align-items:center; gap:8px; font-size:.7rem; color:var(--ink2); font-weight:500; }
+.dl-l { display:flex; align-items:center; gap:8px; font-size:.75rem; color:var(--ink2); font-weight:500; }
 .dl-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }  /* Square dots — editorial */
-.dl-r { font-family:var(--fm); font-size:.68rem; font-weight:600; color:var(--ink); }
+.dl-r { font-family:var(--fm); font-size:.75rem; font-weight:600; color:var(--ink); }
 
 /* ═══ DATA TABLE ════════════════════════════════════════════ */
 .table-card {
@@ -450,7 +450,7 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
 .tt-title { font-family:var(--fd); font-size:.95rem; font-weight:400; font-style:italic; flex:1; color:var(--ink); }
 .filter-row { display:flex; gap:4px; }
 .fb {
-  padding:4px 11px; border-radius:20px; font-size:.65rem; font-weight:500;
+  padding:4px 11px; border-radius:20px; font-size:.75rem; font-weight:500;
   border:1px solid var(--border); color:var(--ink3);
   cursor:pointer; background:transparent; font-family:var(--fb); transition:all .13s;
 }
@@ -462,14 +462,14 @@ html,body { height:100%; font-family:var(--fb); background:var(--bg); color:var(
   transition:all .15s;
 }
 .search-wrap:focus-within { border-color:var(--border2); background:var(--surface); }
-.search-wrap input { background:none; border:none; outline:none; font-family:var(--fb); font-size:.72rem; color:var(--ink); width:140px; }
+.search-wrap input { background:none; border:none; outline:none; font-family:var(--fb); font-size:.75rem; color:var(--ink); width:140px; }
 .search-wrap input::placeholder { color:var(--ink3); }
 
 table { width:100%; border-collapse:collapse; }
 thead tr { border-bottom:1px solid var(--border); background:var(--surface2); }
 th {
   padding:10px 14px; text-align:left;
-  font-size:.62rem; font-weight:600; text-transform:uppercase;
+  font-size:.75rem; font-weight:600; text-transform:uppercase;
   letter-spacing:.08em; color:var(--ink3); white-space:nowrap;
 }
 tbody tr { border-bottom:1px solid var(--border); transition:background .12s; cursor:pointer; }
@@ -478,11 +478,11 @@ tbody tr:hover { background:var(--surface2); }
 td { padding:11px 14px; font-size:.79rem; vertical-align:middle; }
 .td-ico { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
 .td-main { font-weight:600; font-size:.8rem; margin-bottom:1px; color:var(--ink); }
-.td-sub { font-size:.62rem; color:var(--ink3); }
+.td-sub { font-size:.75rem; color:var(--ink3); }
 .td-mono { font-family:var(--fm); font-weight:600; font-size:.8rem; }
 .td-mono.pos{color:var(--teal)}.td-mono.neg{color:var(--rose)}
-.cat-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:.62rem; font-weight:600; }
-.st-pill { padding:3px 9px; border-radius:5px; font-size:.62rem; font-weight:600; }
+.cat-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:.75rem; font-weight:600; }
+.st-pill { padding:3px 9px; border-radius:5px; font-size:.75rem; font-weight:600; }
 .st-pill.manual { background:var(--teallt); color:var(--teal); }
 .st-pill.ai { background:var(--purplt); color:var(--purple); }
 .st-pill.import { background:var(--bluelt); color:var(--blue); }
@@ -491,16 +491,16 @@ tbody tr:hover .row-acts { opacity:1; }
 .ra {
   width:26px; height:26px; border-radius:5px; border:1px solid var(--border);
   background:var(--surface); cursor:pointer; display:flex; align-items:center;
-  justify-content:center; font-size:.65rem; transition:all .12s;
+  justify-content:center; font-size:.75rem; transition:all .12s;
 }
 .ra:hover { border-color:var(--border2); box-shadow:var(--shadow); }
 .ra.del:hover { background:var(--rose); color:white; border-color:var(--rose); }
 .tf { padding:11px 22px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); background:var(--surface2); }
-.tf-info { font-size:.65rem; color:var(--ink3); font-family:var(--fm); }
+.tf-info { font-size:.75rem; color:var(--ink3); font-family:var(--fm); }
 .pag { display:flex; gap:3px; }
 .pg {
   width:28px; height:28px; border-radius:5px; border:1px solid var(--border);
-  background:var(--surface); cursor:pointer; font-size:.7rem; font-weight:600;
+  background:var(--surface); cursor:pointer; font-size:.75rem; font-weight:600;
   display:flex; align-items:center; justify-content:center;
   color:var(--ink2); transition:all .12s; font-family:var(--fm);
 }
@@ -525,24 +525,24 @@ tbody tr:hover .row-acts { opacity:1; }
 .bc-hdr { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
 .bc-ic { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
 .bc-name { font-size:.83rem; font-weight:600; color:var(--ink); }
-.bc-lmt { font-size:.62rem; color:var(--ink3); margin-top:1px; font-family:var(--fm); }
+.bc-lmt { font-size:.75rem; color:var(--ink3); margin-top:1px; font-family:var(--fm); }
 .bc-amts { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
 .bc-spent { font-family:var(--fm); font-size:1.2rem; font-weight:600; color:var(--ink); }
 .bc-spent.over { color:var(--rose); }
-.bc-rem { font-size:.7rem; font-weight:600; }
+.bc-rem { font-size:.75rem; font-weight:600; }
 .bc-rem.ok { color:var(--teal); }.bc-rem.bad { color:var(--rose); }
 .bc-track { height:5px; background:var(--bg2); border-radius:3px; overflow:hidden; margin-bottom:6px; }
 .bc-fill { height:100%; border-radius:3px; transition:width .8s ease; }
-.bc-meta { display:flex; justify-content:space-between; font-size:.6rem; color:var(--ink3); font-family:var(--fm); margin-bottom:14px; }
+.bc-meta { display:flex; justify-content:space-between; font-size:.75rem; color:var(--ink3); font-family:var(--fm); margin-bottom:14px; }
 .bc-acts { display:flex; gap:7px; padding-top:12px; border-top:1px solid var(--border); }
 
 /* ═══ ANALYTICS PAGE ════════════════════════════════════════ */
 .an-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
 .metric-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:20px; box-shadow:var(--shadow); }
 .mc-icon { font-size:1.1rem; margin-bottom:10px; }
-.mc-lbl { font-size:.62rem; color:var(--ink3); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin-bottom:5px; }
+.mc-lbl { font-size:.75rem; color:var(--ink3); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin-bottom:5px; }
 .mc-val { font-family:var(--fm); font-size:1.15rem; font-weight:600; margin-bottom:3px; color:var(--ink); }
-.mc-sub { font-size:.63rem; color:var(--ink3); }
+.mc-sub { font-size:.75rem; color:var(--ink3); }
 .mc-val.good{color:var(--teal)}.mc-val.warn{color:var(--amber)}.mc-val.bad{color:var(--rose)}
 
 .fire-card {
@@ -552,13 +552,13 @@ tbody tr:hover .row-acts { opacity:1; }
 }
 .fire-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .fire-title { display:flex; align-items:center; gap:8px; font-family:var(--fd); font-size:1rem; font-style:italic; font-weight:400; color:var(--ink); }
-.fire-tag { background:rgba(217,119,6,.12); color:var(--amber); font-size:.58rem; font-weight:700; padding:2px 8px; border-radius:5px; text-transform:uppercase; letter-spacing:.06em; font-family:var(--fm); }
+.fire-tag { background:rgba(217,119,6,.12); color:var(--amber); font-size:.75rem; font-weight:700; padding:2px 8px; border-radius:5px; text-transform:uppercase; letter-spacing:.06em; font-family:var(--fm); }
 .fire-trk { height:8px; background:rgba(217,119,6,.15); border-radius:4px; overflow:hidden; margin-bottom:8px; }
 .fire-fill { height:100%; background:linear-gradient(90deg, var(--amber), #F59E0B); border-radius:4px; transition:width 1s ease; }
 .fire-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:14px; }
 .fs { text-align:center; }
 .fs-v { font-family:var(--fm); font-size:.95rem; font-weight:600; color:var(--ink); }
-.fs-l { font-size:.58rem; color:var(--ink3); margin-top:3px; text-transform:uppercase; letter-spacing:.06em; }
+.fs-l { font-size:.75rem; color:var(--ink3); margin-top:3px; text-transform:uppercase; letter-spacing:.06em; }
 
 /* ═══ MPESA IMPORT PAGE ═════════════════════════════════════ */
 .import-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
@@ -571,25 +571,25 @@ tbody tr:hover .row-acts { opacity:1; }
 .drop-zone:hover, .drop-zone.drag { border-color:var(--blue); background:var(--bluebg); }
 .dz-icon { font-size:2.5rem; margin-bottom:14px; }
 .dz-title { font-family:var(--fd); font-size:1.1rem; font-style:italic; font-weight:400; margin-bottom:6px; color:var(--ink); }
-.dz-sub { font-size:.73rem; color:var(--ink2); line-height:1.65; margin-bottom:16px; }
+.dz-sub { font-size:.75rem; color:var(--ink2); line-height:1.65; margin-bottom:16px; }
 .file-preview { display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:10px 14px; margin-top:12px; }
 .file-preview.vis { display:flex; }
 .fp-icon { font-size:1.1rem; }
 .fp-info { flex:1; min-width:0; }
 .fp-name { font-size:.76rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
-.fp-size { font-size:.61rem; color:var(--ink3); font-family:var(--fm); }
+.fp-size { font-size:.75rem; color:var(--ink3); font-family:var(--fm); }
 .fp-rm { cursor:pointer; color:var(--ink3); font-size:.76rem; padding:3px; border-radius:3px; }
 .fp-rm:hover { color:var(--rose); }
 
 .import-form { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:24px; box-shadow:var(--shadow); }
-.priv-notice { background:var(--amberlt); border:1px solid rgba(217,119,6,.18); border-radius:8px; padding:11px 14px; display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-size:.68rem; color:var(--ink2); line-height:1.55; }
+.priv-notice { background:var(--amberlt); border:1px solid rgba(217,119,6,.18); border-radius:8px; padding:11px 14px; display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-size:.75rem; color:var(--ink2); line-height:1.55; }
 .steps-list { background:var(--surface2); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-top:12px; display:none; }
 .steps-list.vis { display:block; }
-.step { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.74rem; color:var(--ink3); border-bottom:1px solid var(--border); transition:color .2s; }
+.step { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.75rem; color:var(--ink3); border-bottom:1px solid var(--border); transition:color .2s; }
 .step:last-child { border-bottom:none; }
 .step.act { color:var(--ink); }
 .step.done { color:var(--teal); }
-.step-dot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.58rem; font-weight:700; flex-shrink:0; background:var(--border); color:var(--ink3); }
+.step-dot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; background:var(--border); color:var(--ink3); }
 .step.act .step-dot { background:var(--bluebg); color:var(--blue); animation:spin 1s linear infinite; }
 .step.done .step-dot { background:var(--teallt); color:var(--teal); animation:none; }
 @keyframes spin { to{transform:rotate(360deg)} }
@@ -599,17 +599,17 @@ tbody tr:hover .row-acts { opacity:1; }
 .ir-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 .ir-stat { text-align:center; background:var(--surface); border-radius:7px; padding:10px 6px; border:1px solid var(--border); }
 .ir-sv { font-family:var(--fm); font-size:1.1rem; font-weight:700; color:var(--ink); }
-.ir-sl { font-size:.6rem; color:var(--ink3); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
+.ir-sl { font-size:.75rem; color:var(--ink3); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
 
 /* ═══ SETTINGS PAGE ═════════════════════════════════════════ */
 .config-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--rxl); padding:22px; box-shadow:var(--shadow); margin-bottom:16px; }
 .config-title { font-family:var(--fd); font-size:1rem; font-weight:400; font-style:italic; margin-bottom:4px; color:var(--ink); }
-.config-sub { font-size:.7rem; color:var(--ink3); margin-bottom:18px; font-weight:400; line-height:1.5; }
+.config-sub { font-size:.75rem; color:var(--ink3); margin-bottom:18px; font-weight:400; line-height:1.5; }
 .key-input-wrap { position:relative; }
 .key-input-wrap input { padding-right:72px; }
-.key-show-btn { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:.62rem; font-weight:600; cursor:pointer; color:var(--ink2); transition:all .13s; }
+.key-show-btn { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:.75rem; font-weight:600; cursor:pointer; color:var(--ink2); transition:all .13s; }
 .key-show-btn:hover { border-color:var(--border2); color:var(--ink); }
-.sb-key-status { display:flex; align-items:center; gap:7px; font-size:.68rem; padding:8px 11px; border-radius:7px; margin-top:8px; font-weight:500; }
+.sb-key-status { display:flex; align-items:center; gap:7px; font-size:.75rem; padding:8px 11px; border-radius:7px; margin-top:8px; font-weight:500; }
 .sb-key-status.ok { background:var(--teallt); color:var(--teal); }
 .sb-key-status.err { background:var(--roselt); color:var(--rose); }
 .sb-key-status.none { background:var(--surface2); color:var(--ink3); border:1px solid var(--border); }
@@ -633,7 +633,7 @@ tbody tr:hover .row-acts { opacity:1; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
 .form-row.full { grid-template-columns:1fr; }
 .form-grp { display:flex; flex-direction:column; gap:5px; }
-.form-lbl { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); }
+.form-lbl { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); }
 .form-input {
   background:var(--surface2); border:1px solid var(--border); border-radius:7px;
   padding:9px 12px; font-family:var(--fb); font-size:.82rem; color:var(--ink);
@@ -666,7 +666,7 @@ select.form-input { cursor:pointer; }
 #toast.info .ti    { color:#818CF8; }
 
 /* ═══ FORM HELPERS ══════════════════════════════════════════ */
-.form-hint { font-size:.62rem; color:var(--ink3); margin-top:4px; line-height:1.5; }
+.form-hint { font-size:.75rem; color:var(--ink3); margin-top:4px; line-height:1.5; }
 
 /* ═══ STAGGERED REVEAL ANIMATIONS ══════════════════════════ */
 /* Stat cards stagger in on page load */
@@ -743,7 +743,7 @@ thead { position:sticky; top:0; z-index:10; }
   display:flex; gap:16px; margin-top:12px; padding-top:10px;
   border-top:1px solid var(--border);
 }
-.cl-item { display:flex; align-items:center; gap:6px; font-size:.63rem; color:var(--ink2); }
+.cl-item { display:flex; align-items:center; gap:6px; font-size:.75rem; color:var(--ink2); }
 .cl-dot  { width:8px; height:3px; border-radius:1px; flex-shrink:0; }
 
 /* Stat card accent bottom bar animation */
@@ -812,7 +812,7 @@ thead { position:sticky; top:0; z-index:10; }
   .tt { flex-wrap:wrap; gap:8px; padding:12px 14px; }
   .filter-row { flex-wrap:wrap; }
   .search-wrap input { width:100px; }
-  table { font-size:.72rem; }
+  table { font-size:.75rem; }
   th, td { padding:8px 10px; }
 
   /* Gamification badges 3-col on mobile */
@@ -828,61 +828,44 @@ thead { position:sticky; top:0; z-index:10; }
   .mn-item {
     display:flex; flex-direction:column; align-items:center; gap:2px;
     padding:5px 8px; border-radius:8px; cursor:pointer;
-    color:rgba(255,255,255,.35); font-size:.55rem; font-weight:500;
+    color:rgba(255,255,255,.35); font-size:.75rem; font-weight:500;
     min-width:52px; transition:all .15s;
   }
   .mn-item.on  { color:white; }
   .mn-item .mn-ic { font-family:var(--fm); font-size:1.1rem; line-height:1; }
 }
 </style>
+<link rel="stylesheet" href="stitch.css">
 </head>
 <body>
 <div id="layout">
 
 <!-- ═══ SIDEBAR ═══════════════════════════════════ -->
-<aside id="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-icon" style="font-family:var(--fm);font-size:.9rem;font-weight:700;letter-spacing:-.05em">Fp</div>
-    <div class="sb-logo-text">Fyn<em>Pet</em></div>
-  </div>
-  <div class="sb-sync-status" id="sync-status">
-    <div class="sync-dot local" id="sync-dot"></div>
-    <span id="sync-label">Local only</span>
-  </div>
-  <nav class="sb-nav">
-    <div class="sb-sec">Menu</div>
-    <div class="ni on" data-click="goPage" data-click-args='["dashboard","$el"]'><span class="icon" style="font-family:var(--fm)">⊞</span>Dashboard</div>
-    <div class="ni" data-click="goPage" data-click-args='["transactions","$el"]'><span class="icon" style="font-family:var(--fm)">≡</span>Transactions</div>
-    <div class="ni" data-click="goPage" data-click-args='["budgets","$el"]'><span class="icon" style="font-family:var(--fm)">◫</span>Budgets</div>
-    <div class="ni" data-click="goPage" data-click-args='["analytics","$el"]'><span class="icon" style="font-family:var(--fm)">∿</span>Analytics</div>
-    <div class="sb-sec">Financial</div>
-    <div class="ni" data-click="goPage" data-click-args='["mpesa","$el"]'><span class="icon" style="font-family:var(--fm)">⇅</span>M-Pesa Import<span class="ni-badge" id="import-badge" style="display:none">New</span></div>
-    <div class="sb-sec">Settings</div>
-    <div class="ni" data-click="goPage" data-click-args='["settings","$el"]'><span class="icon" style="font-family:var(--fm)">◌</span>API & Config</div>
-    <div class="ni" data-click="toggleAdvisor"><span class="icon" style="font-family:var(--fm)">◉</span>AI Advisor</div>
-  </nav>
-  <div class="sb-foot">
-    <div class="upgrade-card">
-      <div class="uc-title">FynPet Pro</div>
-      <div class="uc-sub">Full AI analysis + unlimited sync</div>
-      <button class="uc-btn">Upgrade $9/mo</button>
-    </div>
-  </div>
+<aside id="sidebar" aria-label="Main navigation">
+  <div class="sb-logo"><div class="sb-logo-icon">FP</div><div class="sb-logo-text">FynPet<span class="brand-caption">Kenya · KES ledger</span></div></div>
+  <button class="sb-ai" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span>Ask Fyn AI</button>
+  <nav class="sb-nav" aria-label="Pages"><button class="ni on" data-click="goPage" data-click-args='["dashboard","$el"]' aria-current="page"><span class="icon" data-icon="dashboard" aria-hidden="true"></span>Dashboard</button>
+<button class="ni " data-click="goPage" data-click-args='["transactions","$el"]' ><span class="icon" data-icon="ledger" aria-hidden="true"></span>Transactions</button>
+<button class="ni " data-click="goPage" data-click-args='["budgets","$el"]' ><span class="icon" data-icon="wallet" aria-hidden="true"></span>Budgets</button>
+<button class="ni " data-click="goPage" data-click-args='["analytics","$el"]' ><span class="icon" data-icon="chart" aria-hidden="true"></span>Analytics</button>
+<button class="ni " data-click="goPage" data-click-args='["mpesa","$el"]' ><span class="icon" data-icon="import" aria-hidden="true"></span>M-Pesa Import</button>
+<button class="ni " data-click="goPage" data-click-args='["settings","$el"]' ><span class="icon" data-icon="settings" aria-hidden="true"></span>Settings</button></nav>
+  <div class="sb-sync-status" id="sync-status"><div class="sync-dot local" id="sync-dot"></div><span id="sync-label">Saved on this device</span></div>
+  <div class="sb-foot"><p>Your recorded finances, in one place.</p><button class="btn-secondary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in to sync</button></div>
 </aside>
 
 <!-- ═══ MAIN ═══════════════════════════════════ -->
 <div id="main">
   <div id="topbar">
-    <div class="mob-ham" data-click="toggleMobSidebar">☰</div>
+    <button class="mob-ham" aria-label="Open navigation" data-click="toggleMobSidebar"><span data-icon="menu" aria-hidden="true"></span></button>
     <div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
-    <div class="tb-search"><span class="tb-search-icon">⌕</span><input type="text" placeholder="Search transactions…" data-input="searchTx" data-input-args='["$value"]'></div>
-    <div class="ib" title="Export CSV" data-click="exportCSV" style="font-family:var(--fm);font-size:.9rem;font-weight:600;color:var(--ink2)">↑</div>
-    <div class="ib" data-click="toggleAdvisor" title="AI Advisor" style="font-family:var(--fm);font-weight:700;font-size:.75rem;background:var(--bluebg);border-color:rgba(55,48,163,.2);color:var(--blue)">AI</div>
-    <div class="ib" title="Sync now" data-click="syncNow" id="sync-btn" style="font-family:var(--fm);font-size:.9rem;color:var(--ink2)">⟳</div>
-    <div class="tb-user" title="Sign out" data-click="confirmSignOut">
+    <div class="tb-search"><span class="tb-search-icon" data-icon="search" aria-hidden="true"></span><input type="text" aria-label="Search transactions" placeholder="Search transactions…" data-input="searchGlobalTx" data-input-args='["$value"]'></div>
+    <button class="ib" aria-label="Export CSV" title="Export CSV" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span></button>
+    <button class="ib" aria-label="Open Fyn AI" title="Fyn AI" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span></button>
+    <button class="ib" aria-label="Sync now" title="Sync now" data-click="syncNow" id="sync-btn"><span data-icon="sync" aria-hidden="true"></span></button>
+    <button class="tb-user" title="Account and settings" aria-label="Account and settings" data-click="goPage" data-click-args='["settings",null]'>
       <div class="tb-av" id="tb-av">J</div>
-      <div class="tb-ui"><div class="tun" id="tb-name">Jeremy</div><div class="tur" id="tb-role">Admin</div></div>
-    </div>
+      <div class="tb-ui"><div class="tun" id="tb-name">Jeremy</div><div class="tur" id="tb-role">Admin</div></div></button>
   </div>
 
   <div id="content">
@@ -890,7 +873,7 @@ thead { position:sticky; top:0; z-index:10; }
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Financial Report</div><div class="ph-sub" id="dash-sub"></div></div>
+        <div class="ph-left"><div class="ph-title">Your financial ledger</div><div class="ph-sub" id="dash-sub"></div></div>
         <div class="ph-acts">
           <button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'>Import M-Pesa</button>
           <button class="btn-primary" data-click="openAddTx">+ Add Transaction</button>
@@ -913,7 +896,7 @@ thead { position:sticky; top:0; z-index:10; }
       </div>
       <div class="table-card" id="budget-status-card" style="margin-bottom:14px;display:none">
         <div class="tt">
-          <div class="tt-title">Budget Status <span id="budget-status-period" style="font-size:.62rem;font-weight:400;color:var(--ink3);font-family:var(--fm)">— this month</span></div>
+          <div class="tt-title">Budget Status <span id="budget-status-period" style="font-size:.75rem;font-weight:400;color:var(--ink3);font-family:var(--fm)">— this month</span></div>
           <button class="btn-ghost" data-click="goPage" data-click-args='["budgets",null]'>Manage →</button>
         </div>
         <div id="budget-status-bars" style="padding:0 4px"></div>
@@ -929,7 +912,7 @@ thead { position:sticky; top:0; z-index:10; }
     <div class="page" id="page-transactions">
       <div class="page-header">
         <div class="ph-left"><div class="ph-title">Transactions</div><div class="ph-sub" id="tx-count-sub">Loading…</div></div>
-        <div class="ph-acts"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-primary" data-click="openAddTx">＋ Add</button></div>
+        <div class="ph-acts"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-primary" data-click="openAddTx">Add transaction</button></div>
       </div>
       <div class="table-card">
         <div class="tt">
@@ -961,12 +944,12 @@ thead { position:sticky; top:0; z-index:10; }
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
       <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Analytics</div><div class="ph-sub">Deep financial insights & projections</div></div>
+        <div class="ph-left"><div class="ph-title">Analytics</div><div class="ph-sub">Understand your recorded spending and savings</div></div>
         <div class="ph-acts"><button class="btn-primary" data-click="runAiAnalysis">Get AI Analysis</button></div>
       </div>
       <div class="fire-card">
         <div class="fire-hdr"><div class="fire-title">FIRE Progress</div><div class="fire-tag">Financial Independence</div></div>
-        <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--ink2);font-family:var(--fm);margin-bottom:5px"><span id="fire-saved-lbl">KES 0 saved</span><span id="fire-target-lbl">Target: KES 3,000,000</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink2);font-family:var(--fm);margin-bottom:5px"><span id="fire-saved-lbl">KES 0 saved</span><span id="fire-target-lbl">Target: KES 3,000,000</span></div>
         <div class="fire-trk"><div class="fire-fill" id="fire-fill" style="width:0%"></div></div>
         <div class="fire-stats" id="fire-stats"></div>
       </div>
@@ -991,7 +974,7 @@ thead { position:sticky; top:0; z-index:10; }
           <label class="drop-zone" id="drop-zone" for="pdf-file" data-dragover="dzDrag" data-dragover-args='["$event",true]' data-dragleave="dzDrag" data-dragleave-args='["$event",false]' data-drop="dzDrop" data-drop-args='["$event"]'>
             <div class="dz-icon" style="font-family:var(--fm);font-size:2.8rem;font-weight:300;color:var(--ink3)">↑</div>
             <div class="dz-title">Drop M-Pesa PDF here</div>
-            <div class="dz-sub">Safaricom monthly statements. Password-protected files supported — enter your National ID below.</div>
+            <div class="dz-sub">Safaricom monthly statements. Password-protected files supported. Enter the statement password if needed.</div>
             <button class="btn-primary" type="button" data-click="choosePdf">Choose File</button>
           </label>
           <input type="file" id="pdf-file" accept=".pdf" style="display:none" data-change="handlePDF" data-change-args='["$el"]'>
@@ -1002,29 +985,29 @@ thead { position:sticky; top:0; z-index:10; }
           </div>
           <div class="priv-notice">
             <span>⊠</span>
-            <div><strong>How your statement is handled.</strong> The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through our server to Anthropic's Claude to be categorised. Phone numbers are removed first. Anthropic does not train on this data.</div>
+            <div><strong>How your statement is handled.</strong> The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised. Phone numbers are removed before Anthropic processing. You will be asked for consent before transmission.</div>
           </div>
         </div>
         <div class="import-form">
           <div style="font-family:var(--fd);font-size:.95rem;font-weight:800;margin-bottom:14px">Import Settings</div>
           <div class="form-grp" style="margin-bottom:10px">
-            <div class="form-lbl">PDF Password (if protected)</div>
-            <input class="form-input" type="password" id="pdf-pw" placeholder="National ID number (M-Pesa default)">
+            <label class="form-lbl" for="pdf-pw">PDF Password (if protected)</label>
+            <div class="password-field"><input class="form-input" type="password" id="pdf-pw" placeholder="Statement password"><button class="btn-ghost" type="button" aria-controls="pdf-pw" aria-pressed="false" data-click="toggleKeyVis" data-click-args='["pdf-pw","$el"]'>Show</button></div>
           </div>
-          <div class="form-row">
-            <div class="form-grp"><div class="form-lbl">Date From</div><input class="form-input" type="date" id="imp-from"></div>
-            <div class="form-grp"><div class="form-lbl">Date To</div><input class="form-input" type="date" id="imp-to"></div>
+          <div class="form-row import-dates">
+            <div class="form-grp"><label class="form-lbl" for="imp-from">Date From</label><input class="form-input" type="date" id="imp-from"></div>
+            <div class="form-grp"><label class="form-lbl" for="imp-to">Date To</label><input class="form-input" type="date" id="imp-to"></div>
           </div>
-          <button class="btn-primary" style="width:100%;justify-content:center;padding:11px;margin-bottom:12px" id="import-btn" data-click="runImport">Import & Analyse</button>
+          <button class="btn-primary" style="width:100%;justify-content:center;padding:11px;margin-bottom:12px" id="import-btn" data-click="runImport">Import statement</button>
           <div class="steps-list" id="steps-list">
             <div class="step" id="stp1"><div class="step-dot">1</div>Decrypting PDF</div>
             <div class="step" id="stp2"><div class="step-dot">2</div>Extracting transaction text</div>
             <div class="step" id="stp3"><div class="step-dot">3</div>Claude AI categorising transactions</div>
             <div class="step" id="stp4"><div class="step-dot">4</div>Running financial analysis</div>
-            <div class="step" id="stp5"><div class="step-dot">5</div>Saving to Supabase & local cache</div>
+            <div class="step" id="stp5"><div class="step-dot">5</div>Saving your records</div>
           </div>
           <div class="import-result" id="import-result">
-            <div class="ir-title"><span style="font-family:var(--fm);font-size:.7rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px;margin-right:6px">DONE</span>Import Complete</div>
+            <div class="ir-title"><span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px;margin-right:6px">DONE</span>Import Complete</div>
             <div class="ir-stats" id="ir-stats"></div>
           </div>
         </div>
@@ -1038,90 +1021,62 @@ thead { position:sticky; top:0; z-index:10; }
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Configuration</div><div class="ph-sub">Profile, FIRE target, and cloud connection status</div></div>
+        <div class="ph-left"><div class="ph-title">Settings</div><div class="ph-sub">Your profile, exchange rates and privacy preferences</div></div>
       </div>
 
-      <div class="config-grid">
-        <div class="config-card" style="border-left:3px solid var(--blue)">
+      <div class="config-grid"><div class="config-card"><h2 class="config-title">Account &amp; sync</h2><p class="config-sub">Keep your records on this device or sign in to sync them to your account.</p><div class="service-status"><p>Fyn AI <span id="claude-status" class="sb-key-status none">Checking…</span></p><p>Account sync <span id="sb-status" class="sb-key-status none">Checking…</span></p></div><div class="account-actions"><button class="btn-primary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in</button><button class="btn-secondary" data-click="syncNow">Sync now</button><button class="btn-ghost" data-click="recheckCloudConfig">Check connection</button><button class="btn-ghost" data-click="confirmSignOut">Sign out</button></div></div></div><div class="config-grid">
+        <div class="config-card">
           <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--blue);background:var(--bluelt);padding:2px 7px;border-radius:4px">NET</span>
-            Server Configuration</div>
-          <div class="config-sub">The AI key is stored in Netlify environment variables on the server — never in your browser. AI features require signing in.</div>
-          <div style="margin:12px 0 8px;display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
-              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Claude AI (Anthropic)</div>
-              <div class="sb-key-status none" id="claude-status" style="margin:0">Checking…</div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--rsm);border:1px solid var(--border)">
-              <div style="font-size:.72rem;font-weight:600;color:var(--ink2)">Supabase Database</div>
-              <div class="sb-key-status none" id="sb-status" style="margin:0">Checking…</div>
-            </div>
-          </div>
-          <button class="btn-secondary" style="margin-top:4px;font-size:.72rem;width:100%;justify-content:center" data-click="recheckCloudConfig">↺ Re-check connection</button>
-          <div style="margin-top:12px;padding:10px 12px;background:var(--bluelt);border:1px solid rgba(55,48,163,.12);border-radius:var(--rsm);font-size:.67rem;line-height:1.7;color:var(--ink2)">
-            To update credentials, go to <strong>Netlify → Site configuration → Environment variables</strong>, update <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">ANTHROPIC_API_KEY</code>, <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_URL</code>, or <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px">SUPABASE_ANON_KEY</code>.
-          </div>
-        </div>
-      </div>
-
-      <div class="config-grid">
-        <div class="config-card" style="border-left:3px solid var(--ink3)">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--ink2);background:var(--bg2);padding:2px 7px;border-radius:4px">USR</span>
+            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--ink2);background:var(--bg2);padding:2px 7px;border-radius:4px">USR</span>
             Profile</div>
           <div class="config-sub">Your identity shown in the dashboard.</div>
           <div class="form-row">
-            <div class="form-grp"><div class="form-lbl">Name</div><input class="form-input" type="text" id="cfg-name" placeholder="Jeremy" data-input="saveConfig" data-input-args='["name","$value"]'></div>
-            <div class="form-grp"><div class="form-lbl">Role</div><input class="form-input" type="text" id="cfg-role" placeholder="Admin" data-input="saveConfig" data-input-args='["role","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-name">Name</label><input class="form-input" type="text" id="cfg-name" placeholder="Jeremy" data-input="saveConfig" data-input-args='["name","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-role">Role</label><input class="form-input" type="text" id="cfg-role" placeholder="Admin" data-input="saveConfig" data-input-args='["role","$value"]'></div>
           </div>
         </div>
-        <div class="config-card" style="border-left:3px solid var(--amber)">
+        <div class="config-card">
           <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--amber);background:var(--amberlt);padding:2px 7px;border-radius:4px">FIRE</span>
+            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--amber);background:var(--amberlt);padding:2px 7px;border-radius:4px">FIRE</span>
             Independence Target</div>
           <div class="config-sub">Your Financial Independence number (25× annual expenses).</div>
           <div class="form-grp">
-            <div class="form-lbl">Target Amount (KES)</div>
+            <label class="form-lbl" for="cfg-fire">Target Amount (KES)</label>
             <input class="form-input" type="number" id="cfg-fire" placeholder="3000000" data-input="saveConfig" data-input-args='["fireTarget","$float:3000000"]'>
           </div>
-          <button class="btn-primary" style="margin-top:12px;font-size:.72rem;width:100%;justify-content:center" data-click="saveAllConfig">Save Settings</button>
+          <button class="btn-primary" style="margin-top:12px;font-size:.75rem;width:100%;justify-content:center" data-click="saveAllConfig">Save Settings</button>
         </div>
       </div>
 
       <div class="config-grid" style="margin-top:16px">
-        <div class="config-card" style="border-left:3px solid var(--teal)">
+        <div class="config-card">
           <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">FX</span>
+            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">FX</span>
             Exchange Rates to KES</div>
           <div class="config-sub">Editable estimates, not live rates. The KES conversion is saved with each transaction; changing rates affects new or edited transactions.</div>
           <div class="form-row" style="margin-bottom:10px">
-            <div class="form-grp"><div class="form-lbl">1 USD =</div><input class="form-input" type="number" id="cfg-rate-usd" placeholder="130" data-input="saveConfig" data-input-args='["rate_USD","$value"]'></div>
-            <div class="form-grp"><div class="form-lbl">1 EUR =</div><input class="form-input" type="number" id="cfg-rate-eur" placeholder="145" data-input="saveConfig" data-input-args='["rate_EUR","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-rate-usd">1 USD =</label><input class="form-input" type="number" id="cfg-rate-usd" placeholder="130" data-input="saveConfig" data-input-args='["rate_USD","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-rate-eur">1 EUR =</label><input class="form-input" type="number" id="cfg-rate-eur" placeholder="145" data-input="saveConfig" data-input-args='["rate_EUR","$value"]'></div>
           </div>
           <div class="form-row">
-            <div class="form-grp"><div class="form-lbl">1 GBP =</div><input class="form-input" type="number" id="cfg-rate-gbp" placeholder="165" data-input="saveConfig" data-input-args='["rate_GBP","$value"]'></div>
-            <div class="form-grp"><div class="form-lbl">1 TZS =</div><input class="form-input" type="number" id="cfg-rate-tzs" placeholder="0.045" step="0.001" data-input="saveConfig" data-input-args='["rate_TZS","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-rate-gbp">1 GBP =</label><input class="form-input" type="number" id="cfg-rate-gbp" placeholder="165" data-input="saveConfig" data-input-args='["rate_GBP","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-rate-tzs">1 TZS =</label><input class="form-input" type="number" id="cfg-rate-tzs" placeholder="0.045" step="0.001" data-input="saveConfig" data-input-args='["rate_TZS","$value"]'></div>
           </div>
           <div class="form-row" style="margin-top:10px">
             <div class="form-grp"><label class="form-lbl" for="cfg-rate-ugx">1 UGX =</label><input class="form-input" type="number" id="cfg-rate-ugx" placeholder="0.034" min="0.000001" step="any" data-input="saveConfig" data-input-args='["rate_UGX","$value"]'></div>
           </div>
         </div>
-        <div class="config-card" style="border-left:3px solid var(--purple)">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--purple);background:var(--purplt);padding:2px 7px;border-radius:4px">ℹ</span>
-            About FynPet</div>
-          <div class="config-sub">Personal finance intelligence built for Kenya.</div>
-          <div style="font-size:.7rem;color:var(--ink2);line-height:1.75;margin-top:8px">
-            <div>💡 Import M-Pesa statements for automatic AI categorisation</div>
-            <div>💾 Data is kept in this browser; when you sign in it also syncs to your FynPet account (Supabase, encrypted in transit)</div>
-            <div>🤖 AI features send a summary of your finances to Anthropic's Claude, only after you agree</div>
-            <div style="margin-top:10px;font-size:.62rem;color:var(--ink3)">v5.0 · FynPet</div>
-          </div>
-          <button class="btn-danger-sm" style="margin-top:14px" data-click="clearLocalData">Clear local data</button>
+        <div class="config-card">
+          <h2 class="config-title">Privacy &amp; AI</h2>
+          <div class="privacy-copy"><p>Your records are saved in this browser. Signing in lets you sync them across devices.</p><p>Fyn AI uses Anthropic after your consent. Advisor context or extracted statement text passes through Netlify; phone numbers are removed before Anthropic processing.</p></div>
+          <div class="account-actions"><button class="btn-secondary" data-click="openModal" data-click-args='["ai-consent-modal"]'>Review AI disclosure</button><button class="btn-ghost" data-click="revokeAiConsent">Turn off AI consent</button></div>
+          <h2 class="config-title" style="margin-top:24px">Data management</h2>
+          <div class="account-actions"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-danger-sm" data-click="clearLocalData">Clear local data</button></div>
         </div>
       </div>
     </div>
 
+<div class="page" id="page-more"><div class="page-header"><div><h1 class="ph-title">More</h1><p class="ph-sub">Your other finance tools</p></div></div><div class="more-grid"><button class="more-link" data-click="goPage" data-click-args='["analytics",null]'><span data-icon="chart" aria-hidden="true"></span><span>Analytics<small>Spending trends and savings</small></span></button><button class="more-link" data-click="goPage" data-click-args='["mpesa",null]'><span data-icon="import" aria-hidden="true"></span><span>M-Pesa Import<small>Bring in a PDF statement</small></span></button><button class="more-link" data-click="goPage" data-click-args='["settings",null]'><span data-icon="settings" aria-hidden="true"></span><span>Settings<small>Profile, rates and privacy</small></span></button><button class="more-link" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span><span>Fyn AI<small>Ask about your recorded finances</small></span></button></div></div>
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1129,37 +1084,31 @@ thead { position:sticky; top:0; z-index:10; }
 <div id="advisor-panel">
   <div class="ap-header">
     <div>
-      <div class="ap-title-row"><div class="ai-pulse"></div><div class="ap-title">Fyn Intelligence</div></div>
-      <div class="ap-sub">AI financial advisor · powered by Claude</div>
+      <div class="ap-title-row"><div class="ai-pulse"></div><div class="ap-title">Fyn AI</div></div>
+      <div class="ap-sub">Your recorded finances · Anthropic AI</div>
     </div>
-    <div class="ap-close" data-click="toggleAdvisor">✕</div>
+    <button class="ap-close" aria-label="Close Fyn AI" data-click="toggleAdvisor"><span data-icon="close" aria-hidden="true"></span></button>
   </div>
-  <div class="ap-tabs">
-    <div class="ap-tab on" data-click="setAdvTab" data-click-args='["chat","$el"]'>Chat</div>
-    <div class="ap-tab" data-click="setAdvTab" data-click-args='["insights","$el"]'>Insights</div>
-    <div class="ap-tab" data-click="setAdvTab" data-click-args='["history","$el"]'>History</div>
+  <p class="advisor-disclosure">After consent, your question and financial context are sent to Anthropic through Netlify. Phone numbers are removed first.</p><div class="ap-tabs">
+    <button class="ap-tab on" data-click="setAdvTab" data-click-args='["chat","$el"]'>Chat</button>
+    <button class="ap-tab" data-click="setAdvTab" data-click-args='["insights","$el"]'>Insights</button>
+    <button class="ap-tab" data-click="setAdvTab" data-click-args='["history","$el"]'>History</button>
   </div>
 
   <!-- Chat tab -->
   <div id="adv-chat-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
-    <div class="ap-messages" id="ap-messages">
-      <div style="text-align:center;padding:32px 20px 20px">
-        <div style="font-family:var(--fm);font-size:2rem;font-weight:300;color:var(--ink3);margin-bottom:14px;letter-spacing:-.05em">Ai</div>
-        <div style="font-family:var(--fd);font-size:1.05rem;font-style:italic;font-weight:400;margin-bottom:6px;color:var(--ink)">Your Financial Advisor</div>
-        <div style="font-size:.72rem;color:var(--ink3);line-height:1.65;max-width:240px;margin:0 auto;font-weight:400">Real-time analysis of your transactions, budgets and cash flow. Ask anything.</div>
-      </div>
-    </div>
+    <div class="ap-messages" id="ap-messages" aria-live="polite" aria-label="Conversation"></div>
     <div class="quick-prompts" id="quick-prompts">
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["Analyse my cash flow this month"]'>Cash flow</div>
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["Am I on track with my budgets?"]'>Budget check</div>
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["What are my top 3 spending problems?"]'>Spending issues</div>
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["How much should I save each month to reach my FIRE target?"]'>FIRE advice</div>
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["Give me a 3-month action plan to improve my finances"]'>Action plan</div>
-      <div class="qp-btn" data-click="sendQuick" data-click-args='["Which categories should I cut to save more?"]'>Where to cut</div>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["Analyse my cash flow this month"]'>Cash flow</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["Am I on track with my budgets?"]'>Budget check</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["What are my top 3 spending problems?"]'>Spending issues</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["How much should I save each month to reach my FIRE target?"]'>FIRE advice</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["Give me a 3-month action plan to improve my finances"]'>Action plan</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["Which categories should I cut to save more?"]'>Where to cut</button>
     </div>
     <div class="ap-input-wrap">
-      <textarea class="ap-textarea" id="ap-input" placeholder="Ask about your finances…" rows="1" data-keydown="handleAdvisorKey" data-keydown-args='["$event"]' data-input="autoResize" data-input-args='["$el"]'></textarea>
-      <button class="ap-send" id="ap-send" data-click="sendAdvisorMessage">↑</button>
+      <textarea class="ap-textarea" id="ap-input" aria-label="Ask Fyn AI" placeholder="Ask about your finances…" rows="1" data-keydown="handleAdvisorKey" data-keydown-args='["$event"]' data-input="autoResize" data-input-args='["$el"]'></textarea>
+      <button class="ap-send" id="ap-send" aria-label="Send message" data-click="sendAdvisorMessage"><span data-icon="send" aria-hidden="true"></span></button>
     </div>
   </div>
 
@@ -1176,14 +1125,7 @@ thead { position:sticky; top:0; z-index:10; }
 <div id="mob-overlay" data-click="toggleMobSidebar"></div>
 
 <!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════════ -->
-<div id="mob-nav">
-  <div class="mn-item on" data-click="mobGoPage" data-click-args='["dashboard","$el"]'><span class="mn-ic">⊞</span>Home</div>
-  <div class="mn-item" data-click="mobGoPage" data-click-args='["transactions","$el"]'><span class="mn-ic">≡</span>Txns</div>
-  <div class="mn-item" data-click="mobGoPage" data-click-args='["budgets","$el"]'><span class="mn-ic">◫</span>Budget</div>
-  <div class="mn-item" data-click="mobGoPage" data-click-args='["analytics","$el"]'><span class="mn-ic">∿</span>Analytics</div>
-  <div class="mn-item" data-click="mobGoPage" data-click-args='["mpesa","$el"]'><span class="mn-ic">⇅</span>Import</div>
-</div>
-
+<nav id="mob-nav" aria-label="Mobile navigation"><button class="mn-item on " data-click="mobGoPage" data-click-args='["dashboard","$el"]'><span class="mn-ic" data-icon="dashboard" aria-hidden="true"></span>Home</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["transactions","$el"]'><span class="mn-ic" data-icon="ledger" aria-hidden="true"></span>Transactions</button><button class="mn-item  mn-add" data-click="openAddTx" ><span class="mn-ic" data-icon="plus" aria-hidden="true"></span>Add</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["budgets","$el"]'><span class="mn-ic" data-icon="wallet" aria-hidden="true"></span>Budgets</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["more","$el"]'><span class="mn-ic" data-icon="menu" aria-hidden="true"></span>More</button></nav>
 <div id="advisor-backdrop" data-click="toggleAdvisor"></div>
 
 <!-- AUTH MODAL -->
@@ -1192,70 +1134,57 @@ thead { position:sticky; top:0; z-index:10; }
     <div class="modal-hdr" style="margin-bottom:16px">
       <div>
         <div class="modal-title">Sign in to sync</div>
-        <div style="font-size:.68rem;color:var(--ink3);margin-top:3px">Save your data securely across devices</div>
+        <div style="font-size:.75rem;color:var(--ink3);margin-top:3px">Save your data securely across devices</div>
       </div>
     </div>
-    <div style="display:flex;gap:3px;margin-bottom:18px;background:var(--bg2);border-radius:8px;padding:3px">
-      <button id="auth-tab-in" data-click="setAuthTab" data-click-args='["in"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)">Sign In</button>
-      <button id="auth-tab-up" data-click="setAuthTab" data-click-args='["up"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)">Sign Up</button>
+<div class="modal-body">    <div style="display:flex;gap:3px;margin-bottom:18px;background:var(--bg2);border-radius:8px;padding:3px">
+      <button id="auth-tab-in" data-click="setAuthTab" data-click-args='["in"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)">Sign In</button>
+      <button id="auth-tab-up" data-click="setAuthTab" data-click-args='["up"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)">Create account</button>
     </div>
     <div class="form-grp" style="margin-bottom:10px">
-      <div class="form-lbl">Email</div>
+      <label class="form-lbl" for="auth-email">Email</label>
       <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
     </div>
     <div class="form-grp" style="margin-bottom:14px">
-      <div class="form-lbl">Password</div>
+      <label class="form-lbl" for="auth-password">Password</label>
       <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" data-keydown="submitOnEnter">
     </div>
-    <div id="auth-error" style="display:none;padding:8px 12px;background:var(--roselt);border:1px solid rgba(220,38,38,.15);border-radius:6px;font-size:.68rem;color:var(--rose);margin-bottom:12px"></div>
+    <div id="auth-error" style="display:none;padding:8px 12px;background:var(--roselt);border:1px solid rgba(220,38,38,.15);border-radius:6px;font-size:.75rem;color:var(--rose);margin-bottom:12px"></div>
     <button class="btn-primary" id="auth-submit-btn" style="width:100%;justify-content:center" data-click="submitAuth">Sign In</button>
-    <button data-click="skipAuth" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;font-size:.67rem;color:var(--ink3);cursor:pointer;text-align:center">Continue without signing in (local only)</button>
-  </div>
+    <button data-click="skipAuth" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;font-size:.75rem;color:var(--ink3);cursor:pointer;text-align:center">Continue without signing in (local only)</button>
+</div>  </div>
 </div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="tx-modal">
   <div class="modal">
-    <div class="modal-hdr"><div class="modal-title" id="tx-modal-title">Add Transaction</div><div class="modal-close" data-click="closeModal" data-click-args='["tx-modal"]'>✕</div></div>
-    <div class="form-row">
-      <div class="form-grp"><div class="form-lbl">Amount</div><div style="display:flex;gap:6px"><input class="form-input" type="number" id="tx-amount" placeholder="0.00" min="0" step="0.01" style="flex:1;min-width:0"><select class="form-input" id="tx-currency" style="width:76px;flex-shrink:0;padding-left:8px"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select></div></div>
-      <div class="form-grp"><div class="form-lbl">Type</div><select class="form-input" id="tx-type"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select></div>
+    <div class="modal-hdr"><div class="modal-title" id="tx-modal-title">Add transaction</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["tx-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+<div class="modal-body"><div id="tx-error" class="modal-error" role="alert" hidden></div>    <div class="form-row">
+      <div class="form-grp"><label class="form-lbl" for="tx-amount">Amount</label><div style="display:flex;gap:6px"><input class="form-input" type="number" id="tx-amount" inputmode="decimal" placeholder="0.00" min="0" step="0.01" style="flex:1;min-width:0"><select class="form-input" id="tx-currency" aria-label="Currency" style="width:76px;flex-shrink:0;padding-left:8px"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select></div></div>
+      <div class="form-grp"><label class="form-lbl" for="tx-type">Type</label><select class="form-input" id="tx-type"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select></div>
     </div>
-    <div class="form-row full"><div class="form-grp"><div class="form-lbl">Description</div><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary…"></div></div>
+    <div class="form-row full"><div class="form-grp"><label class="form-lbl" for="tx-desc">Description</label><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary…"></div></div>
     <div class="form-row">
-      <div class="form-grp"><div class="form-lbl">Category</div><select class="form-input" id="tx-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="income">Income</option><option value="transfer">Transfer</option><option value="other">Other</option></select></div>
-      <div class="form-grp"><div class="form-lbl">Date</div><input class="form-input" type="date" id="tx-date"></div>
+      <div class="form-grp"><label class="form-lbl" for="tx-cat">Category</label><select class="form-input" id="tx-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="income">Income</option><option value="transfer">Transfer</option><option value="other">Other</option></select></div>
+      <div class="form-grp"><label class="form-lbl" for="tx-date">Date</label><input class="form-input" type="date" id="tx-date"></div>
     </div>
-    <div class="form-row full"><div class="form-grp"><div class="form-lbl">Notes (optional)</div><input class="form-input" type="text" id="tx-notes" placeholder="Optional notes…"></div></div>
-    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["tx-modal"]'>Cancel</button><button class="btn-primary" id="tx-save-btn" data-click="saveTx">Add Transaction</button></div>
+    <div class="form-row full"><div class="form-grp"><label class="form-lbl" for="tx-notes">Notes (optional)</label><input class="form-input" type="text" id="tx-notes" placeholder="Optional notes…"></div></div>
+</div>    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["tx-modal"]'>Cancel</button><button class="btn-primary" id="tx-save-btn" data-click="saveTx">Save entry</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="budget-modal">
   <div class="modal">
-    <div class="modal-hdr"><div class="modal-title" id="budget-modal-title">New Budget</div><div class="modal-close" data-click="closeModal" data-click-args='["budget-modal"]'>✕</div></div>
-    <div class="form-row">
-      <div class="form-grp"><div class="form-lbl">Category</div><select class="form-input" id="b-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="other">Other</option></select></div>
-      <div class="form-grp"><div class="form-lbl">Monthly Limit (KES)</div><input class="form-input" type="number" id="b-limit" placeholder="0.00" min="0"></div>
+    <div class="modal-hdr"><div class="modal-title" id="budget-modal-title">New Budget</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["budget-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+<div class="modal-body">    <div class="form-row">
+      <div class="form-grp"><label class="form-lbl" for="b-cat">Category</label><select class="form-input" id="b-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="other">Other</option></select></div>
+      <div class="form-grp"><label class="form-lbl" for="b-limit">Monthly Limit (KES)</label><input class="form-input" type="number" id="b-limit" placeholder="0.00" min="0"></div>
     </div>
-    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget">Save Budget</button></div>
+</div>    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget">Save Budget</button></div>
   </div>
 </div>
 
-<div class="modal-overlay" id="ai-consent-modal">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-hdr"><div class="modal-title">Before you use AI features</div></div>
-    <div style="font-size:.78rem;line-height:1.7;color:var(--ink2);display:flex;flex-direction:column;gap:10px">
-      <p>FynPet's advisor and statement import use <strong>Claude, by Anthropic</strong>. To answer you, we send:</p>
-      <ul style="padding-left:18px;display:flex;flex-direction:column;gap:4px">
-        <li>your name in FynPet, monthly totals, budgets and your 10 most recent transactions (advisor)</li>
-        <li>the text of statements you import: dates, amounts, merchant and counterparty names (import)</li>
-      </ul>
-      <p>Phone numbers are removed first. Anthropic processes the data to produce the answer and does not use it to train models. You can keep using FynPet without AI features.</p>
-    </div>
-    <div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>I agree</button></div>
-  </div>
-</div>
+<div class="modal-overlay" id="ai-consent-modal"><div class="modal" style="max-width:420px"><div class="modal-hdr"><h2 class="modal-title" id="consent-title">Before you use AI</h2><button class="modal-close" aria-label="Close without agreeing" data-click="answerAiConsent" data-click-args='[false]'><span data-icon="close" aria-hidden="true"></span></button></div><div class="modal-body consent-body"><p>FynPet uses Anthropic to answer questions and extract transactions from M-Pesa statements.</p><section><h3>Advisor questions</h3><p>Your profile name, monthly totals, budgets and up to 10 recent transaction summaries are sent through Netlify to Anthropic.</p></section><section><h3>Statement import</h3><p>The PDF opens locally. Extracted text, including dates, amounts and merchant or counterparty names, is sent through Netlify to Anthropic after consent.</p></section><section><h3>Your choice</h3><p>Phone numbers are removed before Anthropic processing. You can use manual records and CSV export without AI. Turn off consent in Settings at any time.</p></section></div><div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>Agree and continue</button></div></div></div>
 
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal confirm-modal">

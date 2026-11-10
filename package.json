@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "npm run build && netlify dev",
-    "check": "node --check public/app.js && node --check public/calc.js && node --check netlify/functions/ai.mjs && node --check netlify/functions/config.mjs",
+    "check": "node --check public/app.js && node --check public/icons.js && node --check public/calc.js && node --check netlify/functions/ai.mjs && node --check netlify/functions/config.mjs",
     "test": "node --test --experimental-test-module-mocks \"tests/**/*.test.mjs\""
   },
   "engines": {

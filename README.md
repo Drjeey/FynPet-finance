@@ -8,6 +8,8 @@ A personal finance app for Kenya: transactions, budgets, analytics, M-Pesa state
 
 The development roadmap is in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md).
 
+The UI follows the approved Stitch screens and current specification downloaded on 10 November 2026. Shared styles are in `public/stitch.css`, and the visual and product constraints are recorded in [DESIGN.md](DESIGN.md) and [PRODUCT.md](PRODUCT.md). Prototype sample figures and simulated keyboard graphics are not included in the working app.
+
 ---
 
 ## Project structure

@@ -1,4 +1,5 @@
 import { DEFAULT_RATES, convertToKes, amountKes, sumKes, categoryTotals, nairobiDate, monthKey, periodBounds, periodStats, chartSeries, emergencyFundMonths } from './calc.js';
+import { icon, renderIcons } from './icons.js';
 
 // ═══════════════════════════════════════════════════════════
 // FYNPET — FULL STACK ENGINE
@@ -197,23 +198,23 @@ function getSbClient() {
 // ── STATE ─────────────────────────────────────────────────
 const state = {
   ...loadProfileData(),
-  ui: { txFilter: 'all', txSearch: '', txPage: 1, perPage: 12, editTxId: null, editBudgetId: null, advisorOpen: true, advisorTab: 'chat' },
+  ui: { txFilter: 'all', txSearch: '', txPage: 1, perPage: 12, editTxId: null, editBudgetId: null, advisorOpen: false, advisorTab: 'chat' },
   pendingDel: { type: null, id: null },
   selectedFile: null,
 };
 
 // ── CATEGORY META ─────────────────────────────────────────
 const CATS = {
-  food:          { icon:'◆', label:'Food & Groceries',  color:'#D97706', bg:'#FFFBEB' },
-  transport:     { icon:'◆', label:'Transport',          color:'#2563EB', bg:'#EFF6FF' },
-  utilities:     { icon:'◆', label:'Utilities',          color:'#7C3AED', bg:'#F5F3FF' },
-  entertainment: { icon:'◆', label:'Entertainment',      color:'#DB2777', bg:'#FDF2F8' },
-  health:        { icon:'◆', label:'Health',             color:'#059669', bg:'#ECFDF5' },
-  shopping:      { icon:'◆', label:'Shopping',           color:'#EA580C', bg:'#FFF7ED' },
-  savings:       { icon:'◆', label:'Savings',            color:'#16A34A', bg:'#F0FDF4' },
-  income:        { icon:'◆', label:'Income',             color:'#059669', bg:'#ECFDF5' },
+  food:          { icon:'◆', label:'Food & Groceries',  color:'#92400E', bg:'#FFFBEB' },
+  transport:     { icon:'◆', label:'Transport',          color:'#1D4ED8', bg:'#EFF6FF' },
+  utilities:     { icon:'◆', label:'Utilities',          color:'#5B21B6', bg:'#F5F3FF' },
+  entertainment: { icon:'◆', label:'Entertainment',      color:'#9D174D', bg:'#FDF2F8' },
+  health:        { icon:'◆', label:'Health',             color:'#065F46', bg:'#ECFDF5' },
+  shopping:      { icon:'◆', label:'Shopping',           color:'#9A3412', bg:'#FFF7ED' },
+  savings:       { icon:'◆', label:'Savings',            color:'#166534', bg:'#F0FDF4' },
+  income:        { icon:'◆', label:'Income',             color:'#065F46', bg:'#ECFDF5' },
   transfer:      { icon:'◆', label:'Transfer',           color:'#4338CA', bg:'#EEF2FF' },
-  other:         { icon:'◆', label:'Other',              color:'#78716C', bg:'#F5F5F4' },
+  other:         { icon:'◆', label:'Other',              color:'#475569', bg:'#F5F5F4' },
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -366,14 +367,24 @@ function toggleAdvisor() {
   const main = document.getElementById('main');
   const backdrop = document.getElementById('advisor-backdrop');
   state.ui.advisorOpen = !state.ui.advisorOpen;
+  document.body.classList.toggle('advisor-open', state.ui.advisorOpen);
+  main.inert=state.ui.advisorOpen&&matchMedia('(max-width:768px)').matches;
+  panel.inert = !state.ui.advisorOpen;
+  panel.setAttribute('aria-hidden', String(!state.ui.advisorOpen));
   if (state.ui.advisorOpen) {
+    document.getElementById('sidebar').classList.remove('mob-open');
+    document.getElementById('sidebar').inert=matchMedia('(max-width:768px)').matches;
+    document.getElementById('mob-overlay').classList.remove('show');
+    panel._opener = document.activeElement;
     panel.classList.add('open');
     main.classList.add('panel-open');
     backdrop.classList.add('show');
+    document.getElementById('ap-input').focus();
   } else {
     panel.classList.remove('open');
     main.classList.remove('panel-open');
     backdrop.classList.remove('show');
+    panel._opener?.focus();
   }
 }
 
@@ -396,9 +407,9 @@ function appendMsg(role, text, isTyping=false) {
   const userName = CFG.get('name') ? CFG.get('name').charAt(0).toUpperCase() : 'J';
   if (isTyping) {
     div.id = 'typing-msg';
-    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.6rem">Ai</div><div class="msg-bubble ai"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.75rem">Ai</div><div class="msg-bubble ai"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
   } else if (role === 'ai') {
-    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.6rem">Ai</div><div><div class="msg-bubble ai">${formatMsg(text)}</div><div class="msg-time">${time}</div></div>`;
+    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.75rem">Ai</div><div><div class="msg-bubble ai">${formatMsg(text)}</div><div class="msg-time">${time}</div></div>`;
   } else {
     div.innerHTML = `<div><div class="msg-bubble user">${escHtml(text)}</div><div class="msg-time">${time}</div></div><div class="msg-av user" style="font-family:var(--fm)">${userName}</div>`;
   }
@@ -469,9 +480,9 @@ function renderInsightsTab() {
       ${factors.map(f=>{
         const sc = statusColors[f.status];
         return `<div class="ins-metric-card">
-          <div style="font-family:var(--fm);font-size:.55rem;font-weight:700;color:${sc.color};background:${sc.bg};border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${f.label}</div>
+          <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${sc.color};background:${sc.bg};border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${f.label}</div>
           <div class="imc-info"><div class="imc-name">${f.name}</div><div class="imc-val ${f.status}">${f.val}</div><div class="imc-sub">${f.sub}</div></div>
-          <div class="imc-status" style="background:${sc.bg};color:${sc.color};font-family:var(--fm);font-size:.58rem">${sc.label}</div>
+          <div class="imc-status" style="background:${sc.bg};color:${sc.color};font-family:var(--fm);font-size:.75rem">${sc.label}</div>
         </div>`;
       }).join('')}
     </div>
@@ -482,7 +493,7 @@ function renderInsightsTab() {
         {label:'Exp', n:'Expenses', v:`KES ${s.thisMonth.expenses.toLocaleString()}`, c:'bad',  color:'var(--rose)'},
         {label:'Sav', n:'Saved',    v:`KES ${s.thisMonth.savings.toLocaleString()}`,  c:'good', color:'var(--blue)'},
       ].map(m=>`<div class="ins-metric-card">
-        <div style="font-family:var(--fm);font-size:.55rem;font-weight:700;color:${m.color};background:${m.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${m.label}</div>
+        <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${m.color};background:${m.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${m.label}</div>
         <div class="imc-info"><div class="imc-name">${m.n}</div><div class="imc-val ${m.c}">${m.v}</div></div>
       </div>`).join('')}
     </div>
@@ -669,24 +680,24 @@ function renderGamification(){
   const spendColor=spendDiff!==null?(parseFloat(spendDiff)>0?'var(--rose)':'var(--teal)'):'var(--ink3)';
   const spendArrow=spendDiff!==null?(parseFloat(spendDiff)>0?'↑ More':'↓ Less'):'—';
   card.innerHTML=`<div class="table-card">
-    <div class="tt"><div class="tt-title">Milestones</div><div style="font-size:.63rem;color:var(--ink3);font-family:var(--fm)">${earned}/${badges.length} earned</div></div>
+    <div class="tt"><div class="tt-title">Milestones</div><div style="font-size:.75rem;color:var(--ink3);font-family:var(--fm)">${earned}/${badges.length} earned</div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
       <div style="padding:14px 18px;border-right:1px solid var(--border)">
-        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">Savings Streak</div>
+        <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">Savings Streak</div>
         <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${streak>0?'var(--teal)':'var(--ink3)'};line-height:1">${streak}<span style="font-size:.75rem;font-weight:400;margin-left:4px">mo</span></div>
-        <div style="font-size:.61rem;color:var(--ink3);margin-top:4px">${streak>=3?'Outstanding!':streak>=1?'Keep going!':'Start saving this month'}</div>
+        <div style="font-size:.75rem;color:var(--ink3);margin-top:4px">${streak>=3?'Outstanding!':streak>=1?'Keep going!':'Start saving this month'}</div>
       </div>
       <div style="padding:14px 18px">
-        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">vs Last Month</div>
+        <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">vs Last Month</div>
         <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${spendColor};line-height:1">${spendDiff!==null?(parseFloat(spendDiff)>0?'+':'')+spendDiff+'%':'—'}</div>
-        <div style="font-size:.61rem;color:var(--ink3);margin-top:4px">${spendDiff!==null?spendArrow+' than last month':'No prior data'}</div>
+        <div style="font-size:.75rem;color:var(--ink3);margin-top:4px">${spendDiff!==null?spendArrow+' than last month':'No prior data'}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:14px 18px">
       ${badges.map(b=>`<div style="text-align:center;padding:10px 4px;border-radius:8px;background:${b.done?'var(--bluelt)':'var(--surface2)'};border:1px solid ${b.done?'rgba(55,48,163,.2)':'var(--border)'};transition:all .2s" title="${b.desc}">
         <div style="font-size:1rem;margin-bottom:4px;opacity:${b.done?1:.3}">${b.icon}</div>
-        <div style="font-size:.6rem;font-weight:700;color:${b.done?'var(--blue)':'var(--ink3)'};margin-bottom:1px;line-height:1.2">${b.lbl}</div>
-        <div style="font-size:.54rem;color:var(--ink3);line-height:1.2">${b.desc}</div>
+        <div style="font-size:.75rem;font-weight:700;color:${b.done?'var(--blue)':'var(--ink3)'};margin-bottom:1px;line-height:1.2">${b.lbl}</div>
+        <div style="font-size:.75rem;color:var(--ink3);line-height:1.2">${b.desc}</div>
       </div>`).join('')}
     </div>
   </div>`;
@@ -710,7 +721,7 @@ function renderStatCards(period = 'month') {
   const cards = [
     {
       icon:'↑', iconBg:'var(--teallt)', iconColor:'var(--teal)',
-      lbl:'Total Income', val:`KES ${fmt(s.income)}`,
+      lbl:'Recorded income', val:`KES ${fmt(s.income)}`,
       sub: s.label,
       badge: parseFloat(s.incChg) >= 0 ? `+${s.incChg}%` : `${s.incChg}%`,
       bt: parseFloat(s.incChg) >= 0 ? 'up' : 'dn',
@@ -718,8 +729,8 @@ function renderStatCards(period = 'month') {
     },
     {
       icon:'↓', iconBg:'var(--roselt)', iconColor:'var(--rose)',
-      lbl:'Total Expenses', val:`KES ${fmt(s.exp)}`,
-      sub: s.label,
+      lbl:'Recorded expenses', val:`KES ${fmt(s.exp)}`,
+      sub: s.label + ' · vs previous period',
       badge: parseFloat(s.expChg) >= 0 ? `+${s.expChg}%` : `${s.expChg}%`,
       bt: parseFloat(s.expChg) <= 0 ? 'up' : 'dn',
       accent:'var(--rose)',
@@ -741,10 +752,10 @@ function renderStatCards(period = 'month') {
       accent:'var(--purple)',
     },
   ];
-  document.getElementById('stat-cards').innerHTML = cards.map(c => `
+  document.getElementById('stat-cards').innerHTML = cards.map((c,i) => `
     <div class="stat-card">
       <div class="sc-top">
-        <div class="sc-ic" style="background:${c.iconBg};color:${c.iconColor};font-family:var(--fm);font-weight:700;font-size:1.1rem">${c.icon}</div>
+        <div class="sc-ic" style="background:${c.iconBg};color:${c.iconColor}">${icon(['export','import','wallet','ledger'][i])}</div>
         <div class="sc-badge ${c.bt}">${c.badge}</div>
       </div>
       <div class="sc-lbl">${c.lbl}</div>
@@ -779,13 +790,13 @@ function renderBudgetStatus(period = 'month') {
       <div style="width:7px;height:7px;border-radius:50%;background:${cc.color};flex-shrink:0"></div>
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;margin-bottom:5px;align-items:baseline">
-          <div style="font-size:.72rem;font-weight:600;color:var(--ink)">${cc.label}</div>
-          <div style="font-size:.62rem;font-family:var(--fm);color:${color};font-weight:700">${pctNum}% · <span style="color:var(--ink3)">KES ${spent.toLocaleString()} / ${b.limit.toLocaleString()}</span></div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--ink)">${cc.label}</div>
+          <div style="font-size:.75rem;font-family:var(--fm);color:${color};font-weight:700">${pctNum}% · <span style="color:var(--ink3)">KES ${spent.toLocaleString()} / ${b.limit.toLocaleString()}</span></div>
         </div>
         <div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden">
           <div style="height:100%;border-radius:2px;width:${pct}%;background:${color};transition:width .6s ease"></div>
         </div>
-        <div style="font-size:.6rem;color:var(--ink3);margin-top:3px">${pct<100?`KES ${remaining.toLocaleString()} remaining`:'Over budget'}</div>
+        <div style="font-size:.75rem;color:var(--ink3);margin-top:3px">${pct<100?`KES ${remaining.toLocaleString()} remaining`:'Over budget'}</div>
       </div>
     </div>`;
   }).join('');
@@ -803,7 +814,7 @@ function drawMainChart(period) {
   ctx.clearRect(0,0,W,H);
   const { labels, income: incD, expenses: expD } = chartSeries(state.transactions, period, new Date(), exchangeRates());
   if([...incD,...expD].every(v=>v===0)){
-    ctx.fillStyle='#A8A29E';ctx.textAlign='center';ctx.font=`12px DM Sans`;
+    ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font=`12px Inter`;
     ctx.fillText('No data yet — add transactions to see your chart',W/2,H/2);return;
   }
   const maxV=Math.max(...incD,...expD,1);
@@ -817,7 +828,7 @@ function drawMainChart(period) {
     const rr=(x,y,w,h,r,cl)=>{if(h<=0)return;ctx.fillStyle=cl;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.arcTo(x,y+h,x,y+h,0);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill()};
     rr(cx-bw-2,pT+cH-ih,bw,ih,3,'rgba(55,48,163,.75)');
     rr(cx+2,pT+cH-eh,bw,eh,3,'rgba(220,38,38,.62)');
-    ctx.fillStyle='#A8A29E';ctx.textAlign='center';ctx.font=`9px IBM Plex Mono`;
+    ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font=`12px JetBrains Mono`;
     ctx.fillText(l,cx,H-5);
   });
 }
@@ -843,8 +854,8 @@ function drawDonutChart(period = 'month'){
   const total=totalKes(exp);
   if(!entries.length){
     ctx.strokeStyle='#e8eaf2';ctx.lineWidth=12;ctx.beginPath();ctx.arc(55,55,42,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle='#A8A29E';ctx.textAlign='center';ctx.font='10px DM Sans';ctx.fillText('No data',55,59);
-    document.getElementById('donut-legend').innerHTML='<div style="font-size:.68rem;color:var(--ink3);text-align:center;padding:8px">No expense data</div>';return;
+    ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font='12px Inter';ctx.fillText('No data',55,59);
+    document.getElementById('donut-legend').innerHTML='<div style="font-size:.75rem;color:var(--ink3);text-align:center;padding:8px">No expense data</div>';return;
   }
   let sa=-Math.PI/2;
   entries.forEach(([cat,v])=>{
@@ -858,13 +869,13 @@ function drawDonutChart(period = 'month'){
   ctx.fill();
   // Center text
   ctx.fillStyle='#1C1917';ctx.textAlign='center';
-  ctx.font='500 9px IBM Plex Mono';
+  ctx.font='500 12px JetBrains Mono';
   ctx.fillText('KES',55,51);
-  ctx.font='600 11px IBM Plex Mono';
+  ctx.font='600 12px JetBrains Mono';
   ctx.fillText(total>=1000000?(total/1000000).toFixed(1)+'M':total>=1000?(total/1000).toFixed(0)+'K':total,55,66);
   document.getElementById('donut-legend').innerHTML=entries.map(([cat,v])=>{
     const pct=((v/total)*100).toFixed(0);const cc=CATS[cat]||CATS.other;
-    return `<div class="dl-row"><div class="dl-l"><div class="dl-dot" style="background:${cc.color}"></div>${cc.label}</div><div style="display:flex;align-items:center;gap:6px"><div class="dl-r">KES ${v.toLocaleString()}</div><div style="font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:3px;background:${cc.bg};color:${cc.color};font-family:var(--fm)">${pct}%</div></div></div>`;
+    return `<div class="dl-row"><div class="dl-l"><div class="dl-dot" style="background:${cc.color}"></div>${cc.label}</div><div style="display:flex;align-items:center;gap:6px"><div class="dl-r">KES ${v.toLocaleString()}</div><div style="font-size:.75rem;font-weight:700;padding:1px 6px;border-radius:3px;background:${cc.bg};color:${cc.color};font-family:var(--fm)">${pct}%</div></div></div>`;
   }).join('');
 }
 
@@ -883,22 +894,18 @@ function txRow(tx,actions=true){
   const amtClass=isPos?'pos':'neg';
   const amtSign=isPos?'+':'−';
   const srcLabel=tx.source==='ai'?'AI':tx.source==='import'?'Import':'Manual';
-  const srcClass=tx.source==='ai'?'ai':tx.source==='import'?'import':'manual';
   const cur=tx.currency&&tx.currency!=='KES'?tx.currency:'KES';
-  const amtDisplay=cur==='KES'?`${amtSign}KES ${tx.amount.toLocaleString()}`:`${amtSign}${cur} ${tx.amount.toLocaleString()} <span style="font-size:.58rem;color:var(--ink3);font-weight:400">≈ KES ${txAmountKes(tx).toLocaleString()}</span>`;
+  const amtDisplay=`${amtSign}KES ${txAmountKes(tx).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2})}${cur==='KES'?'':`<span class="fx-note">${cur} ${tx.amount.toLocaleString()}</span>`}`;
   return `<tr>
     <td><div style="display:flex;align-items:center;gap:10px">
-      <div class="td-ico" style="background:${c.bg};position:relative;overflow:hidden">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${c.color};border-radius:0"></div>
-      </div>
+      <div class="td-ico" style="background:${c.bg};color:${c.color}">${icon(tx.type==='income'?'export':'ledger')}</div>
       <div><div class="td-main">${escHtml(tx.description)}</div><div class="td-sub">${escHtml(tx.date)}</div></div>
     </div></td>
-    <td><div class="cat-pill" style="background:${c.bg};color:${c.color};font-family:var(--fm)">${c.label}</div></td>
+    <td><div class="cat-pill" style="background:${c.bg};color:${c.color}">${c.label}</div><div class="source-note">${srcLabel}</div></td>
     <td><div class="td-mono ${amtClass}">${amtDisplay}</div></td>
-    <td><div class="st-pill ${srcClass}">${srcLabel}</div></td>
     ${actions?`<td><div class="row-acts">
-      <div class="ra" data-click="openEditTx" data-click-args="${argsAttr([tx.id])}" title="Edit" style="font-size:.9rem">✎</div>
-      <div class="ra del" data-click="confirmDel" data-click-args="${argsAttr(['tx',tx.id])}" title="Delete" style="font-size:.9rem">×</div>
+      <button class="ra" data-click="openEditTx" data-click-args="${argsAttr([tx.id])}" title="Edit" aria-label="Edit ${escHtml(tx.description)}">${icon('edit')}</button>
+      <button class="ra del" data-click="confirmDel" data-click-args="${argsAttr(['tx',tx.id])}" title="Delete" aria-label="Delete ${escHtml(tx.description)}">${icon('delete')}</button>
     </div></td>`:''}
   </tr>`;
 }
@@ -907,7 +914,7 @@ function renderRecentTx(){
   const el=document.getElementById('recent-tx');if(!el)return;
   const recent=[...state.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
   if(!recent.length){el.innerHTML=`<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">—</div><div class="empty-title">No transactions yet</div><div class="empty-sub">Add your first transaction or import an M-Pesa statement.</div><button class="btn-primary" data-click="openAddTx">+ Add Transaction</button></div>`;return}
-  el.innerHTML=`<table><thead><tr><th>Transaction</th><th>Category</th><th>Amount</th><th>Source</th><th>Actions</th></tr></thead><tbody>${recent.map(t=>txRow(t)).join('')}</tbody></table>`;
+  el.innerHTML=`<table><thead><tr><th scope="col">Transaction</th><th scope="col">Category</th><th scope="col">Amount (KES)</th><th scope="col">Actions</th></tr></thead><tbody>${recent.map(t=>txRow(t)).join('')}</tbody></table>`;
 }
 
 function renderTxPage(){
@@ -920,15 +927,20 @@ function renderTxPage(){
   const start=(txPage-1)*perPage,end=Math.min(start+perPage,total),paged=filtered.slice(start,end);
   const el=document.getElementById('full-tx-table');
   const _emptyMsg=state.ui.txFilter!=='all'?`No ${state.ui.txFilter} transactions found.`:state.ui.txSearch?'Try a different search.':allCount>0?'All transactions loaded.':'Add your first transaction to get started.';
-  const _clearBtn=state.ui.txFilter!=='all'?`<button class="btn-ghost" style="padding:3px 10px;font-size:.65rem;margin-top:10px" data-click="showAllTxTypes">Show all types</button>`:'';
+  const _clearBtn=state.ui.txFilter!=='all'?`<button class="btn-ghost" style="padding:3px 10px;font-size:.75rem;margin-top:10px" data-click="showAllTxTypes">Show all types</button>`:'';
   if(!paged.length){el.innerHTML=`<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">∅</div><div class="empty-title">No transactions found</div><div class="empty-sub">${_emptyMsg}${_clearBtn}</div></div>`;
-  }else{el.innerHTML=`<table><thead><tr><th>Transaction</th><th>Category</th><th>Amount</th><th>Source</th><th>Actions</th></tr></thead><tbody>${paged.map(t=>txRow(t)).join('')}</tbody></table>`}
+  }else{el.innerHTML=`<table><thead><tr><th scope="col">Transaction</th><th scope="col">Category</th><th scope="col">Amount (KES)</th><th scope="col">Actions</th></tr></thead><tbody>${paged.map(t=>txRow(t)).join('')}</tbody></table>`}
   document.getElementById('tx-pg-info').textContent=total>0?`Showing ${start+1}–${end} of ${total}`:'No results';
   document.getElementById('tx-pag').innerHTML=`<button class="pg" data-click="setTxPage" data-click-args='[${txPage-1}]' ${txPage<=1?'disabled':''}>‹</button>${Array.from({length:pages},(_,i)=>`<button class="pg ${txPage===i+1?'on':''}" data-click="setTxPage" data-click-args='[${i+1}]'>${i+1}</button>`).join('')}<button class="pg" data-click="setTxPage" data-click-args='[${txPage+1}]' ${txPage>=pages?'disabled':''}>›</button>`;
 }
 
 function setTxFilter(f,btn){state.ui.txFilter=f;state.ui.txPage=1;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTxPage()}
 function searchTx(q){state.ui.txSearch=q;state.ui.txPage=1;renderTxPage();renderRecentTx()}
+function searchGlobalTx(q){
+  if(!document.getElementById('page-transactions').classList.contains('on'))goPage('transactions',null);
+  document.getElementById('tx-search').value=q;
+  searchTx(q);
+}
 function setTxPage(p){state.ui.txPage=p;renderTxPage()}
 
 // ─── Budgets page ──────────────────────────────────────────
@@ -954,14 +966,14 @@ function renderBudgetsPage(){
       <div class="bc-hdr">
         <div class="bc-ic" style="background:${cc.bg};position:relative;overflow:hidden;flex-shrink:0">
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${cc.color}"></div>
-          <span style="font-family:var(--fm);font-size:.65rem;font-weight:700;color:${cc.color};padding-left:6px">${cc.label.slice(0,2).toUpperCase()}</span>
+          <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${cc.color};padding-left:6px">${cc.label.slice(0,2).toUpperCase()}</span>
         </div>
         <div><div class="bc-name">${cc.label}</div><div class="bc-lmt">KES ${b.limit.toLocaleString()}/month</div></div>
       </div>
       <div class="bc-amts"><div class="bc-spent ${over?'over':''}">KES ${s.toLocaleString()}</div><div class="bc-rem ${over?'bad':'ok'}">${over?'−KES '+Math.abs(left).toLocaleString()+' over':'+KES '+left.toLocaleString()+' left'}</div></div>
       <div class="bc-track"><div class="bc-fill" style="width:${pct}%;background:${over?'var(--rose)':cc.color}"></div></div>
       <div class="bc-meta"><span>${pct.toFixed(0)}% used</span><span>KES ${b.limit.toLocaleString()} limit</span></div>
-      <div class="bc-acts"><button class="btn-secondary" style="flex:1;justify-content:center;font-size:.68rem;padding:6px" data-click="openEditBudget" data-click-args="${argsAttr([b.id])}">Edit</button><button class="btn-danger-sm" data-click="confirmDel" data-click-args="${argsAttr(['budget',b.id])}">Delete</button></div>
+      <div class="bc-acts"><button class="btn-secondary" style="flex:1;justify-content:center;font-size:.75rem;padding:6px" data-click="openEditBudget" data-click-args="${argsAttr([b.id])}">Edit</button><button class="btn-danger-sm" data-click="confirmDel" data-click-args="${argsAttr(['budget',b.id])}">Delete</button></div>
     </div>`;
   }).join('');
 }
@@ -996,7 +1008,7 @@ function drawTrendChart(){
     const s=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='savings'));
     months.push(s);labels.push(m.toLocaleDateString('en',{month:'short'}));
   }
-  if(months.every(v=>v===0)){ctx.fillStyle='#A8A29E';ctx.textAlign='center';ctx.font='12px DM Sans';ctx.fillText('Add savings transactions to see trend',W/2,H/2);return}
+  if(months.every(v=>v===0)){ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font='12px Inter';ctx.fillText('Add savings transactions to see trend',W/2,H/2);return}
   const maxV=Math.max(...months,1);const pL=10,pR=10,pT=14,pB=22,cW=W-pL-pR,cH=H-pT-pB;
   const step=cW/(labels.length-1||1);const pts=months.map((v,i)=>({x:pL+i*step,y:pT+cH*(1-v/maxV)}));
   ctx.strokeStyle='rgba(28,25,23,.05)';ctx.lineWidth=1;
@@ -1005,7 +1017,7 @@ function drawTrendChart(){
   ctx.beginPath();ctx.moveTo(pts[0].x,cH+pT);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,cH+pT);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
   ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
   ctx.strokeStyle='#3b5bfc';ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
-  ctx.fillStyle='#A8A29E';ctx.textAlign='center';ctx.font=`9px IBM Plex Mono`;
+  ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font=`12px JetBrains Mono`;
   labels.forEach((l,i)=>ctx.fillText(l,pL+i*step,H-5));
 }
 
@@ -1028,11 +1040,11 @@ function renderHealthFactors(){
   ];
   document.getElementById('health-factors').innerHTML=factors.map(f=>`
     <div style="display:flex;align-items:center;gap:10px">
-      <div style="font-family:var(--fm);font-size:.55rem;font-weight:700;color:${f.color};background:${f.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center;letter-spacing:.02em">${f.label}</div>
+      <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${f.color};background:${f.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center;letter-spacing:.02em">${f.label}</div>
       <div style="flex:1">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:.72rem;font-weight:500;color:var(--ink)">${f.name}</div>
-          <div style="font-size:.62rem;font-weight:700;color:${f.color};font-family:var(--fm)">${f.v}</div>
+          <div style="font-size:.75rem;font-weight:500;color:var(--ink)">${f.name}</div>
+          <div style="font-size:.75rem;font-weight:700;color:${f.color};font-family:var(--fm)">${f.v}</div>
         </div>
         <div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden">
           <div style="height:100%;border-radius:2px;width:${f.pct}%;background:${f.color};transition:width .8s ease"></div>
@@ -1065,7 +1077,8 @@ function renderMonthlyTable(){
 function openAddTx(){
   state.ui.editTxId=null;
   document.getElementById('tx-modal-title').textContent='Add Transaction';
-  document.getElementById('tx-save-btn').textContent='Add Transaction';
+  document.getElementById('tx-save-btn').textContent='Save entry';
+  document.getElementById('tx-error').hidden=true;
   ['tx-amount','tx-desc','tx-notes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('tx-type').value='expense';
   document.getElementById('tx-cat').value='food';
@@ -1076,6 +1089,7 @@ function openAddTx(){
 function openEditTx(id){
   const tx=state.transactions.find(t=>t.id===id);if(!tx)return;
   state.ui.editTxId=id;
+  document.getElementById('tx-error').hidden=true;
   document.getElementById('tx-modal-title').textContent='Edit Transaction';
   document.getElementById('tx-save-btn').textContent='Save Changes';
   document.getElementById('tx-amount').value=tx.amount;
@@ -1095,9 +1109,11 @@ function saveTx(){
   const date=document.getElementById('tx-date').value;
   const notes=document.getElementById('tx-notes').value.trim();
   const currency=(document.getElementById('tx-currency')?.value||'KES').toUpperCase();
-  if(!Number.isFinite(amount)||amount<=0){showToast('Enter a valid amount','error');return}
-  if(!description){showToast('Enter a description','error');return}
-  if(!date){showToast('Select a date','error');return}
+  const invalid=(id,message)=>{const el=document.getElementById(id);el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby','tx-error');const error=document.getElementById('tx-error');error.textContent=message;error.hidden=false;el.focus();};
+  ['tx-amount','tx-desc','tx-date'].forEach(id=>document.getElementById(id).removeAttribute('aria-invalid'));
+  if(!Number.isFinite(amount)||amount<=0){invalid('tx-amount','Enter an amount greater than zero.');return}
+  if(!description){invalid('tx-desc','Add a description or merchant name.');return}
+  if(!date){invalid('tx-date','Choose the transaction date.');return}
   const savedKes=convertToKes(amount,currency,exchangeRates());
   if(state.ui.editTxId){
     const idx=state.transactions.findIndex(t=>t.id===state.ui.editTxId);
@@ -1342,13 +1358,13 @@ function setAuthTab(tab) {
   const submitBtn = document.getElementById('auth-submit-btn');
   const pwInput = document.getElementById('auth-password');
   if (tab === 'in') {
-    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
-    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
+    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
+    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
     submitBtn.textContent = 'Sign In';
     pwInput.autocomplete = 'current-password';
   } else {
-    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
-    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
+    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
+    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
     submitBtn.textContent = 'Create Account';
     pwInput.autocomplete = 'new-password';
   }
@@ -1473,6 +1489,7 @@ function toggleKeyVis(inputId,btn){
   const inp=document.getElementById(inputId);
   inp.type=inp.type==='password'?'text':'password';
   btn.textContent=inp.type==='password'?'Show':'Hide';
+  btn.setAttribute('aria-pressed',String(inp.type!=='password'));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1492,7 +1509,9 @@ function exportCSV(){
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
 function toggleMobSidebar(){
-  document.getElementById('sidebar').classList.toggle('mob-open');
+  const sidebar=document.getElementById('sidebar');
+  sidebar.classList.toggle('mob-open');
+  sidebar.inert=!sidebar.classList.contains('mob-open')&&matchMedia('(max-width:768px)').matches;
   document.getElementById('mob-overlay').classList.toggle('show');
 }
 function mobGoPage(id,el){
@@ -1505,16 +1524,26 @@ function mobGoPage(id,el){
 }
 
 function goPage(id,navEl){
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('sidebar').inert=matchMedia('(max-width:768px)').matches;
+  document.getElementById('mob-overlay').classList.remove('show');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+id)?.classList.add('on');
   if(navEl)navEl.classList.add('on');
+  document.querySelectorAll('.sb-nav .ni').forEach(el=>{
+    const active=readArgs(el,'click')[0]===id;
+    el.classList.toggle('on',active);
+    if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');
+  });
   // Sync mobile bottom nav highlight
   document.querySelectorAll('.mn-item').forEach(mn=>{
     const mnPage=readArgs(mn,'click')[0];
-    mn.classList.toggle('on', mnPage===id);
+    const active=mnPage===id||(mnPage==='more'&&['analytics','mpesa','settings'].includes(id));
+    mn.classList.toggle('on',active);
+    if(active)mn.setAttribute('aria-current','page');else mn.removeAttribute('aria-current');
   });
-  const titles={dashboard:'Dashboard',transactions:'Transactions',budgets:'Budgets',analytics:'Analytics',mpesa:'M-Pesa Import',settings:'API & Settings'};
+  const titles={dashboard:'Dashboard',transactions:'Transactions',budgets:'Budgets',analytics:'Analytics',mpesa:'M-Pesa Import',settings:'Settings',more:'More'};
   document.getElementById('tb-title').childNodes[0].textContent=(titles[id]||id)+' ';
   if(id==='transactions'){
     state.ui.txFilter='all';state.ui.txSearch='';state.ui.txPage=1;
@@ -1526,6 +1555,7 @@ function goPage(id,navEl){
   if(id==='analytics')renderAnalytics();
   if(id==='mpesa')renderImportHistory();
   if(id==='settings')loadSettingsPage();
+  document.getElementById('content').scrollTop=0;
 }
 
 function loadSettingsPage() {
@@ -1539,21 +1569,50 @@ function loadSettingsPage() {
   // Reflect current cloud connection state
   const cfg = window._cloudConfig;
   updateCloudStatus('claude', cfg?.aiEnabled ? true : false, cfg?.aiEnabled ? '✓ Ready (sign in to use)' : '✕ Not configured');
-  updateCloudStatus('sb', cfg?.supabaseUrl ? true : false, cfg?.supabaseUrl ? '✓ Connected' : '✕ Not connected');
+  updateCloudStatus('sb', cfg?.supabaseUrl ? true : false, cfg?.supabaseUrl ? 'Available — sign in to sync' : 'Not available in this environment');
 }
 
 
 // ═══════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════
-function openModal(id){document.getElementById(id).classList.add('open')}
+function openModal(id){
+  const overlay=document.getElementById(id);
+  overlay._opener=document.activeElement;
+  overlay.classList.add('open');
+  document.getElementById('layout').inert=true;
+  document.getElementById('mob-nav').inert=true;
+  const dialog=overlay.querySelector('.modal');
+  dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
+  const title=dialog.querySelector('.modal-title,.cm-title');
+  if(title){if(!title.id)title.id=id+'-title';dialog.setAttribute('aria-labelledby',title.id);}
+  dialog.tabIndex=-1;dialog.focus();
+}
 function closeModal(id){
-  document.getElementById(id).classList.remove('open');
+  const overlay=document.getElementById(id);
+  overlay.classList.remove('open');
+  if(!document.querySelector('.modal-overlay.open')){
+    document.getElementById('layout').inert=false;
+    document.getElementById('mob-nav').inert=false;
+  }
+  overlay._opener?.focus();
   // Dismissing the consent dialog (Escape / backdrop) counts as "Not now".
   if(id==='ai-consent-modal'&&_consentResolve){_consentResolve(false);_consentResolve=null;}
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id))});
+document.addEventListener('keydown',e=>{
+  const overlay=[...document.querySelectorAll('.modal-overlay.open')].at(-1);
+  if(e.key==='Escape'){
+    if(overlay)closeModal(overlay.id);else if(state.ui.advisorOpen)toggleAdvisor();
+  }
+  if(e.key==='Tab'&&overlay){
+    const items=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')].filter(el=>el.getClientRects().length&&!el.hidden);
+    const first=items[0],last=items.at(-1);
+    if(e.shiftKey&&(document.activeElement===first||document.activeElement===overlay.querySelector('.modal'))){e.preventDefault();last?.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
+  }
+});
+function revokeAiConsent(){localStorage.removeItem('fynpet_cfg_aiConsent');showToast('AI consent turned off. You will be asked before the next AI request.','info');}
 
 let _toastTimer=null;
 function showToast(msg,type='success'){
@@ -1584,12 +1643,12 @@ function choosePdf(e){e.preventDefault();document.getElementById('pdf-file').cli
 function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 
 const ACTIONS = {
-  answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop,
+  answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
   exportCSV, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveAllConfig, saveBudget,
-  saveConfig, saveTx, searchTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
+  saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, showAllTxTypes, skipAuth, submitAuth, submitOnEnter, syncNow, toggleAdvisor,
-  toggleMobSidebar,
+  toggleMobSidebar, toggleKeyVis,
 };
 
 ['click','input','change','keydown','dragover','dragleave','drop'].forEach(type=>{
@@ -1616,6 +1675,22 @@ window.addEventListener('resize',()=>{drawMainChart(_chartPeriod);drawDonutChart
 // BOOT
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
+  renderIcons();
+  document.getElementById('advisor-panel').inert=true;
+  document.getElementById('advisor-panel').setAttribute('aria-hidden','true');
+  document.querySelectorAll('.page .ph-title').forEach(el=>{el.setAttribute('role','heading');el.setAttribute('aria-level','1');});
+  document.querySelectorAll('.form-grp').forEach(group=>{
+    const control=group.querySelector('input,select,textarea');const label=group.querySelector('.form-lbl');
+    if(control&&label&&!control.labels?.length)control.setAttribute('aria-label',label.textContent.trim());
+  });
+  const viewport=()=>{
+    document.documentElement.style.setProperty('--viewport-height',(window.visualViewport?.height||window.innerHeight)+'px');
+    document.documentElement.style.setProperty('--viewport-top',(window.visualViewport?.offsetTop||0)+'px');
+    const sidebar=document.getElementById('sidebar');
+    sidebar.inert=matchMedia('(max-width:768px)').matches&&!sidebar.classList.contains('mob-open');
+    document.getElementById('main').inert=state.ui.advisorOpen&&matchMedia('(max-width:768px)').matches;
+  };
+  viewport();window.visualViewport?.addEventListener('resize',viewport);window.visualViewport?.addEventListener('scroll',viewport);window.addEventListener('resize',viewport);
   const now = new Date();
   const fmtDate = d => d.toLocaleDateString('en-KE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
