@@ -80,3 +80,49 @@ test('emergency coverage uses three complete months and includes empty months', 
   assert.equal(emergencyFundMonths(records, new Date('2026-10-21T12:00Z')), 3);
   assert.equal(emergencyFundMonths([], new Date('2026-10-21T12:00Z')), 0);
 });
+
+import { monthSummary, daysLeftInMonth, categoryShares, niceScale } from '../public/calc.js';
+
+test('monthSummary reports net cash flow and the change on last month', () => {
+  const now = new Date('2026-11-16T09:00:00Z');
+  const rows = [
+    tx(85000, 'KES', { type: 'income', category: 'income', date: '2026-11-12' }),
+    tx(53600, 'KES', { date: '2026-11-10' }),
+    tx(78600, 'KES', { type: 'income', category: 'income', date: '2026-10-12' }),
+    tx(55400, 'KES', { date: '2026-10-10' }),
+    tx(9999, 'KES', { type: 'savings', category: 'savings', date: '2026-11-11' }),
+  ];
+  const s = monthSummary(rows, now);
+  assert.equal(s.net, 31400); assert.equal(s.prevNet, 23200);
+  assert.equal(s.netChangePct, 35.3); assert.equal(s.spentPct, 63); assert.equal(s.hasPrevious, true);
+});
+
+test('monthSummary handles no income, no previous month and overspending', () => {
+  const now = new Date('2026-11-16T09:00:00Z');
+  assert.deepEqual(monthSummary([], now), { income: 0, expenses: 0, net: 0, prevIncome: 0, prevExpenses: 0, prevNet: 0, hasPrevious: false, netChangePct: null, spentPct: null });
+  const s = monthSummary([tx(100, 'KES', { type: 'income', category: 'income', date: '2026-11-02' }), tx(150, 'KES', { date: '2026-11-03' })], now);
+  assert.equal(s.net, -50); assert.equal(s.spentPct, 100); assert.equal(s.netChangePct, null);
+});
+
+test('daysLeftInMonth counts today and uses the Nairobi date', () => {
+  assert.equal(daysLeftInMonth(new Date('2026-11-16T09:00:00Z')), 15);
+  assert.equal(daysLeftInMonth(new Date('2026-11-30T09:00:00Z')), 1);
+  assert.equal(daysLeftInMonth(new Date('2026-02-28T21:30:00Z')), 31); // 00:30 on 1 March in Nairobi
+});
+
+test('categoryShares folds small categories into other and always totals 100', () => {
+  const totals = { food: 18224, transport: 11256, utilities: 8576, shopping: 6432, entertainment: 5360, health: 2000, other: 1752 };
+  const shares = categoryShares(totals, 5);
+  assert.deepEqual(shares.map(s => s.key), ['food', 'transport', 'utilities', 'shopping', 'entertainment', 'other']);
+  assert.equal(shares.reduce((a, s) => a + s.pct, 0), 100);
+  assert.equal(shares.at(-1).total, 3752);
+  assert.deepEqual(categoryShares({ food: 1, transport: 1, utilities: 1 }).reduce((a, s) => a + s.pct, 0), 100);
+  assert.deepEqual(categoryShares({}), []);
+});
+
+test('niceScale gives three round steps that cover the data', () => {
+  assert.deepEqual(niceScale(28500), { step: 10000, top: 30000 });
+  assert.deepEqual(niceScale(7), { step: 2.5, top: 7.5 });
+  assert.deepEqual(niceScale(0), { step: 1, top: 3 });
+  assert.ok(niceScale(123456).top >= 123456);
+});

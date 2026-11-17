@@ -118,3 +118,56 @@ export function emergencyFundMonths(transactions, now = new Date(), rates = DEFA
   const savings = sumKes(transactions, { type: 'savings' }, rates);
   return expenses > 0 ? savings / (expenses / 3) : 0;
 }
+
+// ── Dashboard helpers ───────────────────────────────────────
+
+// Income, spending and net cash flow for the calendar month, with the month before for comparison.
+// netChangePct compares net cash flow with last month's; it is null when last month had no positive net.
+export function monthSummary(transactions, now = new Date(), rates = DEFAULT_RATES) {
+  const cur = periodBounds('month', now), prev = periodBounds('month', now, true);
+  const total = (type, range) => sumKes(transactions, { type, ...range }, rates);
+  const income = total('income', cur), expenses = total('expense', cur);
+  const prevIncome = total('income', prev), prevExpenses = total('expense', prev);
+  const net = Math.round((income - expenses) * 100) / 100, prevNet = Math.round((prevIncome - prevExpenses) * 100) / 100;
+  return {
+    income, expenses, net, prevIncome, prevExpenses, prevNet,
+    hasPrevious: prevIncome > 0 || prevExpenses > 0,
+    netChangePct: prevNet > 0 ? Math.round(((net - prevNet) / prevNet) * 1000) / 10 : null,
+    // Share of income spent, capped at 100 for drawing; null when there is no income.
+    spentPct: income > 0 ? Math.min(100, Math.round((expenses / income) * 100)) : null,
+  };
+}
+
+// Days left in the Nairobi calendar month, counting today.
+export function daysLeftInMonth(now = new Date()) {
+  const [year, month, day] = nairobiDate(now).split('-').map(Number);
+  return new Date(Date.UTC(year, month, 0)).getUTCDate() - day + 1;
+}
+
+// Category totals as shares that add up to exactly 100. Shows the biggest `limit` categories and folds the rest,
+// together with the real "other" category, into one "other" row.
+export function categoryShares(totals, limit = 5) {
+  const entries = Object.entries(totals).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]);
+  const sum = entries.reduce((total, [, value]) => total + value, 0);
+  if (!sum) return [];
+  const named = entries.filter(([key]) => key !== 'other');
+  const top = named.slice(0, limit), rest = [...named.slice(limit), ...entries.filter(([key]) => key === 'other')];
+  const rows = top.map(([key, value]) => ({ key, total: value }));
+  const otherTotal = rest.reduce((total, [, value]) => total + value, 0);
+  if (otherTotal > 0) rows.push({ key: 'other', total: otherTotal });
+  // Largest-remainder rounding so the percentages never add to 99 or 101.
+  const raw = rows.map(row => (row.total / sum) * 100), floors = raw.map(Math.floor);
+  let left = 100 - floors.reduce((a, b) => a + b, 0);
+  raw.map((value, index) => [value - Math.floor(value), index]).sort((a, b) => b[0] - a[0]).forEach(([, index]) => {
+    if (left > 0) { floors[index]++; left--; }
+  });
+  return rows.map((row, index) => ({ ...row, pct: floors[index] }));
+}
+
+// Axis for a bar chart: three equal steps with a round step size (1, 2, 2.5, 5 times a power of ten).
+export function niceScale(max, steps = 3) {
+  if (!(max > 0)) return { step: 1, top: steps };
+  const raw = max / steps, power = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * power).find(candidate => candidate >= raw);
+  return { step, top: step * steps };
+}

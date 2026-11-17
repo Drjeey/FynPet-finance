@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#111319">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>FynPet — Financial Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Source+Serif+4:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="preload" href="vendor/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="vendor/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script src="vendor/supabase.js" defer></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
@@ -836,13 +838,14 @@ thead { position:sticky; top:0; z-index:10; }
 }
 </style>
 <link rel="stylesheet" href="stitch.css">
+<link rel="stylesheet" href="midnight.css">
 </head>
 <body>
 <div id="layout">
 
 <!-- ═══ SIDEBAR ═══════════════════════════════════ -->
 <aside id="sidebar" aria-label="Main navigation">
-  <div class="sb-logo"><div class="sb-logo-icon">FP</div><div class="sb-logo-text">FynPet<span class="brand-caption">Kenya · KES ledger</span></div></div>
+  <div class="sb-logo"><div class="sb-logo-icon">FP</div><div class="sb-logo-text">FynPet<span class="brand-caption">KES ledger</span></div></div>
   <button class="sb-ai" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span>Ask Fyn AI</button>
   <nav class="sb-nav" aria-label="Pages"><button class="ni on" data-click="goPage" data-click-args='["dashboard","$el"]' aria-current="page"><span class="icon" data-icon="dashboard" aria-hidden="true"></span>Dashboard</button>
 <button class="ni " data-click="goPage" data-click-args='["transactions","$el"]' ><span class="icon" data-icon="ledger" aria-hidden="true"></span>Transactions</button>
@@ -850,61 +853,101 @@ thead { position:sticky; top:0; z-index:10; }
 <button class="ni " data-click="goPage" data-click-args='["analytics","$el"]' ><span class="icon" data-icon="chart" aria-hidden="true"></span>Analytics</button>
 <button class="ni " data-click="goPage" data-click-args='["mpesa","$el"]' ><span class="icon" data-icon="import" aria-hidden="true"></span>M-Pesa Import</button>
 <button class="ni " data-click="goPage" data-click-args='["settings","$el"]' ><span class="icon" data-icon="settings" aria-hidden="true"></span>Settings</button></nav>
-  <div class="sb-sync-status" id="sync-status"><div class="sync-dot local" id="sync-dot"></div><span id="sync-label">Saved on this device</span></div>
-  <div class="sb-foot"><p>Your recorded finances, in one place.</p><button class="btn-secondary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in to sync</button></div>
+  <div class="sb-sync-status" id="sync-status"><div class="sync-dot local" id="sync-dot"></div><span id="sync-label" aria-live="polite">Saved on this device</span></div>
+  <div class="sb-foot"><button class="btn-secondary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in to sync</button></div>
 </aside>
 
 <!-- ═══ MAIN ═══════════════════════════════════ -->
 <div id="main">
   <div id="topbar">
     <button class="mob-ham" aria-label="Open navigation" data-click="toggleMobSidebar"><span data-icon="menu" aria-hidden="true"></span></button>
-    <div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
+    <span class="tb-mark" aria-hidden="true">FP</span><div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
     <div class="tb-search"><span class="tb-search-icon" data-icon="search" aria-hidden="true"></span><input type="text" aria-label="Search transactions" placeholder="Search transactions…" data-input="searchGlobalTx" data-input-args='["$value"]'></div>
-    <button class="ib" aria-label="Export CSV" title="Export CSV" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span></button>
-    <button class="ib" aria-label="Open Fyn AI" title="Fyn AI" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span></button>
+    <button class="ib tb-export" aria-label="Export CSV" title="Export CSV" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span></button>
+    <button class="ib tb-ai" aria-label="Open Fyn AI" title="Fyn AI" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span></button>
     <button class="ib" aria-label="Sync now" title="Sync now" data-click="syncNow" id="sync-btn"><span data-icon="sync" aria-hidden="true"></span></button>
     <button class="tb-user" title="Account and settings" aria-label="Account and settings" data-click="goPage" data-click-args='["settings",null]'>
-      <div class="tb-av" id="tb-av">J</div>
-      <div class="tb-ui"><div class="tun" id="tb-name">Jeremy</div><div class="tur" id="tb-role">Admin</div></div></button>
+      <div class="tb-av" id="tb-av">Y</div>
+      <div class="tb-ui"><div class="tun" id="tb-name">You</div></div></button>
   </div>
 
+  <div class="sync-banner" id="sync-banner" role="status" hidden>
+    <span class="sb-ico" data-icon="sync" aria-hidden="true"></span>
+    <p><strong>Couldn't sync.</strong> Your changes are saved on this device.</p>
+    <button class="btn-secondary" data-click="syncNow">Try again</button>
+    <button class="ib" aria-label="Dismiss sync message" data-click="dismissSyncBanner"><span data-icon="close" aria-hidden="true"></span></button>
+  </div>
   <div id="content">
 
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Your financial ledger</div><div class="ph-sub" id="dash-sub"></div></div>
-        <div class="ph-acts">
-          <button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'>Import M-Pesa</button>
-          <button class="btn-primary" data-click="openAddTx">+ Add Transaction</button>
-        </div>
-      </div>
-      <div class="stats-grid" id="stat-cards"></div>
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="cc-hdr"><div><div class="cc-title">Cash Flow</div><div class="cc-sub">Income vs Expenses over time</div></div><div class="period-btns"><button class="pb on" data-click="setChartPeriod" data-click-args='["$el","week"]'>7D</button><button class="pb" data-click="setChartPeriod" data-click-args='["$el","month"]'>1M</button><button class="pb" data-click="setChartPeriod" data-click-args='["$el","3m"]'>3M</button></div></div>
-          <canvas id="main-canvas" height="130"></canvas>
-          <div class="chart-legend-row">
-            <div class="cl-item"><div class="cl-dot" style="background:var(--blue)"></div>Income</div>
-            <div class="cl-item"><div class="cl-dot" style="background:var(--rose)"></div>Expenses</div>
+      <section class="card hero" id="hero" aria-labelledby="hero-title">
+        <div class="hero-main">
+          <div class="hero-top"><h2 class="eyebrow" id="hero-title">This month</h2><span class="chip up" id="hero-delta" hidden></span></div>
+          <div class="hero-figure"><span class="hero-num" id="hero-net">KES 0</span><span class="hero-cap">net cash flow</span></div>
+          <p class="hero-sub" id="hero-sub"></p>
+          <div class="hero-split" id="hero-split" hidden>
+            <div class="split-bar" role="img" id="split-bar" aria-label=""><span class="split-spent" id="split-spent"></span><span class="split-kept" id="split-kept"></span></div>
+            <div class="split-key"><span id="split-spent-lbl"></span><span id="split-kept-lbl"></span></div>
           </div>
         </div>
-        <div class="chart-card">
-          <div class="cc-hdr"><div><div class="cc-title">By Category</div><div class="cc-sub" id="donut-period-sub">This month's breakdown</div></div></div>
-          <div class="donut-wrap"><canvas id="donut-canvas" width="110" height="110" style="width:110px!important;height:110px!important;flex-shrink:0"></canvas><div class="donut-leg" id="donut-legend"></div></div>
+        <div class="hero-acts">
+          <button class="btn-primary" data-click="openAddTx"><span data-icon="plus" aria-hidden="true"></span>Add transaction</button>
+          <button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'><span data-icon="import" aria-hidden="true"></span>Import M-Pesa statement</button>
         </div>
-      </div>
-      <div class="table-card" id="budget-status-card" style="margin-bottom:14px;display:none">
-        <div class="tt">
-          <div class="tt-title">Budget Status <span id="budget-status-period" style="font-size:.75rem;font-weight:400;color:var(--ink3);font-family:var(--fm)">— this month</span></div>
-          <button class="btn-ghost" data-click="goPage" data-click-args='["budgets",null]'>Manage →</button>
-        </div>
-        <div id="budget-status-bars" style="padding:0 4px"></div>
-      </div>
-      <div id="gamification-card" style="display:none;margin-bottom:14px"></div>
-      <div class="table-card">
-        <div class="tt"><div class="tt-title">Recent Transactions</div><button class="btn-ghost" data-click="goPage" data-click-args='["transactions",null]'>View all →</button></div>
-        <div id="recent-tx"></div>
+      </section>
+
+      <section class="card attention" id="attention-card" aria-labelledby="attention-title" hidden>
+        <div class="card-hdr"><h2 id="attention-title">Needs attention</h2><span class="count" id="attention-count"></span></div>
+        <ul class="attention-list" id="attention-list"></ul>
+      </section>
+
+      <section class="card getstarted" id="getstarted" aria-labelledby="gs-title" hidden>
+        <h2 id="gs-title">Get started with FynPet</h2>
+        <p class="muted">Three steps to begin tracking. Your records stay on this device until you sign in.</p>
+        <ol class="steps-grid">
+          <li class="step-card"><span class="step-n">1</span><h3>Add or import transactions</h3><p>Type a transaction yourself or bring in a PDF statement from Safaricom M-Pesa.</p><button class="btn-secondary" data-click="openAddTx">Add a transaction</button></li>
+          <li class="step-card"><span class="step-n">2</span><h3>Set a budget</h3><p>Choose a monthly limit for categories such as Food &amp; Groceries, Transport or Utilities.</p><button class="btn-secondary" data-click="openAddBudget">Set a budget</button></li>
+          <li class="step-card"><span class="step-n">3</span><h3>Ask Fyn a question</h3><p>Ask about your spending and cash flow once your records are added.</p><button class="btn-secondary" data-click="toggleAdvisor">Ask Fyn</button></li>
+        </ol>
+      </section>
+
+      <div class="dash-grid" id="dash-grid">
+        <section class="card cashflow" aria-labelledby="cf-title">
+          <div class="card-hdr">
+            <h2 id="cf-title">Cash flow</h2>
+            <div class="seg" role="group" aria-label="Chart period">
+              <button class="pb" aria-pressed="false" data-click="setChartPeriod" data-click-args='["$el","week"]'>7D</button>
+              <button class="pb on" aria-pressed="true" data-click="setChartPeriod" data-click-args='["$el","month"]'>1M</button>
+              <button class="pb" aria-pressed="false" data-click="setChartPeriod" data-click-args='["$el","3m"]'>3M</button>
+            </div>
+          </div>
+          <div class="legend"><span><i class="dot inc"></i>Income</span><span><i class="dot exp"></i>Expenses</span></div>
+          <div class="chart-wrap" id="chart-wrap">
+            <canvas id="main-canvas" role="img" aria-describedby="cf-summary" aria-label="Income and expenses bar chart" tabindex="0"></canvas>
+            <div class="chart-tip" id="chart-tip" role="status" hidden></div>
+          </div>
+          <p class="chart-summary" id="cf-summary"></p>
+          <table class="sr-only" id="cf-table"><caption>Income and expenses by period</caption></table>
+        </section>
+
+        <section class="card cats" aria-labelledby="cats-title">
+          <div class="card-hdr"><h2 id="cats-title">Where your money went</h2><span class="muted" id="donut-period-sub"></span></div>
+          <div class="donut-row">
+            <div class="donut" id="donut" role="img" aria-labelledby="cats-title"></div>
+            <ul class="legend-list" id="donut-legend"></ul>
+          </div>
+        </section>
+
+        <section class="card budgets-card" id="budget-status-card" aria-labelledby="bud-title">
+          <div class="card-hdr"><h2 id="bud-title">Budgets</h2><span class="muted">Closest to limit</span></div>
+          <div id="budget-status-bars"></div>
+        </section>
+
+        <section class="card recent" aria-labelledby="rec-title">
+          <div class="card-hdr"><h2 id="rec-title">Recent transactions</h2><button class="link" data-click="goPage" data-click-args='["transactions",null]'>View all</button></div>
+          <ul class="rtx-list" id="recent-tx"></ul>
+        </section>
       </div>
     </div>
 
@@ -1031,8 +1074,7 @@ thead { position:sticky; top:0; z-index:10; }
             Profile</div>
           <div class="config-sub">Your identity shown in the dashboard.</div>
           <div class="form-row">
-            <div class="form-grp"><label class="form-lbl" for="cfg-name">Name</label><input class="form-input" type="text" id="cfg-name" placeholder="Jeremy" data-input="saveConfig" data-input-args='["name","$value"]'></div>
-            <div class="form-grp"><label class="form-lbl" for="cfg-role">Role</label><input class="form-input" type="text" id="cfg-role" placeholder="Admin" data-input="saveConfig" data-input-args='["role","$value"]'></div>
+            <div class="form-grp"><label class="form-lbl" for="cfg-name">Name</label><input class="form-input" type="text" id="cfg-name" placeholder="You" data-input="saveConfig" data-input-args='["name","$value"]'></div>
           </div>
         </div>
         <div class="config-card">
@@ -1076,7 +1118,17 @@ thead { position:sticky; top:0; z-index:10; }
       </div>
     </div>
 
-<div class="page" id="page-more"><div class="page-header"><div><h1 class="ph-title">More</h1><p class="ph-sub">Your other finance tools</p></div></div><div class="more-grid"><button class="more-link" data-click="goPage" data-click-args='["analytics",null]'><span data-icon="chart" aria-hidden="true"></span><span>Analytics<small>Spending trends and savings</small></span></button><button class="more-link" data-click="goPage" data-click-args='["mpesa",null]'><span data-icon="import" aria-hidden="true"></span><span>M-Pesa Import<small>Bring in a PDF statement</small></span></button><button class="more-link" data-click="goPage" data-click-args='["settings",null]'><span data-icon="settings" aria-hidden="true"></span><span>Settings<small>Profile, rates and privacy</small></span></button><button class="more-link" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span><span>Fyn AI<small>Ask about your recorded finances</small></span></button></div></div>
+<div class="page" id="page-more">
+  <section class="card more-profile" aria-label="Your ledger"><span class="more-av" id="more-av" aria-hidden="true">Y</span><div class="more-id"><b>Your ledger</b><span>KES · Kenya</span></div><span class="chip" id="more-chip">Local only</span></section>
+  <nav class="card more-list" aria-label="More">
+    <button class="more-row" data-click="goPage" data-click-args='["analytics",null]'><span class="mr-ico" data-icon="chart" aria-hidden="true"></span><span class="mr-text"><b>Analytics</b><small>Spending trends and savings</small></span><span class="mr-go" data-icon="chevron" aria-hidden="true"></span></button>
+    <button class="more-row" data-click="goPage" data-click-args='["mpesa",null]'><span class="mr-ico" data-icon="import" aria-hidden="true"></span><span class="mr-text"><b>M-Pesa Import <em class="badge">PDF</em></b><small>Bring in a PDF statement</small></span><span class="mr-go" data-icon="chevron" aria-hidden="true"></span></button>
+    <button class="more-row" data-click="goPage" data-click-args='["settings",null]'><span class="mr-ico" data-icon="settings" aria-hidden="true"></span><span class="mr-text"><b>Settings</b><small>Profile, rates and privacy</small></span><span class="mr-go" data-icon="chevron" aria-hidden="true"></span></button>
+    <button class="more-row" data-click="toggleAdvisor"><span class="mr-ico" data-icon="spark" aria-hidden="true"></span><span class="mr-text"><b>Fyn AI</b><small>Ask about your recorded finances</small></span><span class="mr-go" data-icon="chevron" aria-hidden="true"></span></button>
+  </nav>
+  <section class="card more-sync" id="more-sync" aria-live="polite"></section>
+  <p class="more-foot" id="more-foot">Your records stay on this device until you sign in.</p>
+</div>
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1125,7 +1177,13 @@ thead { position:sticky; top:0; z-index:10; }
 <div id="mob-overlay" data-click="toggleMobSidebar"></div>
 
 <!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════════ -->
-<nav id="mob-nav" aria-label="Mobile navigation"><button class="mn-item on " data-click="mobGoPage" data-click-args='["dashboard","$el"]'><span class="mn-ic" data-icon="dashboard" aria-hidden="true"></span>Home</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["transactions","$el"]'><span class="mn-ic" data-icon="ledger" aria-hidden="true"></span>Transactions</button><button class="mn-item  mn-add" data-click="openAddTx" ><span class="mn-ic" data-icon="plus" aria-hidden="true"></span>Add</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["budgets","$el"]'><span class="mn-ic" data-icon="wallet" aria-hidden="true"></span>Budgets</button><button class="mn-item  " data-click="mobGoPage" data-click-args='["more","$el"]'><span class="mn-ic" data-icon="menu" aria-hidden="true"></span>More</button></nav>
+<nav id="mob-nav" aria-label="Mobile navigation">
+  <button class="mn-item on" data-click="mobGoPage" data-click-args='["dashboard","$el"]' aria-current="page"><span class="mn-ic" data-icon="dashboard" aria-hidden="true"></span><span class="mn-lbl">Home</span></button>
+  <button class="mn-item" data-click="mobGoPage" data-click-args='["transactions","$el"]'><span class="mn-ic" data-icon="ledger" aria-hidden="true"></span><span class="mn-lbl">Transactions</span></button>
+  <button class="mn-item mn-add" data-click="openAddChoice" aria-haspopup="dialog" aria-label="Add"><span class="mn-ic" data-icon="plus" aria-hidden="true"></span></button>
+  <button class="mn-item" data-click="mobGoPage" data-click-args='["budgets","$el"]'><span class="mn-ic" data-icon="wallet" aria-hidden="true"></span><span class="mn-lbl">Budgets</span></button>
+  <button class="mn-item" data-click="mobGoPage" data-click-args='["more","$el"]'><span class="mn-ic" data-icon="menu" aria-hidden="true"></span><span class="mn-lbl">More</span></button>
+</nav>
 <div id="advisor-backdrop" data-click="toggleAdvisor"></div>
 
 <!-- AUTH MODAL -->
@@ -1156,20 +1214,82 @@ thead { position:sticky; top:0; z-index:10; }
 </div>
 
 <!-- MODALS -->
+<div class="modal-overlay" id="tx-detail">
+  <div class="modal detail-modal">
+    <div class="modal-hdr"><div class="modal-title" id="tx-detail-title">Transaction detail</div><button class="modal-close" aria-label="Close" data-click="closeModal" data-click-args='["tx-detail"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <div class="detail-name" id="td-name"></div>
+      <div class="detail-amt" id="td-amt"></div>
+      <dl class="detail-list">
+        <div><dt>Category</dt><dd id="td-cat"></dd></div>
+        <div><dt>Date</dt><dd id="td-date"></dd></div>
+        <div><dt>Source</dt><dd id="td-src"></dd></div>
+        <div><dt>Notes</dt><dd id="td-notes"></dd></div>
+      </dl>
+    </div>
+    <div class="modal-acts detail-acts"><button class="btn-secondary" data-click="detailEdit">Edit</button><button class="btn-danger-sm" data-click="detailDelete">Delete</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="add-choice">
+  <div class="modal choice-modal">
+    <div class="modal-hdr"><div class="modal-title" id="add-choice-title">Add to FynPet</div><button class="modal-close" aria-label="Close" data-click="closeModal" data-click-args='["add-choice"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <button class="choice-row" data-click="chooseAdd" data-click-args='["tx"]'>
+        <span class="choice-ico" data-icon="plus" aria-hidden="true"></span>
+        <span class="choice-text"><b>Add a transaction</b><small>Type it in yourself</small></span>
+        <span class="choice-go" data-icon="chevron" aria-hidden="true"></span>
+      </button>
+      <button class="choice-row" data-click="chooseAdd" data-click-args='["import"]'>
+        <span class="choice-ico alt" data-icon="import" aria-hidden="true"></span>
+        <span class="choice-text"><b>Import M-Pesa statement</b><small>From a Safaricom PDF</small></span>
+        <span class="choice-go" data-icon="chevron" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="tx-modal">
-  <div class="modal">
+  <div class="modal add-modal">
     <div class="modal-hdr"><div class="modal-title" id="tx-modal-title">Add transaction</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["tx-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
-<div class="modal-body"><div id="tx-error" class="modal-error" role="alert" hidden></div>    <div class="form-row">
-      <div class="form-grp"><label class="form-lbl" for="tx-amount">Amount</label><div style="display:flex;gap:6px"><input class="form-input" type="number" id="tx-amount" inputmode="decimal" placeholder="0.00" min="0" step="0.01" style="flex:1;min-width:0"><select class="form-input" id="tx-currency" aria-label="Currency" style="width:76px;flex-shrink:0;padding-left:8px"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select></div></div>
-      <div class="form-grp"><label class="form-lbl" for="tx-type">Type</label><select class="form-input" id="tx-type"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select></div>
+    <div class="modal-body">
+      <div id="tx-error" class="modal-error" role="alert" hidden></div>
+      <div class="amt-block" id="tx-amount-block">
+        <label class="form-lbl" for="tx-amount">Amount</label>
+        <div class="amt-row">
+          <select class="cur-select" id="tx-currency" aria-label="Currency" data-change="txCurrencyChanged"><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="TZS">TZS</option><option value="UGX">UGX</option></select>
+          <input class="amt-input" type="text" id="tx-amount" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="tx-amount-err tx-kes-hint" data-input="txAmountInput" data-keydown="txEnterSaves" data-keydown-args='["$event"]'>
+        </div>
+        <p class="field-err" id="tx-amount-err" role="alert" hidden></p>
+        <p class="field-hint" id="tx-kes-hint" hidden></p>
+      </div>
+      <div class="type-row">
+        <div class="seg" role="group" aria-label="Type" id="tx-type-seg">
+          <button type="button" class="pb" data-tx-type="expense" aria-pressed="true" data-click="setTxType" data-click-args='["expense"]'>Expense</button>
+          <button type="button" class="pb" data-tx-type="income" aria-pressed="false" data-click="setTxType" data-click-args='["income"]'>Income</button>
+          <button type="button" class="pb extra-type" data-tx-type="savings" aria-pressed="false" data-click="setTxType" data-click-args='["savings"]' hidden>Savings</button>
+          <button type="button" class="pb extra-type" data-tx-type="transfer" aria-pressed="false" data-click="setTxType" data-click-args='["transfer"]' hidden>Transfer</button>
+        </div>
+        <button type="button" class="link" id="tx-more-types" aria-expanded="false" data-click="toggleMoreTypes">More types</button>
+      </div>
+      <select id="tx-type" hidden aria-hidden="true" tabindex="-1"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings</option><option value="transfer">Transfer</option></select>
+      <div class="cat-block" role="group" aria-labelledby="tx-cat-lbl">
+        <div class="cat-head"><span class="form-lbl" id="tx-cat-lbl">Category</span><span class="cat-current" id="tx-cat-current"></span></div>
+        <div class="chips" id="tx-chips"></div>
+        <select class="form-input" id="tx-cat" aria-label="All categories" data-change="setTxCat" data-change-args='["$value"]' hidden><option value="food">Food &amp; Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="income">Income</option><option value="transfer">Transfer</option><option value="other">Other</option></select>
+      </div>
+      <button type="button" class="more-details" id="tx-more-btn" aria-expanded="false" aria-controls="tx-details" data-click="toggleTxDetails"><span data-icon="sliders" aria-hidden="true"></span>More details<span class="chev" data-icon="chevron" aria-hidden="true"></span></button>
+      <div class="details" id="tx-details" hidden>
+        <div class="form-grp"><label class="form-lbl" for="tx-desc">Description</label><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary" maxlength="300" data-input="txDescInput" data-keydown="txEnterSaves" data-keydown-args='["$event"]'></div>
+        <div class="form-grp"><label class="form-lbl" for="tx-date">Date</label><input class="form-input" type="date" id="tx-date"></div>
+        <div class="form-grp"><label class="form-lbl" for="tx-notes">Notes (optional)</label><input class="form-input" type="text" id="tx-notes" placeholder="Optional notes" maxlength="500"></div>
+      </div>
     </div>
-    <div class="form-row full"><div class="form-grp"><label class="form-lbl" for="tx-desc">Description</label><input class="form-input" type="text" id="tx-desc" placeholder="e.g. Naivas Supermarket, Uber, Salary…"></div></div>
-    <div class="form-row">
-      <div class="form-grp"><label class="form-lbl" for="tx-cat">Category</label><select class="form-input" id="tx-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="income">Income</option><option value="transfer">Transfer</option><option value="other">Other</option></select></div>
-      <div class="form-grp"><label class="form-lbl" for="tx-date">Date</label><input class="form-input" type="date" id="tx-date"></div>
+    <div class="modal-acts add-acts">
+      <button class="btn-secondary add-cancel" data-click="closeModal" data-click-args='["tx-modal"]'>Cancel</button>
+      <button class="btn-primary" id="tx-save-btn" data-click="saveTx"><span data-icon="check" aria-hidden="true"></span><span id="tx-save-label">Save</span></button>
+      <button class="link add-again" id="tx-again-btn" data-click="saveTx" data-click-args='[true]'>Save and add another</button>
     </div>
-    <div class="form-row full"><div class="form-grp"><label class="form-lbl" for="tx-notes">Notes (optional)</label><input class="form-input" type="text" id="tx-notes" placeholder="Optional notes…"></div></div>
-</div>    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["tx-modal"]'>Cancel</button><button class="btn-primary" id="tx-save-btn" data-click="saveTx">Save entry</button></div>
   </div>
 </div>
 
@@ -1195,7 +1315,7 @@ thead { position:sticky; top:0; z-index:10; }
   </div>
 </div>
 
-<div id="toast"><span class="ti" id="ti">✓</span><span id="tm">Saved</span></div>
+<div id="toast" role="status" aria-live="polite"><span class="ti" id="ti">✓</span><span id="tm">Saved</span><button type="button" id="toast-action" class="toast-action" data-click="toastAction" hidden></button></div>
 
 <script src="app.js" type="module"></script>
 </body>
