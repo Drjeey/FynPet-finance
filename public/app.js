@@ -2,6 +2,8 @@ import { DEFAULT_RATES, convertToKes, amountKes, sumKes, categoryTotals, nairobi
 import { icon, renderIcons } from './icons.js';
 import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
 import { csvText, csvRow } from './csv.js';
+import { filterTransactions, countFilters, quickRange, groupByDate } from './txfilter.js';
+import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
 import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason } from './importreview.js';
 import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount } from './addflow.js';
 
@@ -220,7 +222,7 @@ function getSbClient() {
 // ── STATE ─────────────────────────────────────────────────
 const state = {
   ...loadProfileData(),
-  ui: { txFilter: 'all', txSearch: '', txPage: 1, perPage: 12, editTxId: null, editBudgetId: null, advisorOpen: false, advisorTab: 'chat' },
+  ui: { txFilter: 'all', txSearch: '', txCats: [], txFrom: '', txTo: '', txPage: 1, txLimit: 20, perPage: 12, editTxId: null, editBudgetId: null, advisorOpen: false, advisorTab: 'chat' },
   pendingDel: { type: null, id: null },
   selectedFile: null,
 };
@@ -1112,67 +1114,305 @@ function txRow(tx,actions=true){
   </tr>`;
 }
 
-function renderTxPage(){
-  let filtered=[...state.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if(state.ui.txFilter!=='all')filtered=filtered.filter(t=>t.type===state.ui.txFilter);
-  if(state.ui.txSearch){const q=state.ui.txSearch.toLowerCase();filtered=filtered.filter(t=>(t.description||'').toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q))}
-  const allCount=state.transactions.length;
-  document.getElementById('tx-count-sub').textContent=(state.ui.txFilter==='all'&&!state.ui.txSearch)?`${allCount} transaction${allCount!==1?'s':''}` : `${filtered.length} of ${allCount} shown`;
-  const{txPage,perPage}=state.ui,total=filtered.length,pages=Math.max(1,Math.ceil(total/perPage));
-  const start=(txPage-1)*perPage,end=Math.min(start+perPage,total),paged=filtered.slice(start,end);
-  const el=document.getElementById('full-tx-table');
-  const _emptyMsg=state.ui.txFilter!=='all'?`No ${state.ui.txFilter} transactions found.`:state.ui.txSearch?'Try a different search.':allCount>0?'All transactions loaded.':'Add your first transaction to get started.';
-  const _clearBtn=state.ui.txFilter!=='all'?`<button class="btn-ghost" style="padding:3px 10px;font-size:.75rem;margin-top:10px" data-click="showAllTxTypes">Show all types</button>`:'';
-  if(!paged.length){el.innerHTML=`<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">∅</div><div class="empty-title">No transactions found</div><div class="empty-sub">${_emptyMsg}${_clearBtn}</div></div>`;
-  }else{el.innerHTML=`<table><thead><tr><th scope="col">Transaction</th><th scope="col">Category</th><th scope="col">Amount (KES)</th><th scope="col">Actions</th></tr></thead><tbody>${paged.map(t=>txRow(t)).join('')}</tbody></table>`}
-  document.getElementById('tx-pg-info').textContent=total>0?`Showing ${start+1}–${end} of ${total}`:'No results';
-  document.getElementById('tx-pag').innerHTML=`<button class="pg" data-click="setTxPage" data-click-args='[${txPage-1}]' ${txPage<=1?'disabled':''}>‹</button>${Array.from({length:pages},(_,i)=>`<button class="pg ${txPage===i+1?'on':''}" data-click="setTxPage" data-click-args='[${i+1}]'>${i+1}</button>`).join('')}<button class="pg" data-click="setTxPage" data-click-args='[${txPage+1}]' ${txPage>=pages?'disabled':''}>›</button>`;
+// ═══════════════════════════════════════════════════════════
+// TRANSACTIONS PAGE: filters, list (table on desktop, grouped list on phones), row menu
+// ═══════════════════════════════════════════════════════════
+const isPhone = () => matchMedia('(max-width:768px)').matches;
+const dayHeading = (group, today) => group.rel === 'today' ? ['Today', nairobiFmt(new Date(`${group.date}T12:00:00Z`), { day: 'numeric', month: 'short', year: 'numeric' })]
+  : group.rel === 'yesterday' ? ['Yesterday', nairobiFmt(new Date(`${group.date}T12:00:00Z`), { day: 'numeric', month: 'short', year: 'numeric' })]
+  : [shortDate(group.date), nairobiFmt(new Date(`${group.date}T12:00:00Z`), { weekday: 'long' })];
+const txFilters = () => ({ type: state.ui.txFilter, query: state.ui.txSearch, categories: state.ui.txCats, from: state.ui.txFrom, to: state.ui.txTo });
+const txFiltersActive = () => state.ui.txFilter !== 'all' || Boolean(state.ui.txSearch) || countFilters(txFilters()) > 0;
+
+function pageList(current, total) {
+  if (total <= 6) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, 2, 3, total, current - 1, current, current + 1].filter(n => n >= 1 && n <= total));
+  const sorted = [...pages].sort((a, b) => a - b), out = [];
+  sorted.forEach((n, i) => { if (i && n - sorted[i - 1] > 1) out.push('…'); out.push(n); });
+  return out;
+}
+function txTypeAmount(tx) {
+  const cls = tx.type === 'income' ? 'in' : tx.type === 'savings' ? 'sav' : tx.type === 'transfer' ? 'neu' : 'out';
+  const sign = tx.type === 'income' ? '+' : '-', foreign = tx.currency && tx.currency !== 'KES';
+  return `<span class="rtx-amt ${cls}">${sign}${fmtKes(txAmountKes(tx))}</span>${foreign ? `<small class="fx">${escHtml(tx.currency)} ${Number(tx.amount).toLocaleString('en-KE')}</small>` : ''}`;
 }
 
-function setTxFilter(f,btn){state.ui.txFilter=f;state.ui.txPage=1;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTxPage()}
-function searchTx(q){state.ui.txSearch=q;state.ui.txPage=1;renderTxPage();renderRecentTx()}
-function searchGlobalTx(q){
-  if(!document.getElementById('page-transactions').classList.contains('on'))goPage('transactions',null);
-  document.getElementById('tx-search').value=q;
+function renderTxPage() {
+  const all = state.transactions.length, rows = filterTransactions(state.transactions, txFilters()), active = txFiltersActive();
+  document.getElementById('tx-count-sub').textContent = active ? `${rows.length} of ${all} shown` : `${all} transaction${all === 1 ? '' : 's'}`;
+  document.querySelectorAll('#tx-filter-row .pb').forEach(b => {
+    const on = readArgs(b, 'click')[0] === state.ui.txFilter; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+  });
+  const n = countFilters(txFilters()), badge = document.getElementById('tx-filter-badge');
+  badge.hidden = !n; badge.textContent = n || '';
+  const pills = [...state.ui.txCats.map(key => `<button type="button" class="pill" data-click="txRemoveCat" data-click-args="${argsAttr([key])}" aria-label="Remove ${escHtml((CATS[key] || CATS.other).label)} filter">${escHtml((CATS[key] || CATS.other).label)}<span data-icon="close" aria-hidden="true"></span></button>`),
+    ...(state.ui.txFrom || state.ui.txTo ? [`<button type="button" class="pill" data-click="txRemoveDates" aria-label="Remove date filter">${escHtml(dateRangeLabel(state.ui.txFrom, state.ui.txTo))}<span data-icon="close" aria-hidden="true"></span></button>`] : [])];
+  const applied = document.getElementById('tx-applied');
+  applied.hidden = !pills.length;
+  applied.innerHTML = pills.length ? `<span class="muted">Active filters</span>${pills.join('')}<button type="button" class="link" data-click="txClearAll">Clear all</button>` : '';
+  renderIcons(applied);
+
+  const el = document.getElementById('full-tx-table'), foot = document.getElementById('tx-foot');
+  if (!all) {
+    foot.hidden = true;
+    el.innerHTML = `<div class="tx-empty"><span class="empty-ico">${icon('ledger')}</span><h3>No transactions yet</h3><p class="muted">Add one yourself or import an M-Pesa statement. Records are saved on this device.</p>
+      <div class="imp-actions"><button class="btn-primary" data-click="openAddTx"><span data-icon="plus" aria-hidden="true"></span>Add your first transaction</button><button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'>Import M-Pesa statement</button></div></div>`;
+    renderIcons(el); return;
+  }
+  if (!rows.length) {
+    foot.hidden = true;
+    el.innerHTML = `<div class="tx-empty"><span class="empty-ico">${icon('search')}</span><h3>No transactions match your search</h3><p class="muted">Try a different word or clear your filters.</p>
+      <button class="btn-secondary" data-click="txClearAll">Clear search and filters</button></div>`;
+    return;
+  }
+  foot.hidden = false;
+  if (isPhone()) {
+    const shown = rows.slice(0, state.ui.txLimit), today = nairobiDate();
+    el.innerHTML = groupByDate(shown, today).map(group => {
+      const [left, right] = dayHeading(group, today);
+      return `<section class="m-day"><header><h3>${escHtml(left)}</h3><span>${escHtml(right)}</span></header><ul class="m-rows">${group.rows.map(txPhoneRow).join('')}</ul></section>`;
+    }).join('') + (rows.length > shown.length ? '<button class="btn-secondary load-more" data-click="txLoadMore">Load more</button>' : '');
+    document.getElementById('tx-pg-info').textContent = `Showing ${shown.length} of ${rows.length} transactions`;
+    document.getElementById('tx-pag').innerHTML = '';
+  } else {
+    const { txPage, perPage } = state.ui, total = rows.length, pages = Math.max(1, Math.ceil(total / perPage));
+    if (txPage > pages) state.ui.txPage = pages;
+    const start = (state.ui.txPage - 1) * perPage, end = Math.min(start + perPage, total);
+    el.innerHTML = `<div class="txt-wrap"><table class="txt"><thead><tr><th scope="col">Description</th><th scope="col">Date</th><th scope="col">Source</th><th scope="col" class="r">Amount</th><th scope="col" class="r"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows.slice(start, end).map(txDesktopRow).join('')}</tbody></table></div>`;
+    document.getElementById('tx-pg-info').textContent = `Showing ${start + 1}-${end} of ${total}`;
+    document.getElementById('tx-pag').innerHTML = pages < 2 ? '' :
+      `<button class="pg" data-click="setTxPage" data-click-args='[${state.ui.txPage - 1}]' ${state.ui.txPage <= 1 ? 'disabled' : ''}>Previous</button>${pageList(state.ui.txPage, pages).map(p => p === '…' ? '<span class="pg gap">…</span>' : `<button class="pg ${p === state.ui.txPage ? 'on' : ''}" aria-label="Page ${p}"${p === state.ui.txPage ? ' aria-current="page"' : ''} data-click="setTxPage" data-click-args='[${p}]'>${p}</button>`).join('')}<button class="pg" data-click="setTxPage" data-click-args='[${state.ui.txPage + 1}]' ${state.ui.txPage >= pages ? 'disabled' : ''}>Next</button>`;
+  }
+}
+function dateRangeLabel(from, to) {
+  const f = d => nairobiFmt(new Date(`${d}T12:00:00Z`), { day: 'numeric', month: 'short' });
+  return from && to ? `${f(from)} - ${f(to)}` : from ? `From ${f(from)}` : `Until ${f(to)}`;
+}
+function txDesktopRow(tx) {
+  const cat = CATS[tx.category] || CATS.other, source = tx.source === 'import' ? 'Imported' : 'Manual', id = argsAttr([tx.id]);
+  return `<tr data-click="openTxDetail" data-click-args="${id}">
+    <td><div class="tx-name"><span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[tx.category] || 'dots')}</span><div><button type="button" class="tx-open" data-click="openTxDetail" data-click-args="${id}" aria-haspopup="dialog">${escHtml(tx.description)}</button><span class="cat-chip" style="background:${cat.bg};color:${cat.color}">${escHtml(cat.label)}</span></div></div></td>
+    <td class="nw">${escHtml(nairobiFmt(new Date(`${tx.date}T12:00:00Z`), { day: 'numeric', month: 'short', year: 'numeric' }))}</td>
+    <td><span class="src ${tx.source === 'import' ? 'imp' : ''}"><i></i>${source}</span></td>
+    <td class="r nw">${txTypeAmount(tx)}</td>
+    <td class="r"><button type="button" class="ib dots" aria-label="Actions for ${escHtml(tx.description)}" aria-haspopup="menu" aria-expanded="false" data-click="openTxMenu" data-click-args="${argsAttr([tx.id, '$el'])}"><span data-icon="dots" aria-hidden="true"></span></button></td></tr>`;
+}
+function txPhoneRow(tx) {
+  const cat = CATS[tx.category] || CATS.other, source = tx.source === 'import' ? 'Imported' : 'Manual';
+  return `<li><button class="rtx" data-click="openTxDetail" data-click-args="${argsAttr([tx.id])}" aria-haspopup="dialog"
+    aria-label="${escHtml(`${tx.description}, ${cat.label}, ${shortDate(tx.date)}, ${source}, ${fmtKes(txAmountKes(tx))}. Open details.`)}">
+    <span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[tx.category] || 'dots')}</span>
+    <span><span class="rtx-name" style="display:block">${escHtml(tx.description)}</span><span class="rtx-meta" style="display:block">${escHtml(cat.label)} · ${source}</span></span>
+    <span class="rtx-amt-wrap">${txTypeAmount(tx)}</span></button></li>`;
+}
+
+function setTxFilter(f, btn) { state.ui.txFilter = f; state.ui.txPage = 1; state.ui.txLimit = 20; renderTxPage(); }
+function searchTx(q) { state.ui.txSearch = q; state.ui.txPage = 1; state.ui.txLimit = 20; renderTxPage(); }
+function searchGlobalTx(q) {
+  if (!document.getElementById('page-transactions').classList.contains('on')) goPage('transactions', null);
+  document.getElementById('tx-search').value = q;
   searchTx(q);
 }
-function setTxPage(p){state.ui.txPage=p;renderTxPage()}
+function setTxPage(p) { state.ui.txPage = Math.max(1, p); renderTxPage(); document.getElementById('content').scrollTop = 0; }
+function txLoadMore() { state.ui.txLimit += 20; renderTxPage(); }
+function resetTxFilters() {
+  Object.assign(state.ui, { txFilter: 'all', txSearch: '', txCats: [], txFrom: '', txTo: '', txPage: 1, txLimit: 20 });
+  const search = document.getElementById('tx-search'); if (search) search.value = '';
+}
+function txClearAll() { resetTxFilters(); renderTxPage(); }
+function txRemoveCat(key) { state.ui.txCats = state.ui.txCats.filter(k => k !== key); state.ui.txPage = 1; renderTxPage(); }
+function txRemoveDates() { state.ui.txFrom = ''; state.ui.txTo = ''; state.ui.txPage = 1; renderTxPage(); }
 
-// ─── Budgets page ──────────────────────────────────────────
-function renderBudgetsPage(){
-  const now=new Date(),ms=monthKey(now);
-  let tLim=0,tSpent=0,tOver=0;
-  state.budgets.forEach(b=>{
-    const s=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.category===b.category&&t.type==='expense'));
-    tLim+=b.limit;tSpent+=s;if(s>b.limit)tOver++;
-  });
-  document.getElementById('budget-stats').innerHTML=[
-    {icon:'$',ic:'var(--bluebg)',icColor:'var(--blue)',lbl:'Total Budget',val:`KES ${tLim.toLocaleString()}`,sub:'This month',badge:'Monthly',bt:'neutral',acc:'var(--blue)'},
-    {icon:'↓',ic:'var(--rosebg)',icColor:'var(--rose)',lbl:'Total Spent',val:`KES ${tSpent.toLocaleString()}`,sub:tLim>0?`${((tSpent/tLim)*100).toFixed(0)}% of budget`:'No limit set',badge:`${tOver} over`,bt:tOver>0?'dn':'up',acc:'var(--rose)'},
-    {icon:'↑',ic:'var(--tealbg)',icColor:'var(--teal)',lbl:'Remaining',val:`KES ${Math.max(0,tLim-tSpent).toLocaleString()}`,sub:'Available to spend',badge:tLim-tSpent>=0?'On track':'Over!',bt:tLim-tSpent>=0?'up':'dn',acc:'var(--teal)'},
-  ].map(c=>`<div class="stat-card"><div class="sc-top"><div class="sc-ic" style="background:${c.ic};color:${c.icColor};font-family:var(--fm);font-weight:700;font-size:1.1rem">${c.icon}</div><div class="sc-badge ${c.bt}">${c.badge}</div></div><div class="sc-lbl">${c.lbl}</div><div class="sc-val">${c.val}</div><div class="sc-sub">${c.sub}</div><div class="sc-accent" style="background:${c.acc}"></div></div>`).join('');
-  const grid=document.getElementById('budget-grid');
-  if(!state.budgets.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">◎</div><div class="empty-title">No budgets yet</div><div class="empty-sub">Create category budgets to track your spending limits.</div><button class="btn-primary" data-click="openAddBudget">+ Create Budget</button></div>`;return}
-  grid.innerHTML=state.budgets.map(b=>{
-    const s=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.category===b.category&&t.type==='expense'));
-    const pct=Math.min((s/b.limit)*100,100),over=s>b.limit,left=b.limit-s;
-    const cc=CATS[b.category]||CATS.other;
-    return `<div class="bc ${over?'over-budget':''}">
-      <div class="bc-hdr">
-        <div class="bc-ic" style="background:${cc.bg};position:relative;overflow:hidden;flex-shrink:0">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${cc.color}"></div>
-          <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${cc.color};padding-left:6px">${cc.label.slice(0,2).toUpperCase()}</span>
-        </div>
-        <div><div class="bc-name">${cc.label}</div><div class="bc-lmt">KES ${b.limit.toLocaleString()}/month</div></div>
-      </div>
-      <div class="bc-amts"><div class="bc-spent ${over?'over':''}">KES ${s.toLocaleString()}</div><div class="bc-rem ${over?'bad':'ok'}">${over?'−KES '+Math.abs(left).toLocaleString()+' over':'+KES '+left.toLocaleString()+' left'}</div></div>
-      <div class="bc-track"><div class="bc-fill" style="width:${pct}%;background:${over?'var(--rose)':cc.color}"></div></div>
-      <div class="bc-meta"><span>${pct.toFixed(0)}% used</span><span>KES ${b.limit.toLocaleString()} limit</span></div>
-      <div class="bc-acts"><button class="btn-secondary" style="flex:1;justify-content:center;font-size:.75rem;padding:6px" data-click="openEditBudget" data-click-args="${argsAttr([b.id])}">Edit</button><button class="btn-danger-sm" data-click="confirmDel" data-click-args="${argsAttr(['budget',b.id])}">Delete</button></div>
-    </div>`;
+// Filters panel (side panel on desktop, bottom sheet on phones)
+function openTxFilters() {
+  document.getElementById('tf-from').value = state.ui.txFrom; document.getElementById('tf-to').value = state.ui.txTo;
+  document.getElementById('tf-cats').innerHTML = CAT_KEYS.map(key => {
+    const cat = CATS[key];
+    return `<label class="cat-check"><input type="checkbox" value="${key}"${state.ui.txCats.includes(key) ? ' checked' : ''}><span class="cc-ico" style="color:${cat.color}">${icon(CAT_ICON[key])}</span><span>${escHtml(cat.label)}</span></label>`;
   }).join('');
+  openModal('tx-filters');
+}
+function txQuickRange(name) {
+  const range = quickRange(name); document.getElementById('tf-from').value = range.from; document.getElementById('tf-to').value = range.to;
+}
+function txResetFilters() {
+  document.getElementById('tf-from').value = ''; document.getElementById('tf-to').value = '';
+  document.querySelectorAll('#tf-cats input').forEach(box => { box.checked = false; });
+}
+function txApplyFilters() {
+  const from = document.getElementById('tf-from').value, to = document.getElementById('tf-to').value;
+  if (from && to && from > to) { showToast('The start date is after the end date.', 'error'); return; }
+  state.ui.txFrom = from; state.ui.txTo = to;
+  state.ui.txCats = [...document.querySelectorAll('#tf-cats input:checked')].map(box => box.value);
+  state.ui.txPage = 1; state.ui.txLimit = 20;
+  closeModal('tx-filters'); renderTxPage();
 }
 
+// A small floating menu (Edit, Delete) used by transaction rows and budget cards on desktop.
+let _menuFor = null;
+function closeRowMenu() {
+  const menu = document.getElementById('row-menu'); if (menu.hidden) return;
+  menu.hidden = true; _menuFor?.setAttribute('aria-expanded', 'false'); _menuFor = null;
+}
+function showRowMenu(button, items) {
+  if (_menuFor === button) { closeRowMenu(); return; }
+  closeRowMenu();
+  const menu = document.getElementById('row-menu');
+  menu.innerHTML = items.map((item, i) => `<button type="button" role="menuitem" class="${item.danger ? 'danger' : ''}" data-menu="${i}">${icon(item.icon)}${escHtml(item.label)}</button>`).join('');
+  menu._items = items; menu.hidden = false; button.setAttribute('aria-expanded', 'true'); _menuFor = button;
+  const r = button.getBoundingClientRect(), h = menu.offsetHeight, w = menu.offsetWidth;
+  menu.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+  menu.style.top = (r.bottom + h + 12 > innerHeight ? r.top - h - 4 : r.bottom + 4) + 'px';
+  menu.querySelector('button')?.focus();
+}
+function wireRowMenu() {
+  const menu = document.getElementById('row-menu');
+  menu.addEventListener('click', e => {
+    const item = e.target.closest('[data-menu]'); if (!item) return;
+    const run = menu._items[Number(item.dataset.menu)].run, opener = _menuFor; closeRowMenu(); run?.();
+    if (!document.querySelector('.modal-overlay.open')) opener?.focus();
+  });
+  menu.addEventListener('keydown', e => {
+    const buttons = [...menu.querySelectorAll('button')], at = buttons.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); buttons[(at + 1) % buttons.length].focus(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); buttons[(at - 1 + buttons.length) % buttons.length].focus(); }
+    if (e.key === 'Escape') { e.preventDefault(); const opener = _menuFor; closeRowMenu(); opener?.focus(); }
+    if (e.key === 'Tab') closeRowMenu();
+  });
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && !e.target.closest('.dots')) closeRowMenu(); });
+  window.addEventListener('resize', closeRowMenu);
+  document.getElementById('content').addEventListener('scroll', closeRowMenu, { passive: true });
+}
+function openTxMenu(id, button) {
+  const tx = state.transactions.find(t => t.id === id); if (!tx) return;
+  showRowMenu(button, [{ label: 'Edit', icon: 'edit', run: () => openEditTx(id) }, { label: 'Delete', icon: 'delete', danger: true, run: () => confirmDel('tx', id) }]);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUDGETS PAGE
+// ═══════════════════════════════════════════════════════════
+function renderBudgetsPage() {
+  const now = new Date(), rows = budgetRows(state.budgets, state.transactions, now, exchangeRates()), summary = budgetSummary(rows, now);
+  document.getElementById('bud-month').textContent = monthLong(0, now);
+  const line = document.getElementById('budget-summary');
+  line.hidden = !rows.length;
+  if (rows.length) line.innerHTML = `<b>${summary.over ? `${fmtKes(-summary.left)} over` : `${fmtKes(summary.left)} left`}</b> across ${summary.count} budget${summary.count === 1 ? '' : 's'}<span class="dotsep">·</span><b>${summary.pctUsed}%</b> used${summary.perDay > 0 ? `<span class="dotsep">·</span>about <b>${fmtKes(summary.perDay)}</b> a day` : ''}`;
+  const grid = document.getElementById('budget-grid');
+  if (!rows.length) {
+    grid.innerHTML = `<div class="card tx-empty"><span class="empty-ico">${icon('wallet')}</span><h3>No budgets yet</h3><p class="muted">Set a monthly limit for a category to see how much is left.</p><button class="btn-primary" data-click="openAddBudget"><span data-icon="plus" aria-hidden="true"></span>Create budget</button></div>`;
+    renderIcons(grid); return;
+  }
+  const sorted = rows.slice().sort((a, b) => b.pct - a.pct);
+  grid.innerHTML = sorted.map(row => {
+    const b = row.budget, cat = CATS[b.category] || CATS.other, label = escHtml(cat.label), id = argsAttr([b.id]);
+    const big = row.over ? `<b>${fmtKes(row.spent - b.limit)}</b> over` : `<b>${fmtKes(row.left)}</b> left`;
+    const sub = row.over ? `Limit exceeded by ${row.overPct}%` : row.perDay > 0 ? `about ${fmtKes(row.perDay)} a day` : 'No days left to spend it';
+    const chip = row.tone === 'warn' ? `${Math.round(row.pct)}% · ${Math.max(0, 100 - Math.round(row.pct))}% remaining` : `${Math.round(row.pct)}%`;
+    return `<article class="bcard ${row.over ? 'is-over' : ''}" aria-label="${label} budget">
+      <header><span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[b.category] || 'dots')}</span><div class="bc-id"><h3>${label}</h3><span class="muted">Monthly limit ${fmtKes(b.limit)}</span></div>
+        <button type="button" class="ib dots" aria-label="Actions for ${label} budget" aria-haspopup="menu" aria-expanded="false" data-click="openBudgetMenu" data-click-args="${argsAttr([b.id, '$el'])}"><span data-icon="dots" aria-hidden="true"></span></button></header>
+      <div class="bc-big ${row.over ? 'over' : ''}">${big}</div>
+      <div class="bc-sub ${row.over ? 'over' : ''}">${sub}</div>
+      <div class="bud-track" role="progressbar" aria-label="${label} budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, Math.round(row.pct))}"><div class="bud-fill ${row.tone === 'ok' ? '' : row.tone}" style="width:${Math.min(100, row.pct)}%"></div></div>
+      <footer><span>Spent ${fmtKes(row.spent)} of ${fmtKes(b.limit)}</span><span class="chip ${row.tone}">${chip}</span></footer>
+      ${row.over ? `<div class="bc-acts"><button type="button" class="btn-secondary" data-click="openRaiseLimit" data-click-args="${id}">Raise limit</button><button type="button" class="btn-secondary" data-click="viewBudgetTx" data-click-args="${argsAttr([b.category])}">View transactions</button></div>` : ''}</article>`;
+  }).join('') + (categoryChoices(state.budgets).some(c => !c.taken) ? `<button type="button" class="bcard add" data-click="openAddBudget"><span class="add-plus">${icon('plus')}</span><b>Add a budget</b><small>Create a spending limit for a new category</small></button>` : '');
+  renderIcons(grid);
+}
+
+function fillBudgetCategories(editingId, selected) {
+  document.getElementById('b-cat').innerHTML = categoryChoices(state.budgets, editingId).map(c =>
+    `<option value="${c.key}"${c.taken ? ' disabled' : ''}>${escHtml((CATS[c.key] || CATS.other).label)}${c.taken ? ' (Already has a budget)' : ''}</option>`).join('');
+  document.getElementById('b-cat').value = selected;
+}
+function setBudgetError(field, message) {
+  const el = document.getElementById(field === 'cat' ? 'b-cat-err' : 'b-limit-err'); el.textContent = message || ''; el.hidden = !message;
+  document.getElementById(field === 'cat' ? 'b-cat' : 'b-limit').setAttribute('aria-invalid', message ? 'true' : 'false');
+}
+function updateBudgetHint() {
+  const category = document.getElementById('b-cat').value, spent = lastMonthSpent(state.transactions, category, new Date(), exchangeRates());
+  const hint = document.getElementById('b-hint'); hint.hidden = !(spent > 0); hint.dataset.amount = String(Math.round(spent));
+  if (spent > 0) document.getElementById('b-hint-text').textContent = `Last month you spent ${fmtKes(spent)} on ${(CATS[category] || CATS.other).label}.`;
+}
+function openAddBudget() {
+  const free = categoryChoices(state.budgets).find(c => !c.taken);
+  if (!free) { showToast('Every category already has a budget.', 'info'); return; }
+  state.ui.editBudgetId = null;
+  document.getElementById('budget-modal-title').textContent = 'New budget'; document.getElementById('b-save-label').textContent = 'Create budget';
+  fillBudgetCategories(null, free.key); document.getElementById('b-limit').value = '';
+  setBudgetError('cat', ''); setBudgetError('limit', ''); updateBudgetHint();
+  openModal('budget-modal'); setTimeout(() => document.getElementById('b-limit').focus(), 60);
+}
+function openEditBudget(id) {
+  const b = state.budgets.find(x => x.id === id); if (!b) return;
+  state.ui.editBudgetId = id;
+  document.getElementById('budget-modal-title').textContent = 'Edit budget'; document.getElementById('b-save-label').textContent = 'Save changes';
+  fillBudgetCategories(id, b.category); document.getElementById('b-limit').value = String(b.limit);
+  setBudgetError('cat', ''); setBudgetError('limit', ''); updateBudgetHint();
+  openModal('budget-modal');
+}
+function budgetCatChanged() { setBudgetError('cat', ''); updateBudgetHint(); }
+function budgetLimitInput() { setBudgetError('limit', ''); }
+function budgetEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveBudget(); } }
+function useLastMonth() {
+  const amount = Number(document.getElementById('b-hint').dataset.amount) || 0;
+  if (amount > 0) { document.getElementById('b-limit').value = String(amount); setBudgetError('limit', ''); document.getElementById('b-limit').focus(); }
+}
+function saveBudget() {
+  const category = document.getElementById('b-cat').value, limit = parseAmount(document.getElementById('b-limit').value), editing = state.ui.editBudgetId;
+  setBudgetError('cat', ''); setBudgetError('limit', '');
+  if (state.budgets.some(b => b.category === category && b.id !== editing)) { setBudgetError('cat', 'A budget for this category already exists.'); document.getElementById('b-cat').focus(); return; }
+  if (!Number.isFinite(limit) || limit <= 0) { setBudgetError('limit', 'Enter a limit greater than zero.'); document.getElementById('b-limit').focus(); return; }
+  const now = new Date().toISOString();
+  if (editing) {
+    const idx = state.budgets.findIndex(b => b.id === editing);
+    if (idx !== -1) state.budgets[idx] = { ...state.budgets[idx], category, limit, updatedAt: now, dirty: true };
+  } else state.budgets.push({ id: uid(), category, limit, period: 'monthly', updatedAt: now, dirty: true });
+  Store.set('budgets', state.budgets); closeModal('budget-modal');
+  showToast(editing ? 'Budget updated' : 'Budget created', 'success');
+  renderBudgetsPage(); renderDashboard();
+  const sb = getSbClient(); if (sb) syncNow();
+}
+
+function openRaiseLimit(id) {
+  const row = budgetRows(state.budgets, state.transactions, new Date(), exchangeRates()).find(r => r.budget.id === id); if (!row) return;
+  state.ui.raiseId = id;
+  const label = (CATS[row.budget.category] || CATS.other).label;
+  document.getElementById('raise-title').textContent = `Raise ${label} limit`;
+  document.getElementById('raise-info').textContent = `Current limit ${fmtKes(row.budget.limit)}. Spent ${fmtKes(row.spent)}.`;
+  document.getElementById('raise-limit').value = String(suggestRaise(row.spent));
+  const err = document.getElementById('raise-err'); err.hidden = true;
+  openModal('budget-raise'); setTimeout(() => document.getElementById('raise-limit').select(), 60);
+}
+function raiseInput() { document.getElementById('raise-err').hidden = true; }
+function raiseEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveRaise(); } }
+function saveRaise() {
+  const b = state.budgets.find(x => x.id === state.ui.raiseId); if (!b) return;
+  const value = parseAmount(document.getElementById('raise-limit').value), err = document.getElementById('raise-err');
+  if (!Number.isFinite(value) || value <= b.limit) { err.textContent = `Enter an amount above the current limit (${fmtKes(b.limit)}).`; err.hidden = false; document.getElementById('raise-limit').focus(); return; }
+  b.limit = value; b.updatedAt = new Date().toISOString(); b.dirty = true;
+  Store.set('budgets', state.budgets); closeModal('budget-raise');
+  showToast(`${(CATS[b.category] || CATS.other).label} limit raised to ${fmtKes(value)}`, 'success');
+  renderBudgetsPage(); renderDashboard();
+  const sb = getSbClient(); if (sb) syncNow();
+}
+function viewBudgetTx(category) {
+  const bounds = periodBounds('month');
+  resetTxFilters(); Object.assign(state.ui, { txCats: [category], txFrom: bounds.from, txTo: bounds.to });
+  _keepTxFilters = true; goPage('transactions', null);
+}
+function openBudgetMenu(id, button) {
+  const b = state.budgets.find(x => x.id === id); if (!b) return;
+  if (isPhone()) { state.ui.menuBudgetId = id; document.getElementById('ba-title').textContent = (CATS[b.category] || CATS.other).label; openModal('budget-actions'); return; }
+  showRowMenu(button, [{ label: 'Edit', icon: 'edit', run: () => openEditBudget(id) }, { label: 'Delete', icon: 'delete', danger: true, run: () => confirmDel('budget', id) }]);
+}
+function baEdit() { const id = state.ui.menuBudgetId; closeModal('budget-actions'); if (id) openEditBudget(id); }
+function baDelete() { const id = state.ui.menuBudgetId; closeModal('budget-actions'); if (id) confirmDel('budget', id); }
+let _keepTxFilters = false;
+
+
+
+// ─── Budgets page ──────────────────────────────────────────
 // ─── Analytics ─────────────────────────────────────────────
 function renderAnalytics(){
   const totalSaved=totalKes(state.transactions.filter(t=>t.type==='savings'));
@@ -1480,42 +1720,6 @@ function chooseAdd(kind) {
 // ═══════════════════════════════════════════════════════════
 // CRUD — BUDGETS
 // ═══════════════════════════════════════════════════════════
-function openAddBudget(){
-  state.ui.editBudgetId=null;
-  document.getElementById('budget-modal-title').textContent='New Budget';
-  document.getElementById('b-save-btn').textContent='Create Budget';
-  document.getElementById('b-cat').value='food';
-  document.getElementById('b-limit').value='';
-  openModal('budget-modal');
-}
-function openEditBudget(id){
-  const b=state.budgets.find(b=>b.id===id);if(!b)return;
-  state.ui.editBudgetId=id;
-  document.getElementById('budget-modal-title').textContent='Edit Budget';
-  document.getElementById('b-save-btn').textContent='Save Changes';
-  document.getElementById('b-cat').value=b.category;
-  document.getElementById('b-limit').value=b.limit;
-  openModal('budget-modal');
-}
-function saveBudget(){
-  const category=document.getElementById('b-cat').value;
-  const limit=parseFloat(document.getElementById('b-limit').value);
-  if(!limit||limit<=0){showToast('Enter a valid limit','error');return}
-  if(state.ui.editBudgetId){
-    if(state.budgets.some(b=>b.category===category&&b.id!==state.ui.editBudgetId)){showToast('Budget for this category already exists','error');return}
-    const idx=state.budgets.findIndex(b=>b.id===state.ui.editBudgetId);
-    if(idx!==-1)state.budgets[idx]={...state.budgets[idx],category,limit,updatedAt:new Date().toISOString(),dirty:true};
-    showToast('Budget updated','success');
-  }else{
-    if(state.budgets.find(b=>b.category===category)){showToast('Budget for this category already exists','error');return}
-    state.budgets.push({id:uid(),category,limit,period:'monthly',updatedAt:new Date().toISOString(),dirty:true});
-    showToast('Budget created','success');
-  }
-  Store.set('budgets',state.budgets);closeModal('budget-modal');
-  renderBudgetsPage(); renderDashboard();
-  const sb=getSbClient();if(sb)syncNow();
-}
-
 // ═══════════════════════════════════════════════════════════
 // DELETE
 // ═══════════════════════════════════════════════════════════
@@ -1524,7 +1728,7 @@ function confirmDel(type,id){
   if(!item)return;
   const name=type==='tx'?item.description:(CATS[item.category]||CATS.other).label;
   state.pendingDel={type,id};
-  askConfirm({title:type==='tx'?'Delete Transaction?':'Delete Budget?',sub:`"${name}" will be permanently deleted.`,okLabel:'Delete',onOk:execDel});
+  askConfirm({title:type==='tx'?'Delete transaction?':'Delete budget?',sub:type==='tx'?`${name} will be permanently deleted. This cannot be undone.`:`The ${name} budget will be deleted. Your transactions are not affected.`,okLabel:'Delete',onOk:execDel});
 }
 // Shared confirmation dialog (confirm-modal): used for deletes and for the unsynced sign-out warning.
 function askConfirm({title,sub,okLabel,onOk}){
@@ -2015,10 +2219,9 @@ function goPage(id,navEl){
     if(active)mn.setAttribute('aria-current','page');else mn.removeAttribute('aria-current');
   });
   applyPageTitle();
+  document.body.dataset.page=id;
   if(id==='transactions'){
-    state.ui.txFilter='all';state.ui.txSearch='';state.ui.txPage=1;
-    document.querySelectorAll('#tx-filter-row .fb').forEach((b,i)=>b.classList.toggle('on',i===0));
-    const srch=document.getElementById('tx-search');if(srch)srch.value='';
+    if(_keepTxFilters)_keepTxFilters=false;else resetTxFilters();
     renderTxPage();
   }
   if(id==='dashboard')renderDashboard();
@@ -2115,16 +2318,15 @@ function readArgs(el,type){
 
 function confirmSignOut(){if(confirm('Sign out?'))signOut()}
 function clearLocalData(){if(confirm('Clear ALL local data on this device? Data synced to your account is not affected.')){localStorage.clear();location.reload()}}
-function showAllTxTypes(){document.querySelector('#tx-filter-row .fb')?.click()}
 function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveAllConfig, saveBudget,
   saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
-  setTxFilter, setTxPage, showAllTxTypes, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
+  setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
   toggleMobSidebar, toggleKeyVis,
 };
 
@@ -2191,7 +2393,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Main render
   const dash = document.getElementById('page-dashboard');
   dash.dataset.intro = '1'; setTimeout(() => delete dash.dataset.intro, 1800);
-  wireChart();
+  wireChart(); wireRowMenu();
+  document.body.dataset.page = 'dashboard';
   applyPageTitle(); matchMedia('(max-width:768px)').addEventListener('change', applyPageTitle);
   renderAll();
 

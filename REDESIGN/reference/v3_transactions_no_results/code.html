@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>Transactions - desktop</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              card: '#121720',
+              raised: '#1A212C',
+              border: '#252E3B',
+              hover: '#1e2634'
+            },
+            fyn: {
+              lime: '#C6F432',
+              limeDark: '#0A0D12',
+              mint: '#34D399',
+              coral: '#FB7185',
+              indigo: '#818CF8',
+              amber: '#FBBF24',
+              text: '#F4F6F8',
+              secondary: '#A3AEBD',
+              tertiary: '#7C8797'
+            }
+          },
+          fontFamily: {
+            manrope: ['Manrope', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #111319;
+      color: #F4F6F8;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .numeral {
+      font-family: 'Manrope', sans-serif;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+    }
+    .action-btn {
+      opacity: 0;
+      transition: opacity 180ms ease-out, transform 150ms ease-out;
+    }
+    tr:hover .action-btn, tr:focus-within .action-btn {
+      opacity: 1;
+    }
+    .press-effect:active {
+      transform: translateY(1px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/></head>
+<body class="min-h-screen bg-[#111319] flex">
+<!-- Fixed Left Sidebar (Full viewport height 248px) -->
+<aside class="w-[248px] h-screen fixed left-0 top-0 bg-[#111319] border-r border-[#252E3B] flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-[#252E3B]/60">
+<div class="w-9 h-9 rounded-[9px] bg-[#C6F432] flex items-center justify-center shadow-sm">
+<span class="font-manrope font-extrabold text-[15px] tracking-tight text-[#0A0D12] leading-none">FP</span>
+</div>
+<div>
+<div class="font-manrope font-bold text-[17px] tracking-tight text-[#F4F6F8] leading-tight">FynPet</div>
+<div class="text-[12px] text-[#A3AEBD] font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-[#C6F432] hover:bg-[#bbf020] text-[#0A0D12] font-semibold text-[14px] flex items-center justify-center gap-2 press-effect transition-all shadow-sm">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.39 8.26L21 9.27L16.2 13.97L17.5 20.6L12 17.27L6.5 20.6L7.8 13.97L3 9.27L9.61 8.26L12 2Z"></path>
+</svg>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Navigation Links -->
+<nav class="px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Dashboard</span>
+</a>
+<!-- Active Transactions Item -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1A212C] text-[#C6F432] text-[14px] font-semibold border border-[#252E3B] transition-all" href="#">
+<svg class="w-5 h-5 text-[#C6F432]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Transactions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Budgets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>M-Pesa Import</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync Status -->
+<div class="p-4 border-t border-[#252E3B]/60">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-[#34D399]"></span>
+<span class="text-[12px] text-[#A3AEBD] font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-9 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] text-[#F4F6F8] font-medium text-[13px] flex items-center justify-center transition-colors press-effect">
+        Sign in to sync
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrapper (offset by sidebar width 248px) -->
+<div class="pl-[248px] flex-1 flex flex-col min-w-0">
+<!-- Top Bar Header (72px) -->
+<header class="h-[72px] px-8 border-b border-[#252E3B] bg-[#111319]/90 sticky top-0 z-20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<h1 class="text-[20px] font-bold font-manrope text-[#F4F6F8]">Transactions</h1>
+<span class="text-[14px] text-[#A3AEBD] font-medium">/ 64 transactions</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search field in header -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-[#121720] border border-[#252E3B] text-[13px] text-[#F4F6F8] placeholder-[#7C8797] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Search transactions..." type="text"/>
+<svg class="w-4 h-4 text-[#7C8797] absolute left-3 top-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Sync Icon Button -->
+<button class="w-10 h-10 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors press-effect" title="Sync Status">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- User Avatar Initial -->
+<div class="w-10 h-10 rounded-full bg-[#1A212C] border border-[#252E3B] flex items-center justify-center font-manrope font-bold text-[14px] text-[#C6F432]">
+          Y
+        </div>
+</div>
+</header>
+<!-- Main Page Body -->
+<main class="p-8 max-w-[1192px] w-full"><div class="flex flex-col w-full gap-space-lg">
+<!-- Main Data Ledger Card (Level 1 Surface) -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-xl flex flex-col min-h-[720px] shadow-sm">
+<!-- Top Action & Meta Row -->
+<div class="flex items-center justify-between gap-4 pb-space-lg">
+<div class="flex flex-col gap-0.5">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">0 of 64 transactions</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">(filtered)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Stored locally on this device
+        </p>
+</div>
+<div class="flex items-center gap-3">
+<!-- Outlined Export CSV Action -->
+<button class="h-11 px-5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-semibold flex items-center gap-2 transition-colors press-effect" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Export CSV</span>
+</button>
+<!-- Electric Lime Primary CTA -->
+<button class="h-11 px-6 rounded-full bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-body-md text-body-md font-semibold flex items-center gap-2 transition-colors press-effect" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Add transaction</span>
+</button>
+</div>
+</div>
+<!-- Filter & Search Toolbar (Level 2 Elements) -->
+<div class="flex flex-col gap-space-md pt-2 pb-space-lg">
+<div class="flex items-center justify-between gap-4 flex-wrap">
+<!-- Segmented Filter Chips -->
+<div aria-label="Transaction Type Filters" class="flex items-center gap-2" role="group">
+<button class="h-8 px-4 rounded-full bg-primary-container text-on-primary-fixed font-body-md text-body-sm font-semibold flex items-center justify-center transition-colors" type="button">
+            All
+          </button>
+<button class="h-8 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-body-md text-body-sm font-medium transition-colors" type="button">
+            Income
+          </button>
+<button class="h-8 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-body-md text-body-sm font-medium transition-colors" type="button">
+            Expenses
+          </button>
+<button class="h-8 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-body-md text-body-sm font-medium transition-colors" type="button">
+            Savings
+          </button>
+<button class="h-8 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-body-md text-body-sm font-medium transition-colors" type="button">
+            Transfers
+          </button>
+</div>
+<!-- Search Input with Active Value 'xyz' and Advanced Filters Button -->
+<div class="flex items-center gap-3">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-10 pl-10 pr-9 rounded-xl bg-surface-container text-on-surface font-body-md text-body-md focus:outline-none focus:bg-surface-container-high transition-colors" id="ledger-search-input" placeholder="Filter by description..." type="text" value="xyz"/>
+<button aria-label="Clear typed query" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-surface-container-highest hover:bg-surface-bright flex items-center justify-center text-on-surface transition-colors" id="clear-input-btn" type="button">
+<span class="material-symbols-outlined text-[13px]">close</span>
+</button>
+</div>
+<!-- Secondary Filters Dropdown Trigger with Badge 2 -->
+<button class="h-10 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-medium flex items-center gap-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">tune</span>
+<span>Filters</span>
+<span class="w-5 h-5 rounded-full bg-surface-container-highest text-on-surface font-metric-regular text-body-sm flex items-center justify-center font-bold">
+              2
+            </span>
+</button>
+</div>
+</div>
+<!-- Applied Filters Status Bar -->
+<div class="flex items-center justify-between gap-4 py-2 px-1">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Active filters:</span>
+<!-- Search term chip -->
+<div class="inline-flex items-center gap-1.5 h-7 pl-3 pr-2 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm">
+<span>Search: <strong class="font-semibold text-primary">xyz</strong></span>
+<button class="w-4 h-4 rounded-full hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Remove search filter" type="button">
+<span class="material-symbols-outlined text-[13px]">close</span>
+</button>
+</div>
+<!-- Active secondary filter pills -->
+<div class="inline-flex items-center gap-1.5 h-7 pl-3 pr-2 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm">
+<span>This month</span>
+<button class="w-4 h-4 rounded-full hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Remove date filter" type="button">
+<span class="material-symbols-outlined text-[13px]">close</span>
+</button>
+</div>
+<div class="inline-flex items-center gap-1.5 h-7 pl-3 pr-2 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm">
+<span>Status: Verified</span>
+<button class="w-4 h-4 rounded-full hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Remove status filter" type="button">
+<span class="material-symbols-outlined text-[13px]">close</span>
+</button>
+</div>
+</div>
+<button class="font-body-sm text-body-sm text-primary-container hover:text-primary-fixed-dim font-semibold transition-colors" id="btn-clear-all-inline" type="button">
+          Clear all
+        </button>
+</div>
+</div>
+<!-- Subtle Ledger Table Headers (Visual Anchor for Desktop Ledger) -->
+<div class="grid grid-cols-12 gap-4 px-4 py-2.5 bg-surface-container rounded-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider select-none mb-auto">
+<div class="col-span-2">Date &amp; Time</div>
+<div class="col-span-4">Transaction / Party</div>
+<div class="col-span-2">Category</div>
+<div class="col-span-2">Reference</div>
+<div class="col-span-2 text-right">Amount (KES)</div>
+</div>
+<!-- Bespoke Zero State / No Results View (Vertically & Horizontally Centered) -->
+<div class="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center my-auto">
+<!-- Icon Container with Subtle Slate Framing -->
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant">search_off</span>
+</div>
+<!-- Primary Error/Empty Heading -->
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight mb-2">
+        No transactions match your search
+      </h2>
+<!-- Exact Required Copy Description -->
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm mb-8 leading-relaxed">
+        Try a different word or clear your filters.
+      </p>
+<!-- Clear search and filters CTA (Outlined 44px min height, font-14) -->
+<button class="min-h-[44px] px-6 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-semibold flex items-center justify-center gap-2 transition-colors press-effect shadow-sm" id="btn-clear-main" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">restart_alt</span>
+<span>Clear search and filters</span>
+</button>
+</div>
+<!-- Bottom Metadata Bar -->
+<div class="pt-6 mt-auto flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm px-1">
+<span>Query: “xyz” • 0 matches in local database</span>
+<span class="font-mono text-body-sm">KES ledger system v2.4</span>
+</div>
+</div>
+</div>
+<script>
+  (function () {
+    const input = document.getElementById('ledger-search-input');
+    const clearInputBtn = document.getElementById('clear-input-btn');
+    const clearMainBtn = document.getElementById('btn-clear-main');
+    const clearInlineBtn = document.getElementById('btn-clear-all-inline');
+
+    function resetFilters() {
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    if (clearInputBtn) clearInputBtn.addEventListener('click', resetFilters);
+    if (clearMainBtn) clearMainBtn.addEventListener('click', resetFilters);
+    if (clearInlineBtn) clearInlineBtn.addEventListener('click', resetFilters);
+  })();
+</script></main>
+</div>
+<!-- Bottom right preview tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-[#1A212C]/90 border border-[#252E3B] text-[11px] text-[#A3AEBD] font-medium flex items-center gap-1.5 shadow-lg backdrop-blur-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

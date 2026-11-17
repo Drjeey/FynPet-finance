@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FynPet</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#111319;color:#e1e2ea;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ffffff", "surface-container-low": "#191c21", "surface-container": "#1d2025", "error-container": "#93000a", "on-surface-variant": "#c4c9ae", "on-primary": "#283500", "tertiary-fixed": "#e0e0ff", "tertiary-container": "#e0e0ff", "on-secondary-container": "#00452e", "surface": "#111319", "on-surface": "#e1e2ea", "tertiary-fixed-dim": "#bdc2ff", "on-tertiary-container": "#4f5ac2", "surface-bright": "#36393f", "surface-dim": "#111319", "outline-variant": "#444934", "on-primary-fixed-variant": "#3b4d00", "background": "#111319", "inverse-surface": "#e1e2ea", "surface-container-lowest": "#0b0e13", "on-primary-fixed": "#161f00", "tertiary": "#ffffff", "surface-container-highest": "#32353b", "on-tertiary-fixed": "#000767", "error": "#ffb4ab", "secondary-fixed": "#68fcbf", "on-primary-container": "#556d00", "primary-fixed": "#c5f331", "secondary-fixed-dim": "#45dfa4", "on-tertiary": "#131e8c", "on-background": "#e1e2ea", "surface-tint": "#aad600", "primary-container": "#c5f331", "on-error": "#690005", "on-error-container": "#ffdad6", "surface-variant": "#32353b", "on-secondary-fixed-variant": "#005137", "outline": "#8e937a", "secondary-container": "#00bd85", "inverse-primary": "#506600", "inverse-on-surface": "#2e3036", "on-secondary": "#003825", "surface-container-high": "#272a30", "primary-fixed-dim": "#aad600", "on-tertiary-fixed-variant": "#2f3aa3", "on-secondary-fixed": "#002114", "secondary": "#45dfa4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1.25rem", "space-sm": "0.5rem", "space-md": "0.75rem", "space-lg": "1.25rem", "space-xs": "0.25rem", "space-xl": "1.5rem", "margin": "2rem" }, fontFamily: { "label-sm": ["Inter"], "display-currency": ["Manrope"], "metric-regular": ["Manrope"], "body-lg": ["Inter"], "headline-sm": ["Manrope"], "headline-lg": ["Manrope"], "metric-large": ["Manrope"], "body-md": ["Inter"], "headline-md": ["Manrope"], "body-sm": ["Inter"], "label-md": ["Inter"] }, fontSize: { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-currency": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "metric-regular": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-large": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "16px", "fontWeight": "500" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-fixed"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl pt-safe"><div class="h-14 px-4 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center font-headline-sm text-headline-sm font-extrabold text-surface tracking-tighter shrink-0 select-none">FP</div><div class="flex flex-col justify-center"><h1 class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">Dashboard</h1><span class="font-body-sm text-body-sm text-on-surface-variant font-medium mt-0.5 leading-none">Mon, 16 Nov</span></div></div><div class="flex items-center gap-1.5 shrink-0"><button aria-label="Ask Fyn AI" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">auto_awesome</span></button><button aria-label="Sync Data" class="w-11 h-11 rounded-full relative flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">sync</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-secondary-fixed pulse-sync-dot"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="px-4 py-1 flex items-center justify-end"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-label-sm font-medium tracking-wide bg-surface-container-highest/80 text-on-surface-variant">Sample data - design preview</span></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-28 bg-surface"><div class="flex flex-col w-full text-on-surface">
+<!-- Interactive State Switcher (Demo bar for UX validation) -->
+<div class="px-4 py-2 bg-surface-container-lowest flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+<span class="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider shrink-0">Demo views</span>
+<div class="flex items-center gap-1.5 shrink-0">
+<button class="px-2.5 py-1 rounded-full bg-primary-container text-surface font-label-sm text-[11px] font-semibold transition-all" id="viewStateDefault">
+        Active ledger
+      </button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[11px] font-medium hover:bg-surface-container-highest transition-all" id="viewStateEmpty">
+        Empty state
+      </button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[11px] font-medium hover:bg-surface-container-highest transition-all" id="viewStateNoResults">
+        No results
+      </button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-high text-primary-container font-label-sm text-[11px] font-medium flex items-center gap-1 hover:bg-surface-container-highest transition-all" id="openFilterSheetBtn">
+<span class="material-symbols-outlined text-[13px]">tune</span> Sheet
+      </button>
+</div>
+</div>
+<!-- Primary Content Area -->
+<div class="flex flex-col w-full px-4 pt-3 pb-6">
+<!-- Search Input (44px target) -->
+<div class="relative w-full mb-3">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full h-11 pl-11 pr-4 bg-surface-container rounded-xl font-body-lg text-[15px] text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-high transition-colors" id="transactionSearchInput" placeholder="Search transactions" type="search"/>
+</div>
+<!-- Filters Carousel & Filter Action Button -->
+<div class="flex items-center gap-2 mb-3">
+<div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 pr-1">
+<button class="h-9 px-4 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-label-md shrink-0 font-semibold shadow-sm transition-transform active:scale-95">
+          All
+        </button>
+<button class="h-9 px-4 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md shrink-0 transition-colors">
+          Income
+        </button>
+<button class="h-9 px-4 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md shrink-0 transition-colors">
+          Expenses
+        </button>
+<button class="h-9 px-4 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md shrink-0 transition-colors">
+          Savings
+        </button>
+<button class="h-9 px-4 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md shrink-0 transition-colors">
+          Transfers
+        </button>
+</div>
+<!-- Filters Drawer Trigger (44px) -->
+<button aria-label="Open filter options" class="h-11 px-3.5 rounded-xl bg-surface-container-high text-on-surface flex items-center gap-1.5 shrink-0 active:bg-surface-container-highest transition-colors" id="triggerFilterDrawer">
+<span class="material-symbols-outlined text-[19px]">tune</span>
+<span class="font-label-md text-label-md font-semibold">Filters</span>
+<span class="w-5 h-5 rounded-full bg-primary-container text-on-primary-fixed font-label-sm text-[11px] font-bold flex items-center justify-center ml-0.5">2</span>
+</button>
+</div>
+<!-- Active Filter Chips Row -->
+<div class="flex flex-wrap items-center gap-1.5 mb-4" id="activeFilterTags">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+<span>Food &amp; Groceries</span>
+<button aria-label="Remove filter Food and Groceries" class="hover:text-error transition-colors flex items-center">
+<span class="material-symbols-outlined text-[15px]">close</span>
+</button>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+<span>Nov 2026</span>
+<button aria-label="Remove filter Nov 2026" class="hover:text-error transition-colors flex items-center">
+<span class="material-symbols-outlined text-[15px]">close</span>
+</button>
+</div>
+<button class="text-on-surface-variant hover:text-primary-container font-label-sm text-[12px] font-semibold px-2 py-1 transition-colors" id="clearAllFiltersBtn">
+        Clear all
+      </button>
+</div>
+<!-- VIEW 1: Main Ledger List -->
+<div class="flex flex-col w-full space-y-4" id="defaultLedgerView">
+<!-- Group: Today -->
+<div class="flex flex-col w-full">
+<div class="flex items-center justify-between pb-2">
+<span class="font-headline-sm text-[14px] text-on-surface font-bold">Today</span>
+<span class="font-label-sm text-[12px] text-on-surface-variant font-medium">16 Nov 2026</span>
+</div>
+<div class="flex flex-col bg-surface-container rounded-2xl overflow-hidden divide-y divide-surface-container-low/50">
+<!-- Row 1: Food & Groceries -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">Naivas Westlands</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Food &amp; Groceries · Imported</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-error tracking-tight whitespace-nowrap">-KES 4,850</span>
+</div>
+</div>
+<!-- Row 2: Transport -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[20px]">directions_car</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">Uber trip</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Transport · Imported</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-error tracking-tight whitespace-nowrap">-KES 950</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: Yesterday -->
+<div class="flex flex-col w-full">
+<div class="flex items-center justify-between pb-2">
+<span class="font-headline-sm text-[14px] text-on-surface font-bold">Yesterday</span>
+<span class="font-label-sm text-[12px] text-on-surface-variant font-medium">15 Nov 2026</span>
+</div>
+<div class="flex flex-col bg-surface-container rounded-2xl overflow-hidden divide-y divide-surface-container-low/50">
+<!-- Row 3: Utilities -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">KPLC token purchase</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Utilities · Imported</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-error tracking-tight whitespace-nowrap">-KES 2,000</span>
+</div>
+</div>
+<!-- Row 4: Income -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">Salary - Tech Services Ltd</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Income · Manual</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-secondary tracking-tight whitespace-nowrap">+KES 85,000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: 14 Nov -->
+<div class="flex flex-col w-full">
+<div class="flex items-center justify-between pb-2">
+<span class="font-headline-sm text-[14px] text-on-surface font-bold">14 Nov</span>
+<span class="font-label-sm text-[12px] text-on-surface-variant font-medium">Saturday</span>
+</div>
+<div class="flex flex-col bg-surface-container rounded-2xl overflow-hidden divide-y divide-surface-container-low/50">
+<!-- Row 5: Entertainment -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[20px]">movie</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">Netflix subscription</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Entertainment · Imported</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-error tracking-tight whitespace-nowrap">-KES 1,100</span>
+</div>
+</div>
+<!-- Row 6: Savings -->
+<div class="h-16 px-3.5 flex items-center justify-between active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-3 min-w-0 pr-2">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary-fixed-dim shrink-0">
+<span class="material-symbols-outlined text-[20px]">savings</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-[14px] font-semibold text-on-surface truncate">M-Shwari deposit</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">Savings · Manual</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-headline-sm text-[15px] font-bold text-tertiary-fixed-dim tracking-tight whitespace-nowrap">KES 10,000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Ledger Summary & Pagination Trigger -->
+<div class="flex flex-col items-center justify-center pt-3 pb-2 space-y-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 6 of 64 transactions</span>
+<button class="w-full h-11 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+          Load more
+        </button>
+</div>
+</div>
+<!-- VIEW 2: Empty State (Initially Hidden) -->
+<div class="hidden flex-col items-center text-center py-10 px-2" id="emptyTransactionsView">
+<div class="w-16 h-16 rounded-3xl bg-surface-container-high flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined text-[36px]">receipt_long</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-1.5">No transactions yet</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mb-6">
+        FynPet operates fully on device. Record your spending manually or import an M-Pesa SMS statement file.
+      </p>
+<div class="flex flex-col w-full max-w-xs gap-2.5">
+<button class="w-full h-12 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-label-md font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">add</span>
+          Add your first transaction
+        </button>
+<button class="w-full h-12 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[20px]">upload_file</span>
+          Import M-Pesa statement
+        </button>
+</div>
+</div>
+<!-- VIEW 3: Search No Results State (Initially Hidden) -->
+<div class="hidden flex-col items-center text-center py-12 px-3" id="noResultsTransactionsView">
+<div class="w-16 h-16 rounded-3xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-[32px]">manage_search</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-1.5">No transactions match your search</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mb-6">
+        We couldn’t find anything matching "<span class="text-on-surface font-semibold" id="activeSearchQueryEcho">xyz</span>". Try checking for typos or resetting active category filters.
+      </p>
+<button class="h-11 px-5 rounded-full bg-surface-container-high text-primary-container font-label-md text-label-md font-semibold hover:bg-surface-container-highest transition-colors" id="resetSearchFiltersBtn">
+        Clear search and filters
+      </button>
+</div>
+</div>
+<!-- Mobile Bottom Sheet: Advanced Filters (Modal Overlay) -->
+<div class="fixed inset-0 z-50 bg-surface-container-lowest/80 hidden transition-opacity" id="filterModalBackdrop">
+<div class="absolute bottom-0 left-0 right-0 max-h-[777px] bg-surface-container rounded-t-3xl flex flex-col overflow-hidden transform translate-y-full transition-transform duration-300" id="filterModalSheet">
+<!-- Sheet Handlebar -->
+<div class="w-full flex justify-center pt-3 pb-1 shrink-0">
+<div class="w-10 h-1.5 bg-surface-container-highest rounded-full"></div>
+</div>
+<!-- Sheet Header -->
+<div class="px-5 py-3 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[22px]">tune</span>
+<h2 class="font-headline-sm text-[18px] font-bold text-on-surface">Filters</h2>
+</div>
+<button aria-label="Close sheet" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" id="closeFilterSheetBtn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Sheet Body (Scrollable) -->
+<div class="flex-1 overflow-y-auto px-5 py-2 space-y-6">
+<!-- Section: Date Range -->
+<div class="flex flex-col space-y-2.5">
+<label class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Date Range</label>
+<!-- Quick date pills -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+<button class="h-8 px-3 rounded-full bg-primary-container text-on-primary-fixed font-label-sm text-[12px] font-bold shrink-0">This month</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[12px] font-medium shrink-0 hover:bg-surface-container-highest">Last month</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[12px] font-medium shrink-0 hover:bg-surface-container-highest">Last 3 months</button>
+</div>
+<!-- Explicit Date Pickers -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<div class="flex flex-col bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="font-body-sm text-[10px] text-on-surface-variant uppercase font-medium">From</span>
+<input class="bg-transparent text-on-surface font-label-md text-label-md mt-0.5 focus:outline-none" type="date" value="2026-11-01"/>
+</div>
+<div class="flex flex-col bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="font-body-sm text-[10px] text-on-surface-variant uppercase font-medium">To</span>
+<input class="bg-transparent text-on-surface font-label-md text-label-md mt-0.5 focus:outline-none" type="date" value="2026-11-16"/>
+</div>
+</div>
+</div>
+<!-- Section: Approved Categories (Strict 10 Categories) -->
+<div class="flex flex-col space-y-2.5 pb-2">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Categories (10 Approved)</label>
+<span class="font-label-sm text-[11px] text-primary-container">Select all</span>
+</div>
+<div class="grid grid-cols-1 gap-1.5">
+<!-- 1. Food & Groceries (Checked) -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary-container">shopping_bag</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Food &amp; Groceries</span>
+</div>
+<input checked="" class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 2. Transport -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-secondary">directions_car</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Transport</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 3. Utilities -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary-container">bolt</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Utilities</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 4. Entertainment -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">movie</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Entertainment</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 5. Health -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-error">medical_services</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Health</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 6. Shopping -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed-dim">storefront</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Shopping</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 7. Savings -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed-dim">savings</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Savings</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 8. Income -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-secondary">payments</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Income</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 9. Transfer -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">swap_horiz</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Transfer</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+<!-- 10. Other -->
+<label class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-surface-container-low cursor-pointer active:bg-surface-container-high">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">more_horiz</span>
+<span class="font-body-md text-[14px] text-on-surface font-medium">Other</span>
+</div>
+<input class="w-5 h-5 rounded accent-primary-container" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Sheet Footer Actions -->
+<div class="p-4 bg-surface-container-high/60 flex items-center gap-3 shrink-0">
+<button class="flex-1 h-12 rounded-full bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-highest transition-colors" id="resetFiltersSheetBtn">
+          Reset
+        </button>
+<button class="flex-1 h-12 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-label-md font-bold transition-transform active:scale-95 shadow-sm" id="applyFiltersSheetBtn">
+          Apply filters (2)
+        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Client-side Micro-Interactions Script -->
+<script>
+  (function() {
+    // DOM Elements
+    const defaultView = document.getElementById('defaultLedgerView');
+    const emptyView = document.getElementById('emptyTransactionsView');
+    const noResultsView = document.getElementById('noResultsTransactionsView');
+    const activeFiltersTags = document.getElementById('activeFilterTags');
+
+    const btnDefault = document.getElementById('viewStateDefault');
+    const btnEmpty = document.getElementById('viewStateEmpty');
+    const btnNoResults = document.getElementById('viewStateNoResults');
+
+    const filterBackdrop = document.getElementById('filterModalBackdrop');
+    const filterSheet = document.getElementById('filterModalSheet');
+    const triggerFilterDrawer = document.getElementById('triggerFilterDrawer');
+    const openFilterSheetBtn = document.getElementById('openFilterSheetBtn');
+    const closeFilterSheetBtn = document.getElementById('closeFilterSheetBtn');
+    const applyFiltersSheetBtn = document.getElementById('applyFiltersSheetBtn');
+    const resetFiltersSheetBtn = document.getElementById('resetFiltersSheetBtn');
+
+    const searchInput = document.getElementById('transactionSearchInput');
+    const clearAllFiltersBtn = document.getElementById('clearAllFiltersBtn');
+    const resetSearchFiltersBtn = document.getElementById('resetSearchFiltersBtn');
+    const searchQueryEcho = document.getElementById('activeSearchQueryEcho');
+
+    function setActiveTab(selectedBtn) {
+      [btnDefault, btnEmpty, btnNoResults].forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'text-surface', 'font-semibold');
+        btn.classList.add('bg-surface-container-high', 'text-on-surface', 'font-medium');
+      });
+      selectedBtn.classList.remove('bg-surface-container-high', 'text-on-surface', 'font-medium');
+      selectedBtn.classList.add('bg-primary-container', 'text-surface', 'font-semibold');
+    }
+
+    function showLedger() {
+      defaultView.classList.remove('hidden');
+      emptyView.classList.add('hidden');
+      noResultsView.classList.add('hidden');
+      activeFiltersTags.classList.remove('hidden');
+      setActiveTab(btnDefault);
+    }
+
+    function showEmpty() {
+      defaultView.classList.add('hidden');
+      emptyView.classList.remove('hidden');
+      noResultsView.classList.add('hidden');
+      activeFiltersTags.classList.add('hidden');
+      setActiveTab(btnEmpty);
+    }
+
+    function showNoResults(query = 'xyz') {
+      defaultView.classList.add('hidden');
+      emptyView.classList.add('hidden');
+      noResultsView.classList.remove('hidden');
+      activeFiltersTags.classList.remove('hidden');
+      if (searchQueryEcho) searchQueryEcho.textContent = query;
+      setActiveTab(btnNoResults);
+    }
+
+    function openFilters() {
+      filterBackdrop.classList.remove('hidden');
+      setTimeout(() => {
+        filterSheet.classList.remove('translate-y-full');
+      }, 10);
+    }
+
+    function closeFilters() {
+      filterSheet.classList.add('translate-y-full');
+      setTimeout(() => {
+        filterBackdrop.classList.add('hidden');
+      }, 250);
+    }
+
+    // View state listeners
+    btnDefault.addEventListener('click', showLedger);
+    btnEmpty.addEventListener('click', showEmpty);
+    btnNoResults.addEventListener('click', () => showNoResults('xyz'));
+
+    // Filter drawer modal listeners
+    triggerFilterDrawer.addEventListener('click', openFilters);
+    openFilterSheetBtn.addEventListener('click', openFilters);
+    closeFilterSheetBtn.addEventListener('click', closeFilters);
+    applyFiltersSheetBtn.addEventListener('click', () => {
+      closeFilters();
+      showLedger();
+    });
+    resetFiltersSheetBtn.addEventListener('click', () => {
+      closeFilters();
+      showLedger();
+    });
+    filterBackdrop.addEventListener('click', (e) => {
+      if (e.target === filterBackdrop) closeFilters();
+    });
+
+    // Search simulation
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (val.length > 2) {
+        showNoResults(val);
+      } else if (val.length === 0) {
+        showLedger();
+      }
+    });
+
+    // Reset handlers
+    clearAllFiltersBtn.addEventListener('click', () => {
+      activeFiltersTags.classList.add('opacity-40');
+      setTimeout(() => {
+        activeFiltersTags.classList.add('hidden');
+      }, 150);
+    });
+
+    resetSearchFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      showLedger();
+    });
+  })();
+</script></main><nav class="fixed bottom-3 left-4 right-4 z-50 pb-safe" data-active-classes="text-primary-container"><div class="h-16 rounded-full bg-surface-container-high flex items-center justify-between px-2" style="background-color: #1A212C; border: 1px solid #252E3B;"><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="font-label-sm text-[12px] mt-0.5">Home</span></a><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="transactions" href="#"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-sm text-[12px] mt-0.5">Transactions</span></a><div class="flex items-center justify-center px-1"><a class="w-13 h-13 w-[52px] h-[52px] rounded-full bg-primary-container text-surface flex items-center justify-center transition-transform active:scale-95" data-path="add-transaction" href="#"><span class="material-symbols-outlined text-[28px] font-bold text-surface">add</span></a></div><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="budgets" href="#"><span class="material-symbols-outlined text-[22px]">pie_chart</span><span class="font-label-sm text-[12px] mt-0.5">Budgets</span></a><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="more" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-[12px] mt-0.5">More</span></a></div></nav></body></html>

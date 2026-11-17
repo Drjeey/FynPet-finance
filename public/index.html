@@ -953,35 +953,39 @@ thead { position:sticky; top:0; z-index:10; }
 
     <!-- TRANSACTIONS -->
     <div class="page" id="page-transactions">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Transactions</div><div class="ph-sub" id="tx-count-sub">Loading…</div></div>
-        <div class="ph-acts"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-primary" data-click="openAddTx">Add transaction</button></div>
-      </div>
-      <div class="table-card">
-        <div class="tt">
-          <div class="tt-title">All Transactions</div>
-          <div class="filter-row" id="tx-filter-row">
-            <button class="fb on" data-click="setTxFilter" data-click-args='["all","$el"]'>All</button>
-            <button class="fb" data-click="setTxFilter" data-click-args='["income","$el"]'>Income</button>
-            <button class="fb" data-click="setTxFilter" data-click-args='["expense","$el"]'>Expenses</button>
-            <button class="fb" data-click="setTxFilter" data-click-args='["savings","$el"]'>Savings</button>
-            <button class="fb" data-click="setTxFilter" data-click-args='["transfer","$el"]'>Transfers</button>
-          </div>
-          <div class="search-wrap"><span style="color:var(--ink3);font-size:.75rem"><span style="font-family:var(--fm);font-size:.8rem;color:var(--ink3)">⌕</span></span><input type="text" id="tx-search" placeholder="Search…" data-input="searchTx" data-input-args='["$value"]'></div>
+      <div class="tx-head">
+        <p class="muted" id="tx-count-sub">Loading…</p>
+        <div class="tx-head-acts">
+          <button class="btn-secondary" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span>Export CSV</button>
+          <button class="btn-primary" data-click="openAddTx"><span data-icon="plus" aria-hidden="true"></span>Add transaction</button>
         </div>
-        <div id="full-tx-table"></div>
-        <div class="tf"><div class="tf-info" id="tx-pg-info"></div><div class="pag" id="tx-pag"></div></div>
       </div>
+      <section class="card tx-card" aria-label="Transactions">
+        <div class="tx-toolbar">
+          <div class="seg tx-types" role="group" aria-label="Transaction type" id="tx-filter-row">
+            <button type="button" class="pb on" aria-pressed="true" data-click="setTxFilter" data-click-args='["all","$el"]'>All</button>
+            <button type="button" class="pb" aria-pressed="false" data-click="setTxFilter" data-click-args='["income","$el"]'>Income</button>
+            <button type="button" class="pb" aria-pressed="false" data-click="setTxFilter" data-click-args='["expense","$el"]'>Expenses</button>
+            <button type="button" class="pb" aria-pressed="false" data-click="setTxFilter" data-click-args='["savings","$el"]'>Savings</button>
+            <button type="button" class="pb" aria-pressed="false" data-click="setTxFilter" data-click-args='["transfer","$el"]'>Transfers</button>
+          </div>
+          <div class="tx-search"><span data-icon="search" aria-hidden="true"></span><input type="search" id="tx-search" aria-label="Search transactions" placeholder="Search transactions" autocomplete="off" data-input="searchTx" data-input-args='["$value"]'></div>
+          <button type="button" class="btn-secondary tx-filter-btn" data-click="openTxFilters" aria-haspopup="dialog"><span data-icon="sliders" aria-hidden="true"></span>Filters<span class="count-badge" id="tx-filter-badge" hidden></span></button>
+        </div>
+        <div class="applied" id="tx-applied" hidden></div>
+        <div id="full-tx-table"></div>
+        <div class="tx-foot" id="tx-foot"><div id="tx-pg-info"></div><div id="tx-pag" class="pag"></div></div>
+      </section>
     </div>
 
     <!-- BUDGETS -->
     <div class="page" id="page-budgets">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Budgets</div><div class="ph-sub">Monthly category spending limits</div></div>
-        <div class="ph-acts"><button class="btn-primary" data-click="openAddBudget">+ New Budget</button></div>
+      <div class="bud-head">
+        <h2 class="bud-month" id="bud-month">This month</h2>
+        <button class="btn-primary" data-click="openAddBudget"><span data-icon="plus" aria-hidden="true"></span>New budget</button>
       </div>
-      <div class="stats-grid" id="budget-stats" style="grid-template-columns:repeat(3,1fr)"></div>
-      <div class="budget-grid" id="budget-grid" style="margin-top:18px"></div>
+      <p class="card bud-summary" id="budget-summary" hidden></p>
+      <div class="bud-grid" id="budget-grid"></div>
     </div>
 
     <!-- ANALYTICS -->
@@ -1293,15 +1297,57 @@ thead { position:sticky; top:0; z-index:10; }
 </div>
 
 <div class="modal-overlay" id="budget-modal">
-  <div class="modal">
-    <div class="modal-hdr"><div class="modal-title" id="budget-modal-title">New Budget</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["budget-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
-<div class="modal-body">    <div class="form-row">
-      <div class="form-grp"><label class="form-lbl" for="b-cat">Category</label><select class="form-input" id="b-cat"><option value="food">Food & Groceries</option><option value="transport">Transport</option><option value="utilities">Utilities</option><option value="entertainment">Entertainment</option><option value="health">Health</option><option value="shopping">Shopping</option><option value="savings">Savings</option><option value="other">Other</option></select></div>
-      <div class="form-grp"><label class="form-lbl" for="b-limit">Monthly Limit (KES)</label><input class="form-input" type="number" id="b-limit" placeholder="0.00" min="0"></div>
+  <div class="modal add-modal">
+    <div class="modal-hdr"><div class="modal-title" id="budget-modal-title">New budget</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["budget-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <div class="form-grp"><label class="form-lbl" for="b-cat">Category</label><select class="form-input" id="b-cat" data-change="budgetCatChanged" aria-describedby="b-cat-err"></select><p class="field-err" id="b-cat-err" role="alert" hidden></p></div>
+      <div class="form-grp"><label class="form-lbl" for="b-limit">Monthly limit (KES)</label><input class="form-input" type="text" id="b-limit" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="b-limit-err b-hint" data-input="budgetLimitInput" data-keydown="budgetEnter" data-keydown-args='["$event"]'><p class="field-err" id="b-limit-err" role="alert" hidden></p>
+        <p class="field-hint" id="b-hint" hidden><span id="b-hint-text"></span> <button type="button" class="link" data-click="useLastMonth">Use this amount</button></p></div>
     </div>
-</div>    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget">Save Budget</button></div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget"><span data-icon="check" aria-hidden="true"></span><span id="b-save-label">Create budget</span></button></div>
   </div>
 </div>
+
+<div class="modal-overlay" id="budget-raise">
+  <div class="modal add-modal raise-modal">
+    <div class="modal-hdr"><div class="modal-title" id="raise-title">Raise limit</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["budget-raise"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <p class="muted" id="raise-info"></p>
+      <div class="form-grp"><label class="form-lbl" for="raise-limit">New monthly limit (KES)</label><input class="form-input" type="text" id="raise-limit" inputmode="decimal" autocomplete="off" aria-describedby="raise-err" data-input="raiseInput" data-keydown="raiseEnter" data-keydown-args='["$event"]'><p class="field-err" id="raise-err" role="alert" hidden></p></div>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-raise"]'>Cancel</button><button class="btn-primary" data-click="saveRaise">Save</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="budget-actions">
+  <div class="modal choice-modal">
+    <div class="modal-hdr"><div class="modal-title" id="ba-title">Budget</div><button class="modal-close" aria-label="Close" data-click="closeModal" data-click-args='["budget-actions"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <button class="choice-row" data-click="baEdit"><span class="choice-ico" data-icon="edit" aria-hidden="true"></span><span class="choice-text"><b>Edit</b></span></button>
+      <button class="choice-row danger" data-click="baDelete"><span class="choice-ico danger" data-icon="delete" aria-hidden="true"></span><span class="choice-text"><b>Delete</b></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="tx-filters">
+  <div class="modal filters-modal">
+    <div class="modal-hdr"><div class="modal-title" id="tx-filters-title">Filters</div><button class="modal-close" aria-label="Close filters" data-click="closeModal" data-click-args='["tx-filters"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <fieldset class="f-sec"><legend>Date range</legend>
+        <div class="date-pair"><label class="form-lbl" for="tf-from">From<input class="form-input" type="date" id="tf-from"></label><label class="form-lbl" for="tf-to">To<input class="form-input" type="date" id="tf-to"></label></div>
+        <div class="quick-pills">
+          <button type="button" class="chip-btn" data-click="txQuickRange" data-click-args='["month"]'>This month</button>
+          <button type="button" class="chip-btn" data-click="txQuickRange" data-click-args='["last-month"]'>Last month</button>
+          <button type="button" class="chip-btn" data-click="txQuickRange" data-click-args='["3m"]'>Last 3 months</button>
+        </div>
+      </fieldset>
+      <fieldset class="f-sec"><legend>Category</legend><div class="cat-checks" id="tf-cats"></div></fieldset>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="txResetFilters">Reset</button><button class="btn-primary" data-click="txApplyFilters">Apply filters</button></div>
+  </div>
+</div>
+
+<div id="row-menu" class="row-menu" role="menu" hidden></div>
 
 <div class="modal-overlay" id="ai-consent-modal"><div class="modal" style="max-width:420px"><div class="modal-hdr"><h2 class="modal-title" id="consent-title">Before you use AI</h2><button class="modal-close" aria-label="Close without agreeing" data-click="answerAiConsent" data-click-args='[false]'><span data-icon="close" aria-hidden="true"></span></button></div><div class="modal-body consent-body"><p>FynPet uses Anthropic to answer questions and extract transactions from M-Pesa statements.</p><section><h3>Advisor questions</h3><p>Your profile name, monthly totals, budgets and up to 10 recent transaction summaries are sent through Netlify to Anthropic.</p></section><section><h3>Statement import</h3><p>The PDF opens locally. Extracted text, including dates, amounts and merchant or counterparty names, is sent through Netlify to Anthropic after consent.</p></section><section><h3>Your choice</h3><p>Phone numbers are removed before Anthropic processing. You can use manual records and CSV export without AI. Turn off consent in Settings at any time.</p></section></div><div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>Agree and continue</button></div></div></div>
 

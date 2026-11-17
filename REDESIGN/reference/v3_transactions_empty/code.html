@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>Transactions - desktop</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              card: '#121720',
+              raised: '#1A212C',
+              border: '#252E3B',
+              hover: '#1e2634'
+            },
+            fyn: {
+              lime: '#C6F432',
+              limeDark: '#0A0D12',
+              mint: '#34D399',
+              coral: '#FB7185',
+              indigo: '#818CF8',
+              amber: '#FBBF24',
+              text: '#F4F6F8',
+              secondary: '#A3AEBD',
+              tertiary: '#7C8797'
+            }
+          },
+          fontFamily: {
+            manrope: ['Manrope', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #111319;
+      color: #F4F6F8;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .numeral {
+      font-family: 'Manrope', sans-serif;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+    }
+    .action-btn {
+      opacity: 0;
+      transition: opacity 180ms ease-out, transform 150ms ease-out;
+    }
+    tr:hover .action-btn, tr:focus-within .action-btn {
+      opacity: 1;
+    }
+    .press-effect:active {
+      transform: translateY(1px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/></head>
+<body class="min-h-screen bg-[#111319] flex">
+<!-- Fixed Left Sidebar (Full viewport height 248px) -->
+<aside class="w-[248px] h-screen fixed left-0 top-0 bg-[#111319] border-r border-[#252E3B] flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-[#252E3B]/60">
+<div class="w-9 h-9 rounded-[9px] bg-[#C6F432] flex items-center justify-center shadow-sm">
+<span class="font-manrope font-extrabold text-[15px] tracking-tight text-[#0A0D12] leading-none">FP</span>
+</div>
+<div>
+<div class="font-manrope font-bold text-[17px] tracking-tight text-[#F4F6F8] leading-tight">FynPet</div>
+<div class="text-[12px] text-[#A3AEBD] font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-[#C6F432] hover:bg-[#bbf020] text-[#0A0D12] font-semibold text-[14px] flex items-center justify-center gap-2 press-effect transition-all shadow-sm">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.39 8.26L21 9.27L16.2 13.97L17.5 20.6L12 17.27L6.5 20.6L7.8 13.97L3 9.27L9.61 8.26L12 2Z"></path>
+</svg>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Navigation Links -->
+<nav class="px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Dashboard</span>
+</a>
+<!-- Active Transactions Item -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1A212C] text-[#C6F432] text-[14px] font-semibold border border-[#252E3B] transition-all" href="#">
+<svg class="w-5 h-5 text-[#C6F432]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Transactions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Budgets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>M-Pesa Import</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync Status -->
+<div class="p-4 border-t border-[#252E3B]/60">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-[#34D399]"></span>
+<span class="text-[12px] text-[#A3AEBD] font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-9 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] text-[#F4F6F8] font-medium text-[13px] flex items-center justify-center transition-colors press-effect">
+        Sign in to sync
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrapper (offset by sidebar width 248px) -->
+<div class="pl-[248px] flex-1 flex flex-col min-w-0">
+<!-- Top Bar Header (72px) -->
+<header class="h-[72px] px-8 border-b border-[#252E3B] bg-[#111319]/90 sticky top-0 z-20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<h1 class="text-[20px] font-bold font-manrope text-[#F4F6F8]">Transactions</h1>
+<span class="text-[14px] text-[#A3AEBD] font-medium">/ 64 transactions</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search field in header -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-[#121720] border border-[#252E3B] text-[13px] text-[#F4F6F8] placeholder-[#7C8797] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Search transactions..." type="text"/>
+<svg class="w-4 h-4 text-[#7C8797] absolute left-3 top-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Sync Icon Button -->
+<button class="w-10 h-10 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors press-effect" title="Sync Status">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- User Avatar Initial -->
+<div class="w-10 h-10 rounded-full bg-[#1A212C] border border-[#252E3B] flex items-center justify-center font-manrope font-bold text-[14px] text-[#C6F432]">
+          Y
+        </div>
+</div>
+</header>
+<!-- Main Page Body -->
+<main class="p-8 max-w-[1192px] w-full"><div class="flex flex-col w-full">
+<div class="w-full bg-surface-container-low rounded-xl p-space-xl shadow-xl relative overflow-hidden">
+<!-- Card Top Header Row -->
+<div class="flex items-center justify-between pb-space-lg">
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-sm text-headline-sm text-primary">0 transactions</span>
+<span class="text-surface-container-highest select-none">/</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Stored locally on this device</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Offline KES ledger ready for initial entries</p>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Disabled Export Action -->
+<button class="h-11 px-5 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center gap-2 cursor-not-allowed opacity-50 select-none" disabled="" title="No data to export">
+<span class="material-symbols-outlined text-body-lg">download</span>
+<span>Export CSV</span>
+</button>
+<!-- Primary Add Transaction -->
+<button class="h-11 px-6 rounded-full bg-primary-container text-surface-container-lowest font-headline-sm text-label-md font-semibold flex items-center gap-2 hover:bg-primary-fixed-dim transition-all shadow-md active:translate-y-px" id="btn-add-primary">
+<span class="material-symbols-outlined text-body-lg font-bold">add</span>
+<span>Add transaction</span>
+</button>
+</div>
+</div>
+<!-- Disabled Ledger Filter Toolbar -->
+<div class="w-full py-space-md flex items-center justify-between gap-space-lg opacity-40 pointer-events-none select-none">
+<!-- Filter Chips Group -->
+<div class="flex items-center gap-2">
+<span class="h-8 px-4 rounded-full bg-primary-container text-surface-container-lowest font-label-md text-label-md font-semibold flex items-center">
+          All
+        </span>
+<span class="h-8 px-4 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center">
+          Income
+        </span>
+<span class="h-8 px-4 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center">
+          Expenses
+        </span>
+<span class="h-8 px-4 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center">
+          Savings
+        </span>
+<span class="h-8 px-4 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center">
+          Transfers
+        </span>
+</div>
+<!-- Search & Advanced Filter Controls -->
+<div class="flex items-center gap-space-md flex-1 max-w-md justify-end">
+<div class="relative w-64">
+<input class="w-full h-9 pl-9 pr-4 rounded-xl bg-surface-container text-outline placeholder-outline font-body-sm text-body-sm cursor-not-allowed" disabled="" placeholder="Search transactions..." type="text"/>
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-outline text-body-lg">search</span>
+</div>
+<button class="h-9 px-4 rounded-full bg-surface-container text-outline font-label-md text-label-md flex items-center gap-1.5 cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-body-md">tune</span>
+<span>Filters</span>
+</button>
+</div>
+</div>
+<!-- Empty State Interior Workspace -->
+<div class="w-full py-20 my-space-md rounded-xl bg-surface-container-lowest flex flex-col items-center justify-center text-center relative">
+<!-- Subtle Decorative Grid Background Elements -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-surface-container/20 to-transparent pointer-events-none rounded-xl"></div>
+<!-- Centered Structural Icon Graphic -->
+<div class="relative mb-6 z-10">
+<div class="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center text-outline shadow-inner">
+<span class="material-symbols-outlined text-[36px]" style="font-variation-settings: 'FILL' 0, 'wght' 300;">receipt_long</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-surface-container-highest text-primary-container absolute -bottom-1 -right-1 flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-body-md font-bold">add</span>
+</div>
+</div>
+<!-- Text Messaging -->
+<div class="max-w-[420px] z-10 flex flex-col items-center">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight mb-2">
+          No transactions yet
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-8">
+          Add one yourself or import an M-Pesa statement. Records are saved on this device.
+        </p>
+<!-- Centered Call To Actions -->
+<div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+<!-- Primary First Action -->
+<button class="w-full sm:w-auto min-h-[44px] px-6 rounded-full bg-primary-container text-surface-container-lowest font-headline-sm text-label-md font-semibold flex items-center justify-center gap-2 hover:bg-primary-fixed-dim transition-all shadow-md active:translate-y-px" id="btn-add-empty">
+<span class="material-symbols-outlined text-body-lg font-bold">add</span>
+<span>+ Add your first transaction</span>
+</button>
+<!-- Secondary M-Pesa Import Action -->
+<button class="w-full sm:w-auto min-h-[44px] px-6 rounded-full bg-surface-container text-primary font-label-md text-label-md font-medium flex items-center justify-center gap-2 hover:bg-surface-container-high transition-all active:translate-y-px" id="btn-mpesa-import">
+<span class="material-symbols-outlined text-body-lg text-secondary">upload_file</span>
+<span>Import M-Pesa statement</span>
+</button>
+</div>
+</div>
+<!-- Quick Ledger Guidance Metadata Footprint -->
+<div class="mt-14 pt-6 flex items-center gap-8 text-outline font-body-sm text-body-sm z-10 select-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-body-md text-secondary">sync_saved_locally</span>
+<span>Zero cloud dependency</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-body-md text-secondary">lock_outline</span>
+<span>Private on-device storage</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-body-md text-secondary">format_list_bulleted</span>
+<span>Direct KES reconciliation</span>
+</div>
+</div>
+</div>
+<!-- Supplementary Information Bento Hint Cards -->
+<div class="grid grid-cols-3 gap-space-lg pt-space-sm">
+<div class="p-space-lg rounded-xl bg-surface-container flex flex-col justify-between">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Fast entry</span>
+<span class="material-symbols-outlined text-body-lg text-outline">bolt</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Log cash expenditures, transfers, and split charges in seconds with precise KES denominations.
+        </p>
+</div>
+<div class="p-space-lg rounded-xl bg-surface-container flex flex-col justify-between">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">M-Pesa sync</span>
+<span class="material-symbols-outlined text-body-lg text-outline">description</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Parse standard Safaricom PDF or SMS statement exports locally without sharing credentials.
+        </p>
+</div>
+<div class="p-space-lg rounded-xl bg-surface-container flex flex-col justify-between">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total privacy</span>
+<span class="material-symbols-outlined text-body-lg text-outline">verified_user</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Your personal data stays strictly on this machine until you deliberately sign in to sync.
+        </p>
+</div>
+</div>
+</div>
+<!-- Interactive Modal Mock for '+ Add transaction' -->
+<div class="fixed inset-0 bg-surface-container-lowest/80 z-50 hidden items-center justify-center p-4" id="add-modal">
+<div class="w-full max-w-lg rounded-xl bg-surface-container-low p-6 shadow-2xl relative">
+<div class="flex items-center justify-between pb-4 mb-4 bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-headline-sm">add_circle</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">New transaction</h3>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center hover:text-primary" id="modal-close">
+<span class="material-symbols-outlined text-body-lg">close</span>
+</button>
+</div>
+<form class="space-y-4" onsubmit="event.preventDefault(); document.getElementById('add-modal').classList.add('hidden');">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-1">Transaction type</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="h-10 rounded-xl bg-surface-container flex items-center justify-center gap-2 cursor-pointer text-primary font-label-md text-label-md has-[:checked]:bg-primary-container has-[:checked]:text-surface-container-lowest">
+<input checked="" class="hidden" name="tx_type" type="radio" value="expense"/>
+<span>Expense</span>
+</label>
+<label class="h-10 rounded-xl bg-surface-container flex items-center justify-center gap-2 cursor-pointer text-primary font-label-md text-label-md has-[:checked]:bg-primary-container has-[:checked]:text-surface-container-lowest">
+<input class="hidden" name="tx_type" type="radio" value="income"/>
+<span>Income</span>
+</label>
+<label class="h-10 rounded-xl bg-surface-container flex items-center justify-center gap-2 cursor-pointer text-primary font-label-md text-label-md has-[:checked]:bg-primary-container has-[:checked]:text-surface-container-lowest">
+<input class="hidden" name="tx_type" type="radio" value="transfer"/>
+<span>Transfer</span>
+</label>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-1">Amount (KES)</label>
+<div class="relative">
+<span class="absolute left-4 top-3 font-headline-sm text-label-md text-outline font-bold">KES</span>
+<input class="w-full h-11 pl-14 pr-4 rounded-xl bg-surface-container text-primary font-metric-regular text-metric-regular placeholder-outline focus:outline-none" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-1">Description / Merchant</label>
+<input class="w-full h-11 px-4 rounded-xl bg-surface-container text-primary font-body-md text-body-md placeholder-outline focus:outline-none" placeholder="e.g. Naivas Supermarket, KPLC, Fuel" type="text"/>
+</div>
+<div class="pt-4 flex items-center justify-end gap-3">
+<button class="h-10 px-5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:text-primary" id="modal-cancel" type="button">
+            Cancel
+          </button>
+<button class="h-10 px-6 rounded-full bg-primary-container text-surface-container-lowest font-headline-sm text-label-md font-semibold hover:bg-primary-fixed-dim" type="submit">
+            Save transaction
+          </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<script>
+  (function initEmptyStateInteractions() {
+    const modal = document.getElementById('add-modal');
+    const openBtns = [
+      document.getElementById('btn-add-primary'),
+      document.getElementById('btn-add-empty')
+    ];
+    const closeBtns = [
+      document.getElementById('modal-close'),
+      document.getElementById('modal-cancel')
+    ];
+    const importBtn = document.getElementById('btn-mpesa-import');
+
+    openBtns.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+      }
+    });
+
+    closeBtns.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+      }
+    });
+
+    if (importBtn) {
+      importBtn.addEventListener('click', () => {
+        // Visual indicator response for M-Pesa import route trigger
+        const originalText = importBtn.innerHTML;
+        importBtn.innerHTML = '<span class="material-symbols-outlined text-body-lg animate-spin">progress_activity</span><span>Opening importer...</span>';
+        setTimeout(() => {
+          importBtn.innerHTML = originalText;
+        }, 800);
+      });
+    }
+  })();
+</script></main>
+</div>
+<!-- Bottom right preview tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-[#1A212C]/90 border border-[#252E3B] text-[11px] text-[#A3AEBD] font-medium flex items-center gap-1.5 shadow-lg backdrop-blur-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

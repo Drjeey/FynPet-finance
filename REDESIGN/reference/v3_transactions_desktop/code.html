@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Transactions - desktop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              card: '#121720',
+              raised: '#1A212C',
+              border: '#252E3B',
+              hover: '#1e2634'
+            },
+            fyn: {
+              lime: '#C6F432',
+              limeDark: '#0A0D12',
+              mint: '#34D399',
+              coral: '#FB7185',
+              indigo: '#818CF8',
+              amber: '#FBBF24',
+              text: '#F4F6F8',
+              secondary: '#A3AEBD',
+              tertiary: '#7C8797'
+            }
+          },
+          fontFamily: {
+            manrope: ['Manrope', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #111319;
+      color: #F4F6F8;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .numeral {
+      font-family: 'Manrope', sans-serif;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+    }
+    .action-btn {
+      opacity: 0;
+      transition: opacity 180ms ease-out, transform 150ms ease-out;
+    }
+    tr:hover .action-btn, tr:focus-within .action-btn {
+      opacity: 1;
+    }
+    .press-effect:active {
+      transform: translateY(1px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#111319] flex">
+
+  <!-- Fixed Left Sidebar (Full viewport height 248px) -->
+  <aside class="w-[248px] h-screen fixed left-0 top-0 bg-[#111319] border-r border-[#252E3B] flex flex-col justify-between z-30 select-none">
+    <div>
+      <!-- Brand Logo Header -->
+      <div class="h-[72px] px-6 flex items-center gap-3 border-b border-[#252E3B]/60">
+        <div class="w-9 h-9 rounded-[9px] bg-[#C6F432] flex items-center justify-center shadow-sm">
+          <span class="font-manrope font-extrabold text-[15px] tracking-tight text-[#0A0D12] leading-none">FP</span>
+        </div>
+        <div>
+          <div class="font-manrope font-bold text-[17px] tracking-tight text-[#F4F6F8] leading-tight">FynPet</div>
+          <div class="text-[12px] text-[#A3AEBD] font-medium leading-none">KES ledger</div>
+        </div>
+      </div>
+
+      <!-- Quick Ask Fyn Button -->
+      <div class="p-4">
+        <button class="w-full h-11 px-4 rounded-xl bg-[#C6F432] hover:bg-[#bbf020] text-[#0A0D12] font-semibold text-[14px] flex items-center justify-center gap-2 press-effect transition-all shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.39 8.26L21 9.27L16.2 13.97L17.5 20.6L12 17.27L6.5 20.6L7.8 13.97L3 9.27L9.61 8.26L12 2Z"/>
+          </svg>
+          <span>Ask Fyn AI</span>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="px-3 space-y-1">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- Active Transactions Item -->
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1A212C] text-[#C6F432] text-[14px] font-semibold border border-[#252E3B] transition-all">
+          <svg class="w-5 h-5 text-[#C6F432]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+          <span>Transactions</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+          </svg>
+          <span>Budgets</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+          <span>Analytics</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          <span>M-Pesa Import</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C]/60 text-[14px] font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Pinned Bottom Sync Status -->
+    <div class="p-4 border-t border-[#252E3B]/60">
+      <div class="flex items-center gap-2 mb-3 px-1">
+        <span class="w-2 h-2 rounded-full bg-[#34D399]"></span>
+        <span class="text-[12px] text-[#A3AEBD] font-medium">Saved on this device</span>
+      </div>
+      <button class="w-full h-9 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] text-[#F4F6F8] font-medium text-[13px] flex items-center justify-center transition-colors press-effect">
+        Sign in to sync
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper (offset by sidebar width 248px) -->
+  <div class="pl-[248px] flex-1 flex flex-col min-w-0">
+
+    <!-- Top Bar Header (72px) -->
+    <header class="h-[72px] px-8 border-b border-[#252E3B] bg-[#111319]/90 sticky top-0 z-20 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-[20px] font-bold font-manrope text-[#F4F6F8]">Transactions</h1>
+        <span class="text-[14px] text-[#A3AEBD] font-medium">/ 64 transactions</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Search field in header -->
+        <div class="relative w-72">
+          <input type="text" placeholder="Search transactions..." class="w-full h-10 pl-9 pr-4 rounded-xl bg-[#121720] border border-[#252E3B] text-[13px] text-[#F4F6F8] placeholder-[#7C8797] focus:outline-none focus:border-[#C6F432] transition-colors">
+          <svg class="w-4 h-4 text-[#7C8797] absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+
+        <!-- Sync Icon Button -->
+        <button class="w-10 h-10 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors press-effect" title="Sync Status">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+
+        <!-- User Avatar Initial -->
+        <div class="w-10 h-10 rounded-full bg-[#1A212C] border border-[#252E3B] flex items-center justify-center font-manrope font-bold text-[14px] text-[#C6F432]">
+          Y
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Page Body -->
+    <main class="p-8 max-w-[1192px] w-full">
+
+      <!-- Page Header Actions Row -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="flex items-center gap-3">
+            <h2 class="text-[28px] font-bold font-manrope text-[#F4F6F8] tracking-tight">Transactions</h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD] font-medium numeral">64 total</span>
+          </div>
+          <p class="text-[14px] text-[#A3AEBD] mt-1">Review, filter, and organize your ledger entries recorded on this device.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Outlined Export CSV button -->
+          <button class="h-11 px-4 rounded-xl border border-[#252E3B] hover:bg-[#1A212C] text-[#F4F6F8] font-medium text-[14px] flex items-center gap-2 transition-colors press-effect">
+            <svg class="w-4 h-4 text-[#A3AEBD]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span>Export CSV</span>
+          </button>
+
+          <!-- Lime Add Transaction button (one plus sign only) -->
+          <button class="h-11 px-5 rounded-xl bg-[#C6F432] hover:bg-[#bbf020] text-[#0A0D12] font-semibold text-[14px] flex items-center gap-2 transition-colors press-effect shadow-sm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Add transaction</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Data Card Container -->
+      <div class="bg-[#121720] border border-[#252E3B] rounded-[20px] overflow-hidden shadow-sm">
+
+        <!-- Toolbar: Type filter chips, search, and Filters button -->
+        <div class="p-5 border-b border-[#252E3B] flex flex-wrap items-center justify-between gap-4">
+          <!-- Left: Filter chips -->
+          <div class="flex items-center gap-2">
+            <button class="h-9 px-4 rounded-full bg-[#C6F432] text-[#0A0D12] text-[13px] font-semibold transition-all press-effect">
+              All
+            </button>
+            <button class="h-9 px-4 rounded-full bg-[#1A212C] border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium transition-all press-effect">
+              Income
+            </button>
+            <button class="h-9 px-4 rounded-full bg-[#1A212C] border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium transition-all press-effect">
+              Expenses
+            </button>
+            <button class="h-9 px-4 rounded-full bg-[#1A212C] border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium transition-all press-effect">
+              Savings
+            </button>
+            <button class="h-9 px-4 rounded-full bg-[#1A212C] border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium transition-all press-effect">
+              Transfers
+            </button>
+          </div>
+
+          <!-- Right: Search field and Filters modal toggle button -->
+          <div class="flex items-center gap-3">
+            <div class="relative w-64">
+              <input type="text" placeholder="Search transactions" class="w-full h-10 pl-9 pr-4 rounded-xl bg-[#1A212C] border border-[#252E3B] text-[13px] text-[#F4F6F8] placeholder-[#7C8797] focus:outline-none focus:border-[#C6F432] transition-colors">
+              <svg class="w-4 h-4 text-[#7C8797] absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+
+            <!-- Filters Button with badge '2' -->
+            <button class="h-10 px-4 rounded-xl bg-[#1A212C] border border-[#252E3B] hover:border-[#3A4658] text-[#F4F6F8] text-[13px] font-medium flex items-center gap-2.5 transition-colors press-effect">
+              <svg class="w-4 h-4 text-[#A3AEBD]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+              </svg>
+              <span>Filters</span>
+              <span class="w-5 h-5 rounded-full bg-[#C6F432] text-[#0A0D12] text-[11px] font-bold flex items-center justify-center numeral">2</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Applied Filters Sub-Bar -->
+        <div class="px-5 py-3 bg-[#111319]/40 border-b border-[#252E3B] flex items-center gap-2">
+          <span class="text-[12px] text-[#7C8797] font-medium mr-1">Active filters:</span>
+          
+          <!-- Pill 1: Food & Groceries x -->
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#F4F6F8] font-medium">
+            <span>Food & Groceries</span>
+            <button class="w-4 h-4 rounded-full hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Remove filter">
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Pill 2: 1 Nov - 30 Nov x -->
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#F4F6F8] font-medium numeral">
+            <span>1 Nov – 30 Nov</span>
+            <button class="w-4 h-4 rounded-full hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Remove filter">
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Clear all text button -->
+          <button class="text-[12px] text-[#A3AEBD] hover:text-[#C6F432] font-medium underline ml-2 transition-colors">
+            Clear all
+          </button>
+        </div>
+
+        <!-- Transactions Data Table (Sentence case headers, >=12px text, non-wrapping amounts) -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#252E3B] text-[12px] font-medium text-[#A3AEBD] bg-[#121720]/80 select-none">
+                <th class="py-3.5 px-6 font-medium">Description</th>
+                <th class="py-3.5 px-6 font-medium w-40">Date</th>
+                <th class="py-3.5 px-6 font-medium w-36">Source</th>
+                <th class="py-3.5 px-6 font-medium text-right w-44">Amount</th>
+                <th class="py-3.5 px-6 font-medium text-right w-28">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#252E3B]/60 text-[14px]">
+
+              <!-- Row 1: Naivas Westlands -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Naivas Westlands</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Food & Groceries</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">16 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+                    <span>Imported</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#FB7185]">
+                  -KES 4,850
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 2: Uber trip -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Uber trip</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Transport</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">15 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+                    <span>Imported</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#FB7185]">
+                  -KES 950
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 3: KPLC token purchase -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">KPLC token purchase</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Utilities</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">14 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+                    <span>Imported</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#FB7185]">
+                  -KES 2,000
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 4: Salary - Tech Services Ltd (Income) -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#34D399]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Salary - Tech Services Ltd</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#34D399]/15 text-[#34D399] text-[12px] font-medium">Income</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">12 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C8797]"></span>
+                    <span>Manual</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#34D399]">
+                  +KES 85,000
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 5: Netflix subscription -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Netflix subscription</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Entertainment</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">10 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C8797]"></span>
+                    <span>Manual</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#FB7185]">
+                  -KES 1,100
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 6: M-Shwari deposit (Savings) -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#818CF8]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">M-Shwari deposit</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#818CF8]/15 text-[#818CF8] text-[12px] font-medium">Savings</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">08 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+                    <span>Imported</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#818CF8]">
+                  -KES 10,000
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 7: Chama contribution (Transfer) -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Chama contribution</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Transfer</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">05 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C8797]"></span>
+                    <span>Manual</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#F4F6F8]">
+                  -KES 5,000
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 8: Pharmacy - Goodlife (Health) -->
+              <tr class="group hover:bg-[#1A212C]/60 focus-within:bg-[#1A212C]/60 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#1A212C] border border-[#252E3B] flex items-center justify-center text-[#A3AEBD]">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-medium text-[#F4F6F8]">Pharmacy - Goodlife</div>
+                      <div class="mt-0.5">
+                        <span class="inline-block px-2 py-0.5 rounded-md bg-[#252E3B]/70 text-[#A3AEBD] text-[12px] font-medium">Health</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-[#A3AEBD] text-[13px] whitespace-nowrap numeral">02 Nov 2026</td>
+                <td class="py-4 px-6 text-[13px] whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A212C] border border-[#252E3B] text-[12px] text-[#A3AEBD]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+                    <span>Imported</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right font-manrope font-semibold text-[15px] whitespace-nowrap numeral text-[#FB7185]">
+                  -KES 2,400
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-1 action-btn">
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#F4F6F8] transition-colors" title="Edit transaction" aria-label="Edit transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                    <button class="w-10 h-10 rounded-lg hover:bg-[#252E3B] flex items-center justify-center text-[#A3AEBD] hover:text-[#FB7185] transition-colors" title="Delete transaction" aria-label="Delete transaction">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer: Record count & Pagination -->
+        <div class="px-6 py-4 bg-[#121720] border-t border-[#252E3B] flex items-center justify-between">
+          <div class="text-[13px] text-[#A3AEBD] font-medium numeral">
+            Showing 1-12 of 64
+          </div>
+
+          <!-- Pagination: previous, 1 (lime), 2, 3 ... 6, next -->
+          <div class="flex items-center gap-1.5 select-none">
+            <button class="h-9 px-3 rounded-lg border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C] text-[13px] font-medium flex items-center gap-1 transition-colors press-effect disabled:opacity-40" disabled>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              <span>Previous</span>
+            </button>
+
+            <!-- Page 1 (Current, Lime pill) -->
+            <button class="w-9 h-9 rounded-lg bg-[#C6F432] text-[#0A0D12] text-[13px] font-bold flex items-center justify-center numeral shadow-sm">
+              1
+            </button>
+            <button class="w-9 h-9 rounded-lg border border-transparent hover:border-[#252E3B] hover:bg-[#1A212C] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium flex items-center justify-center numeral transition-colors">
+              2
+            </button>
+            <button class="w-9 h-9 rounded-lg border border-transparent hover:border-[#252E3B] hover:bg-[#1A212C] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium flex items-center justify-center numeral transition-colors">
+              3
+            </button>
+            <span class="w-8 text-center text-[#7C8797] text-[13px]">...</span>
+            <button class="w-9 h-9 rounded-lg border border-transparent hover:border-[#252E3B] hover:bg-[#1A212C] text-[#A3AEBD] hover:text-[#F4F6F8] text-[13px] font-medium flex items-center justify-center numeral transition-colors">
+              6
+            </button>
+
+            <button class="h-9 px-3 rounded-lg border border-[#252E3B] text-[#A3AEBD] hover:text-[#F4F6F8] hover:bg-[#1A212C] text-[13px] font-medium flex items-center gap-1 transition-colors press-effect">
+              <span>Next</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Bottom right preview tag -->
+  <div class="fixed bottom-4 right-4 z-50">
+    <div class="px-3 py-1.5 rounded-full bg-[#1A212C]/90 border border-[#252E3B] text-[11px] text-[#A3AEBD] font-medium flex items-center gap-1.5 shadow-lg backdrop-blur-sm">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+      <span>Sample data - design preview</span>
+    </div>
+  </div>
+
+</body>
+</html>

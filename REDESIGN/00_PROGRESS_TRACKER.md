@@ -11,8 +11,8 @@ Statuses: NOT STARTED · UNDER AUDIT · AUDIT COMPLETED · STITCH PROMPT PREPARE
 | 1. Shell + Dashboard (desktop) | AUDIT COMPLETED | DESIGN APPROVED (with conditions, 2026-11-16; project 13575091748076985008) | Approved | NOT STARTED (handoff ready: 05_CODEX_HANDOFF_SHELL_DASHBOARD.md; Part A sync fixes first) | NOT STARTED |
 | 2. Dashboard first-use state | AUDIT COMPLETED | STITCH PROMPT PREPARED (Frame B, same prompt) | — | NOT STARTED | NOT STARTED |
 | 3. Mobile shell + dashboard | AUDIT COMPLETED | DESIGN APPROVED (with conditions, 2026-11-16; reviews 07 and 08; handoff 09_CODEX_HANDOFF_MOBILE_SHELL_DASHBOARD.md; sync-error state specified from the desktop banner) | — | NOT STARTED | NOT STARTED |
-| 4. Transactions | AUDIT COMPLETED | DESIGN UNDER REVIEW (desktop list reviewed in 11_REVIEW_PAGES_ROUND1.md; dialogs, states, mobile missing) | — | NOT STARTED | NOT STARTED |
-| 5. Budgets | AUDIT COMPLETED | DESIGN UNDER REVIEW (desktop reviewed in 11_REVIEW; dialogs, mobile missing) | — | NOT STARTED | NOT STARTED |
+| 4. Transactions | AUDIT COMPLETED | APPROVED (18_REVIEW) | BUILT | VERIFIED (1440/375/320, fake backend) | NOT COMMITTED |
+| 5. Budgets | AUDIT COMPLETED | APPROVED (18_REVIEW) | BUILT | VERIFIED (1440/375/320, fake backend) | NOT COMMITTED |
 | 6. Analytics | AUDIT COMPLETED | DESIGN UNDER REVIEW (desktop reviewed in 11_REVIEW; empty, mobile missing) | — | NOT STARTED | NOT STARTED |
 | 7. M-Pesa Import (+ parser rework) | AUDIT COMPLETED | DESIGN UNDER REVIEW (upload ok; reading/review/done need revision, see 11_REVIEW; mobile missing) | — | NOT STARTED | NOT STARTED |
 | 8. Fyn AI + consent | AUDIT COMPLETED | DESIGN UNDER REVIEW (chat panel reviewed in 11_REVIEW; tabs, states, consent, mobile missing) | — | NOT STARTED | NOT STARTED |
