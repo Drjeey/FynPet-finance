@@ -139,7 +139,8 @@ Move every "sum by period, type and category" into pure functions (`calc.js`). S
 Soft deletes (`deleted_at`), an outbox of changed rows, and an incremental pull (`updated_at > lastSync`) with last-write-wins. Sync shows its status and retries when the device comes back online.
 **Test:** two browser contexts: delete on A disappears on B; edit on B appears on A.
 
-### ☐ B3 Import v2 [F5–F8] ⏱ 3–4 days
+### ◐ B3 Import v2 [F5–F8] ⏱ 3–4 days
+> **17 Nov 2026, built locally, not deployed:** review-before-saving flow, applied date range, honest statuses and counts, duplicate checks (receipt and day+amount+description), retry of unread parts, totals check, and cheaper quota cost per chunk. Still AI extraction (no deterministic parser yet) and untested on a real Safaricom statement.
 - A deterministic M-Pesa row parser (receipt, time, details, paid in / withdrawn) in the browser; send only descriptions to `/api/ai` for categorisation.
 - Apply the Date From/To filter. Abort cleanly if PDF.js fails. Record the real import status (success / partial / failed) and how many rows were rejected.
 - Save the `external_ref` unique key to the database (A1).
