@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="mobile_stack" name="shell-type"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    body {
+      font-family: 'Manrope', 'Inter', sans-serif;
+      min-height: max(812px, 100dvh);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-tint": "#aad600",
+            "on-primary": "#283500",
+            "on-background": "#e1e2ea",
+            "surface-dim": "#111319",
+            "on-secondary": "#003825",
+            "on-tertiary-container": "#4f5ac2",
+            "primary-fixed-dim": "#aad600",
+            "on-secondary-fixed-variant": "#005137",
+            "primary": "#ffffff",
+            "primary-fixed": "#c5f331",
+            "on-primary-fixed-variant": "#3b4d00",
+            "primary-container": "#c5f331",
+            "on-error": "#690005",
+            "surface-variant": "#32353b",
+            "error": "#ffb4ab",
+            "tertiary": "#ffffff",
+            "outline": "#8e937a",
+            "background": "#111319",
+            "tertiary-fixed-dim": "#bdc2ff",
+            "tertiary-container": "#e0e0ff",
+            "secondary": "#45dfa4",
+            "tertiary-fixed": "#e0e0ff",
+            "secondary-fixed": "#68fcbf",
+            "surface-container-highest": "#32353b",
+            "secondary-container": "#00bd85",
+            "on-primary-fixed": "#161f00",
+            "secondary-fixed-dim": "#45dfa4",
+            "inverse-surface": "#e1e2ea",
+            "outline-variant": "#444934",
+            "error-container": "#93000a",
+            "on-surface-variant": "#c4c9ae",
+            "on-tertiary-fixed": "#000767",
+            "surface-container": "#1d2025",
+            "on-error-container": "#ffdad6",
+            "on-secondary-fixed": "#002114",
+            "surface-bright": "#36393f",
+            "on-tertiary-fixed-variant": "#2f3aa3",
+            "inverse-primary": "#506600",
+            "on-tertiary": "#131e8c",
+            "surface-container-lowest": "#0b0e13",
+            "surface": "#111319",
+            "on-surface": "#e1e2ea",
+            "on-primary-container": "#556d00",
+            "surface-container-high": "#272a30",
+            "on-secondary-container": "#00452e",
+            "inverse-on-surface": "#2e3036",
+            "surface-container-low": "#191c21"
+          },
+          fontFamily: {
+            sans: ["Manrope", "Inter", "sans-serif"],
+            manrope: ["Manrope", "sans-serif"],
+            inter: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface text-on-surface flex flex-col min-h-screen relative overflow-hidden select-none">
+<!-- TOP HEADER (Under dim, dashboard style) -->
+<header class="w-full pt-safe bg-surface z-10">
+<div class="h-14 px-4 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[19px]">pets</span>
+</div>
+<span class="text-[17px] font-bold tracking-tight text-on-surface">FynPet</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</div>
+</div>
+</header>
+<!-- MAIN DASHBOARD CONTENT (Behind the Scrim) -->
+<main class="flex-1 w-full px-4 pt-1 pb-24 overflow-hidden relative z-10 flex flex-col">
+<!-- Environment / Preview Tag -->
+<div class="flex justify-end w-full mb-3">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[12px] font-medium tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+        Sample data - design preview
+      </div>
+</div>
+<!-- Approved Dashboard Simulated Content -->
+<div class="w-full space-y-4">
+<!-- Total Spend Card ("This month", KES 31,400) -->
+<div class="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/30 shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[13px] font-semibold text-on-surface-variant uppercase tracking-wider">This month</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[12px] font-bold">+3.8%</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-[32px] font-extrabold tracking-tight text-on-surface">KES 31,400</span>
+</div>
+<p class="text-[12px] text-on-surface-variant mt-1">Remaining budget: KES 18,600</p>
+</div>
+<!-- Quick Ledger Preview Rows -->
+<div class="space-y-2">
+<div class="flex items-center justify-between text-[13px] font-semibold text-on-surface-variant px-1">
+<span>Recent transactions</span>
+<span class="text-primary-container text-[12px]">See all</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-surface-container-high/40">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+</div>
+<div>
+<p class="text-[14px] font-bold text-on-surface">Pet Food &amp; Treats</p>
+<p class="text-[12px] text-on-surface-variant">Supermarket • Today</p>
+</div>
+</div>
+<span class="text-[14px] font-bold text-on-surface">-KES 3,250</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-surface-container-high/40">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">local_hospital</span>
+</div>
+<div>
+<p class="text-[14px] font-bold text-on-surface">Vet Checkup</p>
+<p class="text-[12px] text-on-surface-variant">Services • Yesterday</p>
+</div>
+</div>
+<span class="text-[14px] font-bold text-on-surface">-KES 5,000</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-surface-container-high/40">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+</div>
+<div>
+<p class="text-[14px] font-bold text-on-surface">Pet Grooming</p>
+<p class="text-[12px] text-on-surface-variant">Care • 12 Oct</p>
+</div>
+</div>
+<span class="text-[14px] font-bold text-on-surface">-KES 2,400</span>
+</div>
+</div>
+</div>
+</main>
+<!-- DARK TRANSLUCENT SCRIM OVERLAY -->
+<div class="fixed inset-0 z-30 bg-[#111319]/80 backdrop-blur-[2px] transition-opacity"></div>
+<!-- BOTTOM SHEET (Sits above the scrim, above bottom nav) -->
+<div class="fixed inset-x-0 bottom-[64px] z-40 px-3 pb-2 flex flex-col justify-end pointer-events-none">
+<div class="w-full bg-surface-container-low rounded-t-[28px] rounded-b-2xl border border-surface-container-high/60 shadow-2xl p-5 pt-3 pointer-events-auto transition-transform">
+<!-- Subtle Grey Handle Bar at Top Center -->
+<div class="w-full flex justify-center py-1.5 mb-2">
+<div class="w-10 h-1 rounded-full bg-outline-variant/60"></div>
+</div>
+<!-- Top Header of Sheet -->
+<div class="flex items-center justify-between pb-4">
+<h2 class="text-[18px] font-extrabold text-on-surface tracking-tight">Add to FynPet</h2>
+<button aria-label="Close" class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high active:scale-95 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[19px]">close</span>
+</button>
+</div>
+<!-- Two Large Rows (Cards) -->
+<div class="flex flex-col gap-3">
+<!-- Row 1: Add a transaction -->
+<button class="group w-full flex items-center justify-between p-3.5 rounded-2xl bg-surface-container hover:bg-surface-container-high active:scale-[0.985] text-left transition-all duration-150" type="button">
+<div class="flex items-center gap-3.5 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary-container flex items-center justify-center text-primary-container group-hover:text-on-primary-container transition-colors shrink-0">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="text-[15px] font-bold text-on-surface leading-tight whitespace-nowrap">Add a transaction</div>
+<div class="text-[12px] text-on-surface-variant font-medium mt-0.5 whitespace-nowrap">Type it in yourself</div>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant group-hover:text-on-surface group-hover:translate-x-0.5 transition-all shrink-0 ml-2">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</button>
+<!-- Row 2: Import M-Pesa statement -->
+<button class="group w-full flex items-center justify-between p-3.5 rounded-2xl bg-surface-container hover:bg-surface-container-high active:scale-[0.985] text-left transition-all duration-150" type="button">
+<div class="flex items-center gap-3.5 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-secondary flex items-center justify-center text-secondary group-hover:text-on-secondary transition-colors shrink-0">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="text-[15px] font-bold text-on-surface leading-tight whitespace-nowrap">Import M-Pesa statement</div>
+<div class="text-[12px] text-on-surface-variant font-medium mt-0.5 whitespace-nowrap">From a Safaricom PDF</div>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant group-hover:text-on-surface group-hover:translate-x-0.5 transition-all shrink-0 ml-2">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- BOTTOM NAVIGATION (Stays visible below the dim with normal labels) -->
+<nav class="fixed inset-x-0 bottom-0 z-50 bg-surface-container-low border-t border-surface-container-high pb-safe">
+<div class="h-16 px-2 flex items-center justify-around">
+<!-- Home -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[56px] text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="text-[12px] font-medium">Home</span>
+</button>
+<!-- Transactions -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[56px] text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-[12px] font-medium">Transactions</span>
+</button>
+<!-- Add (Lime circular button with + or X) -->
+<button aria-label="Add transaction or dismiss" class="w-11 h-11 -mt-5 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[22px] font-bold">close</span>
+</button>
+<!-- Budgets -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[56px] text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span class="text-[12px] font-medium">Budgets</span>
+</button>
+<!-- More -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[56px] text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+<span class="text-[12px] font-medium">More</span>
+</button>
+</div>
+</nav>
+</body></html>

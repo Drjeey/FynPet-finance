@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FynPet</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#111319;color:#e1e2ea;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ffffff", "surface-container-low": "#191c21", "surface-container": "#1d2025", "error-container": "#93000a", "on-surface-variant": "#c4c9ae", "on-primary": "#283500", "tertiary-fixed": "#e0e0ff", "tertiary-container": "#e0e0ff", "on-secondary-container": "#00452e", "surface": "#111319", "on-surface": "#e1e2ea", "tertiary-fixed-dim": "#bdc2ff", "on-tertiary-container": "#4f5ac2", "surface-bright": "#36393f", "surface-dim": "#111319", "outline-variant": "#444934", "on-primary-fixed-variant": "#3b4d00", "background": "#111319", "inverse-surface": "#e1e2ea", "surface-container-lowest": "#0b0e13", "on-primary-fixed": "#161f00", "tertiary": "#ffffff", "surface-container-highest": "#32353b", "on-tertiary-fixed": "#000767", "error": "#ffb4ab", "secondary-fixed": "#68fcbf", "on-primary-container": "#556d00", "primary-fixed": "#c5f331", "secondary-fixed-dim": "#45dfa4", "on-tertiary": "#131e8c", "on-background": "#e1e2ea", "surface-tint": "#aad600", "primary-container": "#c5f331", "on-error": "#690005", "on-error-container": "#ffdad6", "surface-variant": "#32353b", "on-secondary-fixed-variant": "#005137", "outline": "#8e937a", "secondary-container": "#00bd85", "inverse-primary": "#506600", "inverse-on-surface": "#2e3036", "on-secondary": "#003825", "surface-container-high": "#272a30", "primary-fixed-dim": "#aad600", "on-tertiary-fixed-variant": "#2f3aa3", "on-secondary-fixed": "#002114", "secondary": "#45dfa4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter": "1.25rem", "space-sm": "0.5rem", "space-md": "0.75rem", "space-lg": "1.25rem", "space-xs": "0.25rem", "space-xl": "1.5rem", "margin": "2rem" }, fontFamily: { "label-sm": ["Inter"], "display-currency": ["Manrope"], "metric-regular": ["Manrope"], "body-lg": ["Inter"], "headline-sm": ["Manrope"], "headline-lg": ["Manrope"], "metric-large": ["Manrope"], "body-md": ["Inter"], "headline-md": ["Manrope"], "body-sm": ["Inter"], "label-md": ["Inter"] }, fontSize: { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-currency": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "metric-regular": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-large": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "16px", "fontWeight": "500" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-fixed"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl pt-safe"><div class="h-14 px-4 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center font-headline-sm text-headline-sm font-extrabold text-surface tracking-tighter shrink-0 select-none">FP</div><div class="flex flex-col justify-center"><h1 class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">Dashboard</h1><span class="font-body-sm text-body-sm text-on-surface-variant font-medium mt-0.5 leading-none">Mon, 16 Nov</span></div></div><div class="flex items-center gap-1.5 shrink-0"><button aria-label="Ask Fyn AI" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">auto_awesome</span></button><button aria-label="Sync Data" class="w-11 h-11 rounded-full relative flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">sync</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-secondary-fixed pulse-sync-dot"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="px-4 py-1 flex items-center justify-end"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-label-sm font-medium tracking-wide bg-surface-container-highest/80 text-on-surface-variant">Sample data - design preview</span></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-28 bg-surface"><div class="flex flex-col w-full px-4 gap-3 pb-24 text-on-surface">
+<!-- Segmented Control (Sticky Period Switcher) -->
+<section class="sticky top-14 z-30 pt-2 pb-1 bg-surface/95 backdrop-blur">
+<div class="w-full h-11 bg-surface-container-low rounded-full p-1 flex items-center justify-between">
+<button class="flex-1 h-9 rounded-full text-label-md font-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center" type="button">
+        7D
+      </button>
+<button class="flex-1 h-9 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md transition-all flex items-center justify-center font-semibold" type="button">
+        1M
+      </button>
+<button class="flex-1 h-9 rounded-full text-label-md font-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center" type="button">
+        3M
+      </button>
+</div>
+</section>
+<!-- Hero Card: Net Cash Flow -->
+<section class="bg-surface-container-low rounded-xl p-5 flex flex-col gap-4">
+<div class="flex items-center justify-between"><span class="font-body-md text-body-md text-on-surface-variant font-medium whitespace-nowrap">Net cash flow · This month</span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed/15 text-secondary-fixed font-label-sm text-[12px] font-semibold whitespace-nowrap shrink-0">+12.4%</span></div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-currency text-display-currency font-extrabold tracking-tight text-primary">KES 31,400</span>
+</div>
+<!-- Proportional Progress Bar -->
+<div class="w-full flex flex-col gap-2">
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden flex">
+<div class="h-full bg-secondary-fixed transition-all duration-700" style="width: 61.3%;"></div>
+<div class="h-full bg-error transition-all duration-700" style="width: 38.7%;"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm pt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="text-on-surface">Income KES 85,000</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-on-surface">Expenses KES 53,600</span>
+</div>
+</div>
+<div class="flex justify-end">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+          Savings rate 18.2%
+        </span>
+</div>
+</div>
+<!-- Hairline Divider via tonal step -->
+<div class="w-full h-px bg-surface-container-highest"></div>
+<!-- Comparison Section -->
+<div class="flex flex-col gap-2.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">This month vs last month</span>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface">Income KES 85k vs 78.6k</span>
+<span class="text-secondary-fixed font-medium">+8.1%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-secondary-fixed rounded-full" style="width: 82%;"></div>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm pt-1">
+<span class="text-on-surface">Expenses KES 53.6k vs 55.4k</span>
+<span class="text-secondary-fixed font-medium">-3.2%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 58%;"></div>
+</div>
+</div>
+</div>
+<!-- Bottom CTAs -->
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<button class="h-11 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Add transaction</span></button>
+<button class="h-11 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-medium flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed">phone_android</span>
+<span>Import M-Pesa</span>
+</button>
+</div>
+</section>
+<!-- 2x2 Metric Tiles -->
+<section class="grid grid-cols-2 gap-3">
+<!-- Tile 1: Income -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[116px]">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed/15 text-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">south_west</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Income</span>
+</div>
+<div class="flex flex-col mt-2">
+<span class="font-headline-md text-headline-md text-primary font-bold">KES 85k</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed mt-0.5">+8.1% vs last mo</span>
+</div>
+</div>
+<!-- Tile 2: Expenses -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[116px]">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-error/15 text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">north_east</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Expenses</span>
+</div>
+<div class="flex flex-col mt-2">
+<span class="font-headline-md text-headline-md text-primary font-bold">KES 53.6k</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed mt-0.5">-3.2% less spent</span>
+</div>
+</div>
+<!-- Tile 3: Total saved -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[116px]">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-primary-fixed/15 text-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">savings</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Total saved</span>
+</div>
+<div class="flex flex-col mt-2">
+<span class="font-headline-md text-headline-md text-primary font-bold">142k</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">71% of target</span>
+</div>
+</div>
+<!-- Tile 4: Transactions -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[116px]">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Transactions</span>
+</div>
+<div class="flex flex-col mt-2">
+<span class="font-headline-md text-headline-md text-primary font-bold">64</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">58 imported</span>
+</div>
+</div>
+</section>
+<!-- Cash Flow Weekly Chart Card -->
+<section class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Cash flow</h2>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">In</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Out</span>
+</div>
+</div>
+</div>
+<!-- Active Tooltip Callout -->
+<div class="bg-surface-container-high rounded-lg p-2.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-primary-fixed bg-surface-container-highest px-2 py-0.5 rounded-full font-medium">15-21 Nov</span>
+<span class="font-label-sm text-label-sm text-on-surface">Peak week</span>
+</div>
+<div class="flex items-center gap-3 font-label-sm text-label-sm">
+<span class="text-secondary-fixed font-semibold">In: 28.5k</span>
+<span class="text-error font-semibold">Out: 14.2k</span>
+</div>
+</div>
+<!-- Weekly Bars Display -->
+<div class="h-44 w-full flex items-end justify-between pt-6 pb-2 px-1 relative"><div class="absolute inset-x-0 top-6 border-b border-surface-container-highest/60 flex justify-end"><span class="font-label-sm text-[12px] text-on-surface-variant/60 -mt-3.5">KES 30k</span></div><div class="absolute inset-x-0 top-20 border-b border-surface-container-highest/60 flex justify-end"><span class="font-label-sm text-[12px] text-on-surface-variant/60 -mt-3.5">KES 20k</span></div><div class="absolute inset-x-0 top-32 border-b border-surface-container-highest/60 flex justify-end"><span class="font-label-sm text-[12px] text-on-surface-variant/60 -mt-3.5">KES 10k</span></div><div class="relative z-10 flex flex-col items-center gap-2 flex-1"><div class="flex items-end gap-1.5 h-28"><div class="w-3 rounded-t-sm bg-secondary-fixed/50 bar-anim" style="height: 55%;"></div><div class="w-3 rounded-t-sm bg-error/50 bar-anim" style="height: 42%;"></div></div><span class="font-label-sm text-[12px] text-on-surface-variant">1-7</span></div><div class="relative z-10 flex flex-col items-center gap-2 flex-1"><div class="flex items-end gap-1.5 h-28"><div class="w-3 rounded-t-sm bg-secondary-fixed/60 bar-anim" style="height: 68%;"></div><div class="w-3 rounded-t-sm bg-error/60 bar-anim" style="height: 48%;"></div></div><span class="font-label-sm text-[12px] text-on-surface-variant">8-14</span></div><div class="relative z-10 flex flex-col items-center gap-2 flex-1 bg-surface-container-highest/40 rounded-lg pt-1 pb-0.5"><div class="flex items-end gap-1.5 h-28"><div class="w-3.5 rounded-t-sm bg-secondary-fixed shadow-sm bar-anim" style="height: 95%;"></div><div class="w-3.5 rounded-t-sm bg-error shadow-sm bar-anim" style="height: 52%;"></div></div><span class="font-label-sm text-[12px] text-primary font-bold">15-21</span></div><div class="relative z-10 flex flex-col items-center gap-2 flex-1"><div class="flex items-end gap-1.5 h-28"><div class="w-3 rounded-t-sm bg-secondary-fixed/40 bar-anim" style="height: 40%;"></div><div class="w-3 rounded-t-sm bg-error/40 bar-anim" style="height: 30%;"></div></div><span class="font-label-sm text-[12px] text-on-surface-variant">22-28</span></div></div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm pt-1"><span class="truncate text-[12px]">Expenses highest on 14-21 November.</span><span class="shrink-0 text-[12px] text-on-surface-variant">Updated 2m ago</span></div>
+</section>
+<!-- Spending by Category Card (Donut with compliant palette) -->
+<section class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Spending by category</h2>
+<button class="font-label-sm text-label-sm text-primary-fixed hover:underline flex items-center gap-0.5" type="button">
+        Details
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</div>
+<!-- Centered Donut Chart -->
+<div class="relative w-44 h-44 mx-auto flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#272a30" stroke-width="11"></circle>
+<!-- Blue: Food 34% (circumference ~ 238.76, 34% = 81.18) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#3b82f6" stroke-dasharray="81.18 238.76" stroke-dashoffset="0" stroke-width="11"></circle>
+<!-- Violet: Transport 21% (50.14) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#8b5cf6" stroke-dasharray="50.14 238.76" stroke-dashoffset="-81.18" stroke-width="11"></circle>
+<!-- Teal: Utilities 16% (38.20) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#0d9488" stroke-dasharray="38.20 238.76" stroke-dashoffset="-131.32" stroke-width="11"></circle>
+<!-- Amber: Shopping 12% (28.65) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#d97706" stroke-dasharray="28.65 238.76" stroke-dashoffset="-169.52" stroke-width="11"></circle>
+<!-- Sand: Entertainment 10% (23.88) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#b45309" stroke-dasharray="23.88 238.76" stroke-dashoffset="-198.17" stroke-width="11"></circle>
+<!-- Slate: Other 7% (16.71) -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#64748b" stroke-dasharray="16.71 238.76" stroke-dashoffset="-222.05" stroke-width="11"></circle>
+</svg>
+<!-- Center metric inside ring with >16px clear space -->
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">KES 53.6k</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Expenses</span>
+</div>
+</div>
+<!-- Category Legend List -->
+<div class="flex flex-col gap-2.5 pt-1"><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span><span class="text-on-surface">Food &amp; Groceries</span><span class="text-on-surface-variant text-[12px]">34%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 18,224</span></div><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#8b5cf6]"></span><span class="text-on-surface">Transport</span><span class="text-on-surface-variant text-[12px]">21%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 11,256</span></div><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#0d9488]"></span><span class="text-on-surface">Utilities</span><span class="text-on-surface-variant text-[12px]">16%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 8,576</span></div><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#d97706]"></span><span class="text-on-surface">Shopping</span><span class="text-on-surface-variant text-[12px]">12%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 6,432</span></div><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#b45309]"></span><span class="text-on-surface">Entertainment</span><span class="text-on-surface-variant text-[12px]">10%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 5,360</span></div><div class="flex items-center justify-between text-body-sm font-body-sm"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#64748b]"></span><span class="text-on-surface">Other</span><span class="text-on-surface-variant text-[12px]">7%</span></div><span class="font-metric-regular text-body-sm text-primary font-bold whitespace-nowrap">KES 3,752</span></div></div>
+</section>
+<!-- Budgets Card -->
+<section class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-3.5"><div class="flex items-center justify-between"><h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Budgets</h2><button class="font-label-sm text-[12px] text-primary-fixed hover:underline" type="button">Manage</button></div><div class="flex flex-col gap-1.5"><div class="flex items-center justify-between font-body-sm text-body-sm"><span class="text-on-surface font-medium">Food &amp; Groceries</span><span class="text-secondary-fixed font-semibold">KES 9,500 left</span></div><div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-secondary-fixed rounded-full budget-bar" style="width: 62%;"></div></div><div class="flex items-center justify-between font-label-sm text-[12px] text-on-surface-variant"><span>62% used</span><span>Budget KES 25,000</span></div></div><div class="flex flex-col gap-1.5"><div class="flex items-center justify-between font-body-sm text-body-sm"><span class="text-on-surface font-medium">Transport</span><span class="text-on-surface-variant font-semibold">KES 1,440 left</span></div><div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-[#d97706] rounded-full budget-bar" style="width: 88%;"></div></div><div class="flex items-center justify-between font-label-sm text-[12px] text-on-surface-variant"><span>88% used</span><span>Budget KES 12,000</span></div></div><div class="flex flex-col gap-1.5"><div class="flex items-center justify-between font-body-sm text-body-sm"><span class="text-on-surface font-medium">Entertainment</span><span class="text-error font-semibold">KES 800 over</span></div><div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-error rounded-full budget-bar over-budget-pulse" style="width: 100%;"></div></div><div class="flex items-center justify-between font-label-sm text-[12px] text-on-surface-variant"><span class="text-error font-medium">Exceeded by 16%</span><span>Budget KES 5,000</span></div></div><div class="flex items-center justify-between pt-1"><span class="font-label-sm text-[12px] text-on-surface-variant">Resets in 14 days</span><div class="flex items-center gap-3"><button class="font-label-sm text-[12px] text-on-surface hover:text-primary" type="button">See all 4</button><button class="font-label-sm text-[12px] text-primary-fixed font-semibold flex items-center gap-0.5" type="button"><span class="material-symbols-outlined text-[14px]">add</span>New budget</button></div></div></section>
+<!-- Recent Transactions Card -->
+<section class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Recent transactions</h2>
+<button class="font-label-sm text-label-sm text-primary-fixed hover:underline" type="button">View all</button>
+</div>
+<div class="flex flex-col divide-y divide-surface-container-highest/60" id="transactionList"><div class="h-16 flex items-center justify-between cursor-pointer hover:bg-surface-container-high/40 rounded-lg px-2 -mx-2 transition-colors active:bg-surface-container-high" onclick="toggleDetailModal(true)"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface"><span class="material-symbols-outlined text-[20px]">local_grocery_store</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-primary truncate">Naivas Westlands</span><span class="font-body-sm text-[12px] text-on-surface-variant truncate">Food &amp; Groceries · 16 Nov · M-Pesa import</span></div></div><span class="font-metric-regular text-body-md text-error font-bold whitespace-nowrap ml-2">-KES 4,850</span></div><div class="h-16 flex items-center justify-between cursor-pointer hover:bg-surface-container-high/40 rounded-lg px-2 -mx-2 transition-colors active:bg-surface-container-high" onclick="toggleDetailModal(true)"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface"><span class="material-symbols-outlined text-[20px]">directions_car</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-primary truncate">Uber trip</span><span class="font-body-sm text-[12px] text-on-surface-variant truncate">Transport · 15 Nov · M-Pesa import</span></div></div><span class="font-metric-regular text-body-md text-error font-bold whitespace-nowrap ml-2">-KES 950</span></div><div class="h-16 flex items-center justify-between cursor-pointer hover:bg-surface-container-high/40 rounded-lg px-2 -mx-2 transition-colors active:bg-surface-container-high" onclick="toggleDetailModal(true)"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface"><span class="material-symbols-outlined text-[20px]">bolt</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-primary truncate">KPLC token purchase</span><span class="font-body-sm text-[12px] text-on-surface-variant truncate">Utilities · 14 Nov · M-Pesa import</span></div></div><span class="font-metric-regular text-body-md text-error font-bold whitespace-nowrap ml-2">-KES 2,000</span></div><div class="h-16 flex items-center justify-between cursor-pointer hover:bg-surface-container-high/40 rounded-lg px-2 -mx-2 transition-colors active:bg-surface-container-high" onclick="toggleDetailModal(true)"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full bg-secondary-fixed/15 text-secondary-fixed flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[20px]">payments</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-primary truncate">Tech Services Ltd</span><span class="font-body-sm text-[12px] text-on-surface-variant truncate">Income · 12 Nov · Manual</span></div></div><span class="font-metric-regular text-body-md text-secondary-fixed font-bold whitespace-nowrap ml-2">+KES 85,000</span></div><div class="h-16 flex items-center justify-between cursor-pointer hover:bg-surface-container-high/40 rounded-lg px-2 -mx-2 transition-colors active:bg-surface-container-high" onclick="toggleDetailModal(true)"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface"><span class="material-symbols-outlined text-[20px]">movie</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-primary truncate">Netflix subscription</span><span class="font-body-sm text-[12px] text-on-surface-variant truncate">Entertainment · 10 Nov · Manual</span></div></div><span class="font-metric-regular text-body-md text-error font-bold whitespace-nowrap ml-2">-KES 1,100</span></div></div>
+<div class="flex items-center justify-center pt-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Showing 5 of 64 transactions</span>
+</div>
+</section>
+<!-- Side-by-Side Savings Insight Widgets -->
+<section class="grid grid-cols-2 gap-3"><div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[120px]"><div class="flex items-center justify-between"><span class="font-label-sm text-[12px] text-on-surface-variant">Emergency fund</span><div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-primary-fixed"><span class="material-symbols-outlined text-[14px]">shield</span></div></div><div class="flex flex-col gap-1 mt-2"><span class="font-metric-large text-metric-large text-primary font-bold">2.4 mo</span><span class="font-label-sm text-[12px] text-on-surface-variant">Expenses covered</span></div></div><div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-between min-h-[120px]"><div class="flex items-center justify-between"><span class="font-label-sm text-[12px] text-on-surface-variant">Savings streak</span><div class="flex items-center gap-0.5 text-primary-fixed"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span></div></div><div class="flex flex-col gap-1 mt-2"><span class="font-metric-large text-metric-large text-primary font-bold">3 months</span><span class="font-label-sm text-[12px] text-secondary-fixed font-medium">Consistent saver</span></div></div></section>
+<!-- Ask Fyn AI Helper Card -->
+<section class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">auto_awesome</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Ask Fyn</h2>
+</div>
+<div class="h-11 rounded-full bg-surface-container-high px-4 flex items-center justify-between text-on-surface-variant">
+<span class="font-body-md text-body-md text-on-surface-variant select-none truncate">Ask Fyn about your spending...</span>
+<span class="material-symbols-outlined text-[18px] text-primary-fixed">arrow_forward</span>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+<button class="shrink-0 h-8 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm px-3 hover:bg-surface-container-highest transition-colors" type="button">
+        Where did my money go?
+      </button>
+<button class="shrink-0 h-8 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm px-3 hover:bg-surface-container-highest transition-colors" type="button">
+        Am I over budget?
+      </button>
+<button class="shrink-0 h-8 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm px-3 hover:bg-surface-container-highest transition-colors" type="button">
+        How can I save more?
+      </button>
+</div>
+</section>
+<!-- Transaction Details Bottom Sheet / Overlay Modal -->
+<div class="fixed inset-0 z-50 bg-black/70 flex flex-col justify-end hidden transition-opacity duration-200" id="detailSheet">
+<!-- Click backdrop to close -->
+<div class="flex-1 w-full" onclick="toggleDetailModal(false)"></div>
+<div class="bg-surface-container-low rounded-t-2xl p-5 flex flex-col gap-4 w-full max-h-[751px] overflow-y-auto">
+<!-- Drag handle indicator -->
+<div class="w-10 h-1 bg-surface-container-highest rounded-full mx-auto -mt-1 mb-1"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Transaction Detail</span>
+<h3 class="font-headline-md text-headline-md text-primary font-bold mt-0.5">Naivas Westlands</h3>
+</div>
+<button class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="toggleDetailModal(false)" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex items-baseline gap-1 py-1">
+<span class="font-display-currency text-display-currency text-error font-extrabold">-KES 4,850</span>
+</div>
+<div class="bg-surface-container-high rounded-xl p-3.5 flex flex-col gap-2.5 font-body-md text-body-md">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Category</span>
+<span class="text-on-surface font-medium">Food &amp; Groceries</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Date</span>
+<span class="text-on-surface font-medium">Mon, 16 Nov 2024 · 14:32</span>
+</div>
+<div class="flex justify-between items-center"><span class="text-on-surface-variant text-[12px]">Source</span><span class="inline-flex items-center gap-1 text-on-surface font-medium text-[12px]"><span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>M-Pesa import</span></div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Notes</span>
+<span class="text-on-surface">Weekly household restock</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 pt-2 pb-safe">
+<button class="h-11 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+          Edit
+        </button>
+<button class="h-11 rounded-full bg-error/15 text-error font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+          Delete
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function toggleDetailModal(show) {
+    const modal = document.getElementById('detailSheet');
+    if (!modal) return;
+    if (show) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    } else {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+</script></main><nav class="fixed bottom-3 left-4 right-4 z-50 pb-safe" data-active-classes="text-primary-container"><div class="h-16 rounded-full bg-surface-container-high flex items-center justify-between px-2" style="background-color: #1A212C; border: 1px solid #252E3B;"><a aria-current="page" class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full transition-colors text-primary-container" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="font-label-sm text-[12px] mt-0.5">Home</span></a><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="transactions" href="#"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-sm text-[12px] mt-0.5">Transactions</span></a><div class="flex items-center justify-center px-1"><a class="w-13 h-13 w-[52px] h-[52px] rounded-full bg-primary-container text-surface flex items-center justify-center transition-transform active:scale-95" data-path="add-transaction" href="#"><span class="material-symbols-outlined text-[28px] font-bold text-surface">add</span></a></div><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="budgets" href="#"><span class="material-symbols-outlined text-[22px]">pie_chart</span><span class="font-label-sm text-[12px] mt-0.5">Budgets</span></a><a class="flex flex-col items-center justify-center min-w-[52px] h-12 rounded-full text-on-surface-variant transition-colors hover:text-on-surface" data-path="more" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-[12px] mt-0.5">More</span></a></div></nav></body></html>
