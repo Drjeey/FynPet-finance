@@ -2,6 +2,7 @@ import { DEFAULT_RATES, convertToKes, amountKes, sumKes, categoryTotals, nairobi
 import { icon, renderIcons } from './icons.js';
 import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
 import { csvText, csvRow } from './csv.js';
+import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason } from './importreview.js';
 import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount } from './addflow.js';
 
 // ═══════════════════════════════════════════════════════════
@@ -177,9 +178,11 @@ function normalizeTombstone(t) {
 }
 function normalizeImport(i) {
   if (!i || typeof i !== 'object') return null;
+  const count = value => Math.max(0, parseInt(value, 10) || 0);
   return { id: safeId(i.id) || uid(), filename: String(i.filename || 'statement.pdf').slice(0, 200),
-    count: Math.max(0, parseInt(i.count, 10) || 0), date: isoTime(i.date) || new Date().toISOString(),
-    status: ['success', 'partial', 'failed'].includes(i.status) ? i.status : 'success' };
+    count: count(i.count), skipped: count(i.skipped), rejected: count(i.rejected), date: isoTime(i.date) || new Date().toISOString(),
+    status: ['success', 'partial', 'failed'].includes(i.status) ? i.status : 'success',
+    ...(i.reason ? { reason: String(i.reason).slice(0, 60) } : {}) };
 }
 function normalizeAdvice(h) {
   if (!h || typeof h !== 'object' || !h.prompt) return null;
@@ -1558,153 +1561,250 @@ function execDel(){
 // ═══════════════════════════════════════════════════════════
 // MPESA IMPORT
 // ═══════════════════════════════════════════════════════════
-function dzDrag(e,on){e.preventDefault();document.getElementById('drop-zone').classList.toggle('drag',on)}
-function dzDrop(e){e.preventDefault();dzDrag(e,false);const f=e.dataTransfer.files[0];if(f?.type==='application/pdf')setFile(f)}
-function handlePDF(inp){if(inp.files[0])setFile(inp.files[0])}
-function setFile(f){
-  state.selectedFile=f;
-  document.getElementById('fp-name').textContent=f.name;
-  document.getElementById('fp-size').textContent=(f.size/1024).toFixed(1)+' KB';
-  document.getElementById('file-preview').classList.add('vis');
-}
-function clearFile(){state.selectedFile=null;document.getElementById('file-preview').classList.remove('vis');document.getElementById('pdf-file').value=''}
+const IMPORT_PRIVACY = 'The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised after you agree. Phone numbers are removed first.';
+let imp = { step: 'upload', file: null, cancelled: false, rows: [], rejected: 0, repeats: 0, failedParts: [], chunks: [], byChunk: [], classified: null, recon: null, range: { from: '', to: '' } };
+const CAT_OPTIONS = key => CAT_KEYS.map(k => `<option value="${k}"${k === key ? ' selected' : ''}>${escHtml((CATS[k] || CATS.other).label)}</option>`).join('');
+const IMPORT_STATUS_TEXT = { success: 'Success', partial: 'Partly imported', failed: 'Failed' };
 
-async function runImport(){
-  if(!state.selectedFile){showToast('Select a PDF first','error');return}
-  document.getElementById('import-btn').disabled=true;
-  document.getElementById('steps-list').classList.add('vis');
-  document.getElementById('import-result').classList.remove('vis');
-  const setS = (n, st) => {
-    const el = document.getElementById('stp'+n);
-    const dot = el.querySelector('.step-dot');
-    el.className = 'step ' + st;
-    dot.textContent = st === 'done' ? '✓' : st === 'act' ? '⟳' : n;
-  };
-  try{
-    setS(1,'act');
-    let pdfText='';
-    try{
-      const pdfjsLib=await loadPdfJs();
-      const pw=document.getElementById('pdf-pw').value;
-      const ab=await state.selectedFile.arrayBuffer();
-      const task=pdfjsLib.getDocument({
-        data:ab, password:pw,
-        isEvalSupported:false,   // hardening: never compile code from PDF content
-        cMapUrl:'vendor/pdfjs/cmaps/', cMapPacked:true,
-        standardFontDataUrl:'vendor/pdfjs/standard_fonts/',
-      });
-      const pdf=await task.promise;
-      for(let p=1;p<=pdf.numPages;p++){
-        const page=await pdf.getPage(p);
-        const tc=await page.getTextContent();
-        // hasEOL keeps statement rows on their own lines, which keeps chunks aligned to rows
-        pdfText+=tc.items.map(i=>i.str+(i.hasEOL?'\n':' ')).join('')+'\n';
-      }
-    }catch(e){
-      if(e.name==='PasswordException'){showToast('Wrong PDF password — try your National ID','error');resetImport();return}
-      console.error('PDF read failed',e);
-      showToast('Could not read this PDF. Check that it is an M-Pesa statement and try again.','error');
-      resetImport();return;
-    }
-    if(!pdfText.trim()){showToast('No text found in this PDF. Scanned statements are not supported.','error');resetImport();return}
-    setS(1,'done');setS(2,'act');await delay(400);setS(2,'done');
-    setS(3,'act');
-    const parsed=await parseWithClaude(pdfText);
-    // Skip statement rows already imported earlier (matched on M-Pesa receipt number)
-    const knownReceipts=new Set(state.transactions.map(t=>t.externalRef).filter(Boolean));
-    const txs=parsed.filter(t=>!t.receipt||!knownReceipts.has(t.receipt));
-    setS(3,'done');setS(4,'act');await delay(500);setS(4,'done');
-    setS(5,'act');
-    const batchId=uid();
-    const imp={id:batchId,filename:state.selectedFile.name,count:txs.length,date:new Date().toISOString(),status:'success'};
-    txs.forEach(({receipt,...tx})=>{
-      const clean=normalizeTx({...tx,externalRef:receipt||undefined,id:uid(),source:'import',importBatch:batchId,dirty:true});
-      if(clean)state.transactions.push(clean);
-    });
-    state.imports.push(imp);
-    Store.set('transactions',state.transactions);Store.set('imports',state.imports);
-    setS(5,'done');
-    document.getElementById('ir-stats').innerHTML=[
-      {v:txs.length,l:'Total'},{v:txs.filter(t=>t.type==='expense').length,l:'Expenses'},{v:txs.filter(t=>t.type==='income').length,l:'Income'}
-    ].map(s=>`<div class="ir-stat"><div class="ir-sv">${s.v}</div><div class="ir-sl">${s.l}</div></div>`).join('');
-    document.getElementById('import-result').classList.add('vis');
-    document.getElementById('import-badge').style.display='';
-    renderImportHistory();showToast(` ${txs.length} transactions imported!`,'success');
-    const sb=getSbClient();if(sb)syncNow();
-    setTimeout(renderAll,300);
-  }catch(e){showToast('Import failed: '+(e.message||'unknown error'),'error');console.error(e);resetImport()}
-  document.getElementById('import-btn').disabled=false;
+function impStep(step) {
+  imp.step = step;
+  ['upload', 'reading', 'review', 'done', 'failed'].forEach(name => { document.getElementById('imp-' + name).hidden = name !== step; });
+  document.getElementById('imp-upload-extra').hidden = step !== 'upload';
+  const position = { upload: 0, reading: 0, review: 1, done: 2, failed: 0 }[step];
+  document.querySelectorAll('#imp-stepper li').forEach((li, i) => {
+    li.classList.toggle('on', i === position); li.classList.toggle('done', i < position);
+    if (i === position) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+  });
+  document.getElementById('content').scrollTop = 0;
+}
+function impError(message) {
+  const el = document.getElementById('imp-err'); el.textContent = message || ''; el.hidden = !message;
+}
+
+// ─── Step 1: choose the PDF ───
+function dzDrag(e, on) { e.preventDefault(); document.getElementById('drop-zone').classList.toggle('drag', on); }
+function dzDrop(e) { e.preventDefault(); dzDrag(e, false); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
+function handlePDF(inp) { if (inp.files[0]) setFile(inp.files[0]); }
+function choosePdf(e) { e?.preventDefault?.(); document.getElementById('pdf-file').click(); }
+function setFile(f) {
+  if (f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) { impError('That is not a PDF. Choose the statement PDF from Safaricom.'); return; }
+  impError(''); imp.file = f;
+  document.getElementById('fp-name').textContent = f.name;
+  document.getElementById('fp-size').textContent = (f.size / 1024).toFixed(0) + ' KB';
+  document.getElementById('file-card').hidden = false;
+  document.getElementById('import-btn').disabled = false;
+}
+function clearFile() {
+  imp.file = null; document.getElementById('file-card').hidden = true; document.getElementById('pdf-file').value = '';
+  document.getElementById('import-btn').disabled = true;
 }
 
 // PDF.js is self-hosted (copied to public/vendor/ by scripts/build.mjs) and loaded on first use.
-let _pdfjs=null;
-async function loadPdfJs(){
-  if(_pdfjs)return _pdfjs;
-  const lib=await import(new URL('vendor/pdfjs/pdf.min.mjs',document.baseURI).href);
-  lib.GlobalWorkerOptions.workerSrc=new URL('vendor/pdfjs/pdf.worker.min.mjs',document.baseURI).href;
-  return(_pdfjs=lib);
+let _pdfjs = null;
+async function loadPdfJs() {
+  if (_pdfjs) return _pdfjs;
+  const lib = await import(new URL('vendor/pdfjs/pdf.min.mjs', document.baseURI).href);
+  lib.GlobalWorkerOptions.workerSrc = new URL('vendor/pdfjs/pdf.worker.min.mjs', document.baseURI).href;
+  return (_pdfjs = lib);
 }
-
-async function parseWithClaude(text) {
-  // Kept small so each /api/ai call finishes inside Netlify's 60 s function limit.
-  const CHUNK_SIZE = 3500;
-  const chunks = [];
-  let remaining = text.trim();
-
-  // Split at newline boundaries so no transaction is cut in half
-  while (remaining.length > 0) {
-    if (remaining.length <= CHUNK_SIZE) {
-      chunks.push(remaining);
-      break;
-    }
-    const lastNl = remaining.lastIndexOf('\n', CHUNK_SIZE);
-    const end = lastNl > CHUNK_SIZE * 0.5 ? lastNl : CHUNK_SIZE;
-    chunks.push(remaining.slice(0, end));
-    remaining = remaining.slice(end).trimStart();
+async function readPdfText(file, password) {
+  const pdfjsLib = await loadPdfJs();
+  const pdf = await pdfjsLib.getDocument({
+    data: await file.arrayBuffer(), password,
+    isEvalSupported: false,   // hardening: never compile code from PDF content
+    cMapUrl: 'vendor/pdfjs/cmaps/', cMapPacked: true, standardFontDataUrl: 'vendor/pdfjs/standard_fonts/',
+  }).promise;
+  let text = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const content = await (await pdf.getPage(p)).getTextContent();
+    // hasEOL keeps statement rows on their own lines, which keeps chunks aligned to rows
+    text += content.items.map(i => i.str + (i.hasEOL ? '\n' : ' ')).join('') + '\n';
   }
+  return text;
+}
 
-  const allTxs = [];
-  const seen = new Set();
-  const step3El = document.getElementById('stp3');
+// ─── Step 2: reading (nothing is saved here) ───
+function renderReading(stage, detail = '') {
+  const stages = ['Opening PDF in your browser', 'Reading transactions', 'Categorising with Fyn AI', 'Checking for duplicates', 'Preparing review'];
+  document.getElementById('imp-reading').innerHTML = `<div class="card imp-reading">
+    <div class="card-hdr"><h2>Reading your statement</h2></div>
+    <p class="muted">Nothing is saved until you confirm.</p>
+    <div class="imp-bar" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round((stage / stages.length) * 100)}"><span style="width:${Math.round(((stage - 0.5) / stages.length) * 100)}%"></span></div>
+    <ol class="imp-stages">${stages.map((label, i) => {
+      const state = i + 1 < stage ? 'done' : i + 1 === stage ? 'active' : 'queued';
+      const text = i === 2 && detail ? `${label} - ${detail}` : label;
+      return `<li class="${state}"><span class="st-dot">${state === 'done' ? icon('check') : ''}</span><span>${escHtml(text)}</span><em>${state === 'done' ? 'Done' : state === 'active' ? 'In progress' : 'Waiting'}</em></li>`;
+    }).join('')}</ol>
+    <div class="imp-actions"><button class="btn-secondary" data-click="impCancel">Cancel</button></div></div>`;
+}
+function impCancel() { imp.cancelled = true; impStep('upload'); }
 
-  for (let i = 0; i < chunks.length; i++) {
-    if (step3El) step3El.lastChild.textContent = ` Claude AI — chunk ${i+1} of ${chunks.length}…`;
-    const txs = await _parseChunk(chunks[i]);
-    for (const tx of txs) {
-      // Deduplicate: M-Pesa receipt number, else same date + amount + first 35 chars of description
-      const key = tx.receipt || `${tx.date}|${tx.amount}|${(tx.description||'').slice(0,35)}`;
-      if (!seen.has(key)) { seen.add(key); allTxs.push(tx); }
+async function parseChunks(indices) {
+  for (const i of indices) {
+    if (imp.cancelled) return false;
+    renderReading(3, `part ${i + 1} of ${imp.chunks.length}`);
+    try {
+      const data = await postAi({ mode: 'import', text: imp.chunks[i] });
+      imp.byChunk[i] = Array.isArray(data.transactions) ? data.transactions : [];
+      imp.rejected += data.rejected || 0;
+      imp.failedParts = imp.failedParts.filter(n => n !== i);
+    } catch (e) {
+      if (/sign in|agree|limit/i.test(e.message)) throw e;   // not worth trying the other parts
+      if (!imp.failedParts.includes(i)) imp.failedParts.push(i);
     }
   }
-
-  if (step3El) step3El.lastChild.textContent = ' Claude AI categorising transactions';
-  return allTxs;
+  return true;
+}
+function buildReview() {
+  const { rows, repeats } = dedupeWithinFile(imp.byChunk.flat());
+  imp.rows = rows; imp.repeats = repeats;
+  imp.classified = classifyRows(rows, state.transactions, imp.range);
+  imp.recon = reconcile(rows, imp.totals, { rangeSet: Boolean(imp.range.from || imp.range.to) });
 }
 
-// Extraction prompt, JSON schema and row validation live in netlify/functions/ai.mjs.
-// Returns validated rows: { description, amount, type, category, date, receipt }.
-async function _parseChunk(text) {
-  const data = await postAi({ mode: 'import', text });
-  return Array.isArray(data.transactions) ? data.transactions : [];
+async function runImport() {
+  if (!imp.file) { impError('Choose a PDF first.'); return; }
+  const from = document.getElementById('imp-from').value, to = document.getElementById('imp-to').value;
+  if (from && to && from > to) { impError('The start date is after the end date.'); return; }
+  impError('');
+  // Sign in and consent come first, so nobody waits for a PDF to read and then hits a wall.
+  try {
+    if (!(await getAccessToken())) throw new Error('Sign in to use AI features.');
+    if (!(await ensureAiConsent())) throw new Error('AI features are off until you agree to send data to Claude.');
+  } catch (e) { impFail(e, false); return; }
+  Object.assign(imp, { cancelled: false, rows: [], rejected: 0, repeats: 0, failedParts: [], byChunk: [], range: { from, to } });
+  impStep('reading'); renderReading(1);
+  try {
+    const text = await readPdfText(imp.file, document.getElementById('pdf-pw').value);
+    if (imp.cancelled) return;
+    if (!text.trim()) throw new Error('No text found in this PDF. Scanned statements are not supported.');
+    renderReading(2);
+    imp.chunks = splitChunks(text); imp.totals = statementTotals(text);
+    if (!(await parseChunks(imp.chunks.map((_, i) => i)))) return;
+    renderReading(4); await delay(250);
+    buildReview();
+    if (!imp.rows.length) throw new Error(imp.failedParts.length ? 'The AI could not read this statement.' : 'No transactions were found in this statement.');
+    renderReading(5); await delay(250);
+    renderImportReview(); impStep('review');
+  } catch (e) { if (!imp.cancelled) impFail(e); }
 }
 
-function renderImportHistory(){
-  const el=document.getElementById('import-history');
-  if(!state.imports.length){el.innerHTML='<div class="empty"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">⌃</div><div class="empty-title">No imports yet</div><div class="empty-sub">Upload your first M-Pesa statement.</div></div>';return}
-  el.innerHTML=`<table><thead><tr><th>File</th><th>Date</th><th>Transactions</th><th>Status</th></tr></thead><tbody>${state.imports.slice().reverse().map(i=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div style="font-size:1.1rem">📄</div><div class="td-main">${escHtml(i.filename)}</div></div></td><td>${new Date(i.date).toLocaleDateString()}</td><td><span class="td-mono">${i.count}</span></td><td><div class="st-pill manual">✓ Success</div></td></tr>`).join('')}</tbody></table>`;
+function impFail(error, record = true) {
+  const reason = failureReason(error);
+  console.error('Import failed', error);
+  if (record) {
+    state.imports.push({ id: uid(), filename: imp.file?.name || 'statement.pdf', count: 0, skipped: 0, rejected: 0, date: new Date().toISOString(), status: 'failed', reason: reason.short });
+    Store.set('imports', state.imports); renderImportHistory();
+  }
+  document.getElementById('imp-failed').innerHTML = `<div class="card imp-result bad">
+    <span class="res-ico bad">${icon('alert')}</span><h2>Couldn't read this statement</h2>
+    <p><b>${escHtml(reason.text)}</b></p><p class="muted">${escHtml(reason.next)}</p>
+    <div class="imp-actions">${reason.code === 'signin' ? '<button class="btn-primary" data-click="openModal" data-click-args=\'["auth-modal"]\'>Sign in</button>' : ''}<button class="${reason.code === 'signin' ? 'btn-secondary' : 'btn-primary'}" data-click="impBack">Try again</button></div></div>`;
+  impStep('failed');
 }
 
-function resetImport(){
-  [1,2,3,4,5].forEach(n=>{
-    const el=document.getElementById('stp'+n);
-    if(!el) return;
-    el.className='step';
-    const d=el.querySelector('.step-dot');
-    if(d){d.textContent=n;}
-  });
-  document.getElementById('steps-list').classList.remove('vis');
-  document.getElementById('import-btn').disabled=false;
+// ─── Step 3: review ───
+const impRows = () => [...imp.classified.fresh, ...imp.classified.check];
+const impFind = key => impRows().find(r => r.key === key);
+function reviewRow(row, kind) {
+  const cat = CATS[row.category] || CATS.other, sign = row.type === 'income' ? '+' : '-';
+  const amt = `<span class="rv-amt ${row.type === 'income' ? 'in' : 'out'}">${sign}${fmtKes(row.amount)}</span>`;
+  const meta = `${escHtml(shortDate(row.date))}${row.receipt ? ' · Ref ' + escHtml(row.receipt) : ''}`;
+  if (kind === 'dup') return `<li class="rv-row"><span class="rv-main"><b>${escHtml(row.description)}</b><small>${meta} · Already in FynPet</small></span>${amt}</li>`;
+  const select = `<select class="form-input rv-cat" aria-label="Category for ${escHtml(row.description)}" data-change="impSetCategory" data-change-args="${argsAttr([row.key, '$value'])}">${CAT_OPTIONS(row.category)}</select>`;
+  if (kind === 'check') {
+    const why = row.reason === 'possible-duplicate' ? 'Looks the same as a transaction you already have' : 'We could not tell the category';
+    return `<li class="rv-check" data-key="${row.key}"><div class="rv-main"><b>${escHtml(row.description)}</b><small>${meta}</small><span class="rv-why">${why}</span></div>${amt}${select}
+      <button type="button" class="btn-secondary rv-toggle" data-click="impToggleRow" data-click-args="${argsAttr([row.key])}" aria-pressed="${row.include}">${row.include ? 'Skip this one' : 'Include anyway'}</button></li>`;
+  }
+  return `<li class="rv-row" data-key="${row.key}"><label class="rv-inc"><input type="checkbox" ${row.include ? 'checked' : ''} data-change="impToggleRow" data-change-args="${argsAttr([row.key])}" aria-label="Include ${escHtml(row.description)}"></label>
+    <span class="rv-main"><b>${escHtml(row.description)}</b><small>${meta}</small></span>${select}${amt}</li>`;
 }
+function renderImportReview() {
+  const c = imp.classified, total = imp.rows.length, check = c.check.length, dups = c.duplicates.length;
+  const parts = [`${c.fresh.length} look good`]; if (dups) parts.push(`${dups} ${dups === 1 ? 'is' : 'are'} already in FynPet`);
+  if (check) parts.push(`${check} ${check === 1 ? 'needs' : 'need'} your check`);
+  const sentence = `We found ${total} transaction${total === 1 ? '' : 's'}. ` + (parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts.at(-1) : parts[0]) + '.';
+  const r = imp.recon;
+  const totals = r.status === 'match' ? `<div class="imp-banner ok">${icon('check')}<p><b>Totals match your statement:</b> money in ${fmtKes(r.moneyIn)}, money out ${fmtKes(r.moneyOut)}.</p></div>`
+    : r.status === 'differs' ? `<div class="imp-banner warn">${icon('alert')}<p><b>Totals differ from your statement.</b> We read money in ${fmtKes(r.moneyIn)} (statement ${fmtKes(r.statementIn)}) and money out ${fmtKes(r.moneyOut)} (statement ${fmtKes(r.statementOut)}). Look through the rows before saving. Charges and fees are not imported.</p></div>`
+    : r.status === 'skipped' ? `<div class="imp-banner">${icon('info')}<p>The totals check is skipped because you set a date range.</p></div>`
+    : `<div class="imp-banner">${icon('info')}<p>We couldn't find totals in this statement to check against. Look through the rows before saving.</p></div>`;
+  const failed = imp.failedParts.length ? `<div class="imp-banner warn">${icon('alert')}<p><b>${imp.failedParts.length === 1 ? 'One part' : imp.failedParts.length + ' parts'} of the statement could not be read.</b> Rows from ${imp.failedParts.length === 1 ? 'it are' : 'them are'} missing.</p><button class="btn-secondary" data-click="impRetry">Try again</button></div>` : '';
+  const notes = [];
+  if (c.outside.length) notes.push(`${c.outside.length} row${c.outside.length === 1 ? '' : 's'} outside your date range ${c.outside.length === 1 ? 'was' : 'were'} left out.`);
+  if (imp.repeats) notes.push(`${imp.repeats} repeated row${imp.repeats === 1 ? '' : 's'} in the file ${imp.repeats === 1 ? 'was' : 'were'} counted once.`);
+  if (imp.rejected) notes.push(`${imp.rejected} row${imp.rejected === 1 ? '' : 's'} could not be read and ${imp.rejected === 1 ? 'was' : 'were'} skipped.`);
+  document.getElementById('imp-review').innerHTML = `
+    <div class="card imp-summary"><h2>${escHtml(sentence)}</h2><p class="muted">We read your PDF on this device.${notes.length ? ' ' + escHtml(notes.join(' ')) : ''}</p></div>
+    ${totals}${failed}
+    ${check ? `<section class="card"><div class="card-hdr"><h2>Needs your check (${check})</h2></div><ul class="rv-list">${c.check.map(row => reviewRow(row, 'check')).join('')}</ul></section>` : ''}
+    ${dups ? `<details class="card imp-fold"><summary>Already in FynPet (${dups}) <span class="muted">These will be skipped</span></summary><ul class="rv-list">${c.duplicates.map(row => reviewRow(row, 'dup')).join('')}</ul></details>` : ''}
+    <details class="card imp-fold"${c.fresh.length && !check ? ' open' : ''}><summary>Looks good (${c.fresh.length}) <span class="muted">Suggested categories, ready to save</span></summary><ul class="rv-list">${c.fresh.map(row => reviewRow(row, 'fresh')).join('')}</ul></details>
+    <section class="card privacy-note"><h3>How your data is handled</h3><p>${escHtml(IMPORT_PRIVACY)}</p></section>
+    <div class="imp-footer" role="region" aria-label="Save"><div class="imp-foot-text" id="imp-foot-text" aria-live="polite"></div><button class="btn-secondary" data-click="impBack">Back</button><button class="btn-primary" id="imp-save" data-click="impSave"></button></div>`;
+  updateReviewFooter();
+}
+function updateReviewFooter() {
+  const chosen = impRows().filter(r => r.include), n = chosen.length;
+  const sum = type => chosen.filter(r => type === 'in' ? r.type === 'income' : r.type !== 'income').reduce((a, r) => a + r.amount, 0);
+  document.getElementById('imp-foot-text').innerHTML = `<b>${n} will be saved</b><span>Money out ${fmtKes(sum('out'))} · Money in ${fmtKes(sum('in'))}</span>`;
+  const btn = document.getElementById('imp-save'); btn.disabled = n === 0; btn.textContent = n === 1 ? 'Save 1 transaction' : `Save ${n} transactions`;
+}
+function impToggleRow(key) {
+  const row = impFind(key); if (!row) return;
+  row.include = !row.include;
+  const el = document.querySelector(`#imp-review [data-key="${key}"]`);
+  const btn = el?.querySelector('.rv-toggle'); if (btn) { btn.textContent = row.include ? 'Skip this one' : 'Include anyway'; btn.setAttribute('aria-pressed', String(row.include)); }
+  const box = el?.querySelector('input[type=checkbox]'); if (box) box.checked = row.include;
+  updateReviewFooter();
+}
+function impSetCategory(key, value) { const row = impFind(key); if (row && CAT_KEYS.includes(value)) row.category = value; }
+async function impRetry() {
+  imp.cancelled = false; impStep('reading'); renderReading(3);
+  try { if (!(await parseChunks([...imp.failedParts]))) return; buildReview(); renderImportReview(); impStep('review'); }
+  catch (e) { impFail(e); }
+}
+function impBack() { impStep('upload'); }
+
+// ─── Save (the only place that writes records) ───
+function impSave() {
+  const chosen = impRows().filter(r => r.include), batch = uid();
+  let saved = 0;
+  for (const r of chosen) {
+    const clean = normalizeTx({ description: r.description, amount: r.amount, type: r.type, category: r.category, date: r.date, externalRef: r.receipt || undefined, id: uid(), source: 'import', importBatch: batch, dirty: true });
+    if (clean) { state.transactions.push(clean); saved++; }
+  }
+  const left = impRows().length - chosen.length, dups = imp.classified.duplicates.length;
+  const unread = imp.rejected + (chosen.length - saved);
+  const status = importStatus({ saved, unreadRows: unread, failedParts: imp.failedParts.length });
+  state.imports.push({ id: batch, filename: imp.file?.name || 'statement.pdf', count: saved, skipped: dups + left, rejected: unread, date: new Date().toISOString(), status });
+  Store.set('transactions', state.transactions); Store.set('imports', state.imports);
+  const dates = chosen.map(r => r.date).sort(), period = dates.length ? (dates[0] === dates.at(-1) ? shortDate(dates[0]) : `${shortDate(dates[0])} - ${shortDate(dates.at(-1))} ${dates.at(-1).slice(0, 4)}`) : '';
+  renderAll(); renderImportHistory();
+  const partly = status === 'partial';
+  document.getElementById('imp-done').innerHTML = `<div class="card imp-result ${partly ? 'warn' : 'ok'}">
+    <span class="res-ico ${partly ? 'warn' : 'ok'}">${icon(partly ? 'alert' : 'check')}</span>
+    <span class="chip ${partly ? 'warn' : 'up'}">${partly ? 'Partly imported' : 'Success'}</span>
+    <h2>${saved} transaction${saved === 1 ? '' : 's'} saved</h2>
+    <p class="muted">Saved on this device. Your PDF was not uploaded.${period ? ' Statement period: ' + escHtml(period) + '.' : ''}</p>
+    ${partly ? `<p>${unread ? `${unread} row${unread === 1 ? '' : 's'} could not be read and ${unread === 1 ? 'was' : 'were'} skipped. ` : ''}${imp.failedParts.length ? `${imp.failedParts.length} part${imp.failedParts.length === 1 ? '' : 's'} of the statement could not be read.` : ''}</p>` : ''}
+    <dl class="res-stats"><div><dt>Saved</dt><dd>${saved}</dd></div><div><dt>Skipped as duplicates</dt><dd>${dups}</dd></div><div><dt>Left out by you</dt><dd>${left}</dd></div></dl>
+    <div class="imp-actions"><button class="btn-primary" data-click="goPage" data-click-args='["transactions",null]'>View transactions</button><button class="btn-secondary" data-click="impReset">Import another statement</button></div></div>`;
+  impStep('done');
+  const sb = getSbClient(); if (sb) syncNow();
+}
+function impReset() { clearFile(); document.getElementById('pdf-pw').value = ''; Object.assign(imp, { rows: [], classified: null, recon: null, failedParts: [], byChunk: [] }); impStep('upload'); }
+
+function renderImportHistory() {
+  const el = document.getElementById('import-history'); if (!el) return;
+  if (!state.imports.length) { el.innerHTML = '<p class="empty-note">No imports yet. Your first statement will appear here.</p>'; return; }
+  el.innerHTML = `<div class="hist"><table><thead><tr><th scope="col">File</th><th scope="col">Imported on</th><th scope="col">Saved</th><th scope="col">Skipped</th><th scope="col">Status</th></tr></thead><tbody>${state.imports.slice().reverse().map(i => {
+    const word = i.status === 'failed' ? `Failed${i.reason ? ' (' + escHtml(i.reason) + ')' : ''}` : IMPORT_STATUS_TEXT[i.status] || 'Success';
+    return `<tr><td class="h-file">${escHtml(i.filename)}</td><td>${escHtml(nairobiFmt(new Date(i.date), { day: 'numeric', month: 'short', year: 'numeric' }))}</td><td>${i.count}</td><td>${(i.skipped || 0) + (i.rejected || 0)}</td><td><span class="st ${escHtml(i.status)}">${word}</span></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // AUTH
@@ -2016,13 +2116,12 @@ function readArgs(el,type){
 function confirmSignOut(){if(confirm('Sign out?'))signOut()}
 function clearLocalData(){if(confirm('Clear ALL local data on this device? Data synced to your account is not affected.')){localStorage.clear();location.reload()}}
 function showAllTxTypes(){document.querySelector('#tx-filter-row .fb')?.click()}
-function choosePdf(e){e.preventDefault();document.getElementById('pdf-file').click()}
 function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveAllConfig, saveBudget,
   saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, showAllTxTypes, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
@@ -2081,13 +2180,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Date inputs default to today
   const txDateEl = document.getElementById('tx-date');
   if (txDateEl) txDateEl.value = nairobiDate(now);
-  const impTo = document.getElementById('imp-to');
-  if (impTo) impTo.value = nairobiDate(now);
-  const previousMonth = monthKey(now,-1);
-  const lastDay = new Date(Date.UTC(Number(previousMonth.slice(0,4)), Number(previousMonth.slice(5)), 0)).getUTCDate();
-  const impFrom = document.getElementById('imp-from');
-  if (impFrom) impFrom.value = previousMonth+'-'+String(Math.min(Number(nairobiDate(now).slice(8)),lastDay)).padStart(2,'0');
-
   // Profile
   const name = CFG.get('name') || 'You';
   document.getElementById('tb-name').textContent = name;

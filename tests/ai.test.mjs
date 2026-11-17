@@ -113,3 +113,14 @@ test('enforces the per-user daily quota', async () => {
   for (let i = 0; i < 3; i++) assert.equal((await call({ mode: 'advisor', message: 'q' })).status, 200);
   assert.equal((await call({ mode: 'advisor', message: 'q' })).status, 429);
 });
+
+test('statement chunks cost a fifth of an advisor question against the daily quota', async () => {
+  usage.clear();
+  anthropicReply = message(JSON.stringify({ transactions: [] }));
+  for (let i = 0; i < 15; i++) assert.equal((await call({ mode: 'import', text: 'line' })).status, 200);   // 15 x 0.2 = 3 = the limit
+  assert.equal((await call({ mode: 'import', text: 'line' })).status, 429);
+  usage.clear();
+  for (let i = 0; i < 2; i++) assert.equal((await call({ mode: 'advisor', message: 'q' })).status, 200);
+  for (let i = 0; i < 5; i++) assert.equal((await call({ mode: 'import', text: 'line' })).status, 200);   // 2 + 5 x 0.2 = 3
+  assert.equal((await call({ mode: 'advisor', message: 'q' })).status, 429);
+});

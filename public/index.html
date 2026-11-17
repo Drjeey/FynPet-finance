@@ -1009,55 +1009,54 @@ thead { position:sticky; top:0; z-index:10; }
 
     <!-- MPESA IMPORT -->
     <div class="page" id="page-mpesa">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">M-Pesa Import</div><div class="ph-sub">Upload your Safaricom statement for AI-powered extraction</div></div>
-      </div>
-      <div class="import-layout">
-        <div>
-          <label class="drop-zone" id="drop-zone" for="pdf-file" data-dragover="dzDrag" data-dragover-args='["$event",true]' data-dragleave="dzDrag" data-dragleave-args='["$event",false]' data-drop="dzDrop" data-drop-args='["$event"]'>
-            <div class="dz-icon" style="font-family:var(--fm);font-size:2.8rem;font-weight:300;color:var(--ink3)">↑</div>
-            <div class="dz-title">Drop M-Pesa PDF here</div>
-            <div class="dz-sub">Safaricom monthly statements. Password-protected files supported. Enter the statement password if needed.</div>
-            <button class="btn-primary" type="button" data-click="choosePdf">Choose File</button>
-          </label>
-          <input type="file" id="pdf-file" accept=".pdf" style="display:none" data-change="handlePDF" data-change-args='["$el"]'>
-          <div class="file-preview" id="file-preview">
-            <div class="fp-icon" style="font-family:var(--fm);font-size:.9rem;color:var(--ink3)">—</div>
-            <div class="fp-info"><div class="fp-name" id="fp-name"></div><div class="fp-size" id="fp-size"></div></div>
-            <div class="fp-rm" data-click="clearFile" title="Remove">✕</div>
+      <p class="muted imp-sub">Add transactions from a Safaricom PDF statement.</p>
+      <ol class="stepper" id="imp-stepper" aria-label="Import steps">
+        <li class="on" aria-current="step"><span class="n">1</span>Upload</li>
+        <li><span class="n">2</span>Review</li>
+        <li><span class="n">3</span>Done</li>
+      </ol>
+
+      <section id="imp-upload">
+        <div class="imp-grid">
+          <div class="imp-left">
+            <label class="drop" id="drop-zone" for="pdf-file" data-dragover="dzDrag" data-dragover-args='["$event",true]' data-dragleave="dzDrag" data-dragleave-args='["$event",false]' data-drop="dzDrop" data-drop-args='["$event"]'>
+              <span class="drop-ico" data-icon="import" aria-hidden="true"></span>
+              <b>Drop your M-Pesa statement here</b>
+              <span>Password-protected PDFs work. Use the password Safaricom gave you.</span>
+              <button class="btn-secondary" type="button" data-click="choosePdf" data-click-args='["$event"]'>Choose file</button>
+            </label>
+            <input type="file" id="pdf-file" accept=".pdf,application/pdf" hidden data-change="handlePDF" data-change-args='["$el"]'>
+            <div class="file-card" id="file-card" hidden>
+              <span class="fc-ico" data-icon="import" aria-hidden="true"></span>
+              <div class="fc-text"><b id="fp-name"></b><small id="fp-size"></small></div>
+              <button class="ib" type="button" aria-label="Remove file" data-click="clearFile"><span data-icon="close" aria-hidden="true"></span></button>
+            </div>
           </div>
-          <div class="priv-notice">
-            <span>⊠</span>
-            <div><strong>How your statement is handled.</strong> The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised. Phone numbers are removed before Anthropic processing. You will be asked for consent before transmission.</div>
-          </div>
-        </div>
-        <div class="import-form">
-          <div style="font-family:var(--fd);font-size:.95rem;font-weight:800;margin-bottom:14px">Import Settings</div>
-          <div class="form-grp" style="margin-bottom:10px">
-            <label class="form-lbl" for="pdf-pw">PDF Password (if protected)</label>
-            <div class="password-field"><input class="form-input" type="password" id="pdf-pw" placeholder="Statement password"><button class="btn-ghost" type="button" aria-controls="pdf-pw" aria-pressed="false" data-click="toggleKeyVis" data-click-args='["pdf-pw","$el"]'>Show</button></div>
-          </div>
-          <div class="form-row import-dates">
-            <div class="form-grp"><label class="form-lbl" for="imp-from">Date From</label><input class="form-input" type="date" id="imp-from"></div>
-            <div class="form-grp"><label class="form-lbl" for="imp-to">Date To</label><input class="form-input" type="date" id="imp-to"></div>
-          </div>
-          <button class="btn-primary" style="width:100%;justify-content:center;padding:11px;margin-bottom:12px" id="import-btn" data-click="runImport">Import statement</button>
-          <div class="steps-list" id="steps-list">
-            <div class="step" id="stp1"><div class="step-dot">1</div>Decrypting PDF</div>
-            <div class="step" id="stp2"><div class="step-dot">2</div>Extracting transaction text</div>
-            <div class="step" id="stp3"><div class="step-dot">3</div>Claude AI categorising transactions</div>
-            <div class="step" id="stp4"><div class="step-dot">4</div>Running financial analysis</div>
-            <div class="step" id="stp5"><div class="step-dot">5</div>Saving your records</div>
-          </div>
-          <div class="import-result" id="import-result">
-            <div class="ir-title"><span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px;margin-right:6px">DONE</span>Import Complete</div>
-            <div class="ir-stats" id="ir-stats"></div>
+          <div class="card imp-settings">
+            <h2>Import settings</h2>
+            <div class="form-grp">
+              <label class="form-lbl" for="pdf-pw">PDF password</label>
+              <div class="pw-row"><input class="form-input" type="password" id="pdf-pw" autocomplete="off" placeholder="Statement password"><button type="button" class="link" aria-pressed="false" data-click="toggleKeyVis" data-click-args='["pdf-pw","$el"]'>Show</button></div>
+              <small class="muted">Usually your National ID number.</small>
+            </div>
+            <div class="form-grp">
+              <span class="form-lbl">Date range (optional)</span>
+              <div class="date-pair"><label class="form-lbl" for="imp-from">From<input class="form-input" type="date" id="imp-from"></label><label class="form-lbl" for="imp-to">To<input class="form-input" type="date" id="imp-to"></label></div>
+              <small class="muted">Only rows inside this range are kept. Leave both empty to keep everything.</small>
+            </div>
+            <p class="field-err" id="imp-err" role="alert" hidden></p>
+            <button class="btn-primary" id="import-btn" data-click="runImport" disabled>Read statement</button>
           </div>
         </div>
-      </div>
-      <div class="table-card" style="margin-top:18px">
-        <div class="tt"><div class="tt-title">Import History</div></div>
-        <div id="import-history"></div>
+      </section>
+      <section id="imp-reading" hidden></section>
+      <section id="imp-review" hidden></section>
+      <section id="imp-done" hidden></section>
+      <section id="imp-failed" hidden></section>
+
+      <div id="imp-upload-extra">
+        <section class="card privacy-note"><h3>How your data is handled</h3><p>The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised after you agree. Phone numbers are removed first.</p></section>
+        <section class="card" aria-labelledby="imp-hist-title"><div class="card-hdr"><h2 id="imp-hist-title">Import history</h2></div><div id="import-history"></div></section>
       </div>
     </div>
 

@@ -15,6 +15,9 @@ const CATEGORIES = ['food', 'transport', 'utilities', 'entertainment', 'health',
 // Models that accept server-side refusal fallbacks with the "default" form.
 const FALLBACK_MODELS = new Set(['claude-opus-5-5', 'claude-opus-5', 'claude-fable-5-1', 'claude-sonnet-5-5']);
 
+// A statement is sent in several chunks; each costs a fraction of an advisor question against the daily limit.
+const IMPORT_CHUNK_COST = 0.2;
+
 const LIMITS = {
   advisor: { message: 2000, context: 15000, maxTokens: 4000 },
   import: { text: 8000, maxTokens: 16000 },
@@ -157,7 +160,7 @@ export default async (req) => {
   let body;
   try { body = await req.json(); } catch { return error(400, 'Invalid request body.'); }
 
-  const quota = await consumeDailyQuota(user.id);
+  const quota = await consumeDailyQuota(user.id, body.mode === 'import' ? IMPORT_CHUNK_COST : 1);
   if (!quota.ok) return error(429, `Daily AI limit reached (${quota.limit} requests). It resets at midnight UTC.`);
 
   try {

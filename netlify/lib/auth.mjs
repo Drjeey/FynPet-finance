@@ -18,12 +18,15 @@ export async function getUser(req) {
 
 // Per-user daily request cap, stored in Netlify Blobs. Not atomic: two requests racing
 // at the limit may both pass, which is acceptable for a cost guard.
-export async function consumeDailyQuota(userId) {
+// `cost` lets cheap calls weigh less: one statement chunk costs a fifth of an advisor question,
+// so importing a long statement does not use up the person's daily questions.
+export async function consumeDailyQuota(userId, cost = 1) {
   const limit = parseInt(env('AI_DAILY_LIMIT', '60'), 10);
   const store = getStore('ai-usage');
   const key = `${new Date().toISOString().slice(0, 10)}/${userId}`;
-  const used = parseInt((await store.get(key)) || '0', 10);
-  if (used >= limit) return { ok: false, limit };
-  await store.set(key, String(used + 1));
-  return { ok: true, limit, used: used + 1 };
+  const used = parseFloat((await store.get(key)) || '0') || 0;
+  if (used + cost > limit + 1e-9) return { ok: false, limit };
+  const next = Math.round((used + cost) * 100) / 100;
+  await store.set(key, String(next));
+  return { ok: true, limit, used: next };
 }
