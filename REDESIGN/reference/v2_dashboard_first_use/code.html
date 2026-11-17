@@ -1,0 +1,489 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_dashboard" name="shell-type">
+<title>Dashboard - FynPet KES Ledger</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest": "#32353b",
+            "inverse-primary": "#506600",
+            "on-secondary": "#003825",
+            "error": "#ffb4ab",
+            "surface-dim": "#111319",
+            "on-tertiary-container": "#4f5ac2",
+            "on-secondary-fixed-variant": "#005137",
+            "primary": "#ffffff",
+            "error-container": "#93000a",
+            "on-surface": "#e1e2ea",
+            "surface-container-lowest": "#0b0e13",
+            "inverse-on-surface": "#2e3036",
+            "on-surface-variant": "#c4c9ae",
+            "surface-container": "#1d2025",
+            "on-error": "#690005",
+            "surface-tint": "#aad600",
+            "surface-container-low": "#191c21",
+            "on-primary": "#283500",
+            "surface": "#111319",
+            "secondary": "#45dfa4",
+            "secondary-container": "#00bd85",
+            "on-background": "#e1e2ea",
+            "on-secondary-container": "#00452e",
+            "primary-fixed": "#c5f331",
+            "primary-fixed-dim": "#aad600",
+            "on-primary-fixed": "#161f00",
+            "outline": "#8e937a",
+            "secondary-fixed": "#68fcbf",
+            "on-error-container": "#ffdad6",
+            "surface-bright": "#36393f",
+            "secondary-fixed-dim": "#45dfa4",
+            "on-primary-fixed-variant": "#3b4d00",
+            "on-secondary-fixed": "#002114",
+            "tertiary-container": "#e0e0ff",
+            "on-tertiary-fixed": "#000767",
+            "surface-container-high": "#272a30",
+            "inverse-surface": "#e1e2ea",
+            "on-tertiary-fixed-variant": "#2f3aa3",
+            "tertiary-fixed": "#e0e0ff",
+            "tertiary-fixed-dim": "#bdc2ff",
+            "background": "#111319",
+            "on-primary-container": "#556d00",
+            "outline-variant": "#444934",
+            "on-tertiary": "#131e8c",
+            "tertiary": "#ffffff",
+            "primary-container": "#c5f331",
+            "surface-variant": "#32353b",
+            "tertiary-muted": "#7C8797"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "space-lg": "1.25rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.25rem",
+            "space-xl": "1.5rem"
+          },
+          fontFamily: {
+            "label-md": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "metric-regular": ["Manrope", "sans-serif"],
+            "headline-sm": ["Manrope", "sans-serif"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "metric-large": ["Manrope", "sans-serif"],
+            "headline-lg": ["Manrope", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "display-currency": ["Manrope", "sans-serif"]
+          },
+          fontSize: {
+            "label-md": ["13px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "metric-regular": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "metric-large": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+            "display-currency": ["44px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "800" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Keyframes for entrance and donut sweep */
+    @keyframes cardFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes sweepIn {
+      from {
+        stroke-dashoffset: 301.6;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .animate-card-fade-up {
+      animation: cardFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-donut-sweep {
+      stroke-dasharray: 301.6;
+      stroke-dashoffset: 301.6;
+      animation: sweepIn 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Staggered entrance delays */
+    .delay-row-1 { animation-delay: 50ms; }
+    .delay-row-2 { animation-delay: 100ms; }
+    .delay-row-3 { animation-delay: 150ms; }
+    .delay-row-4 { animation-delay: 200ms; }
+
+    /* Card hover lifting 2px with border brightening to #3A4658 */
+    .interactive-card {
+      transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 250ms ease;
+    }
+    .interactive-card:hover {
+      transform: translateY(-2px);
+      border-color: #3A4658 !important;
+    }
+
+    /* Buttons pressing down 1px on click */
+    .btn-press {
+      transition: transform 100ms ease, background-color 150ms ease, border-color 150ms ease;
+    }
+    .btn-press:active {
+      transform: translateY(1px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#111319] font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Desktop Fixed Sidebar (w-[248px]) -->
+<aside class="fixed left-0 top-0 bottom-0 w-[248px] h-screen bg-[#121720] border-r border-[#252E3B] flex flex-col justify-between p-space-lg z-50">
+<div class="flex flex-col gap-space-lg">
+<!-- Logo Branding: 36x36 lime rounded square with bold text "FP" in #0A0D12 -->
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg bg-[#C6F432] flex items-center justify-center select-none shadow-sm">
+<span class="font-['Manrope'] text-[18px] font-extrabold text-[#0A0D12] tracking-tighter leading-none">FP</span>
+</div>
+<div class="flex flex-col leading-none">
+<span class="font-['Manrope'] text-[18px] font-bold text-primary tracking-tight">FynPet</span>
+<span class="font-['Inter'] text-[12px] text-[#A3AEBD] tracking-normal mt-0.5">KES ledger</span>
+</div>
+</div>
+<!-- Ask Fyn AI Primary Action -->
+<button class="w-full h-11 rounded-full bg-[#C6F432] text-[#0A0D12] font-label-md text-label-md font-semibold flex items-center justify-center gap-space-sm hover:bg-[#b2dc2b] btn-press" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1">
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="text-body-md">Dashboard</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>Transactions</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span>Budgets</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span>M-Pesa Import</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sync Status Pinned to Bottom -->
+<div class="flex flex-col gap-space-md pt-space-md border-t border-[#252E3B]">
+<div class="flex items-center gap-2 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="text-[12px] text-[#A3AEBD]">Saved on this device</span>
+</div>
+<button class="w-full h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md btn-press" type="button">
+        Sign in to sync
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrap (ml-[248px]) -->
+<div class="ml-[248px] flex flex-col min-h-screen">
+<!-- Top Bar -->
+<header class="sticky top-0 h-[72px] bg-[#111319]/90 backdrop-blur-xl border-b border-[#252E3B] z-40 px-margin flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<h1 class="font-headline-lg text-[28px] leading-tight text-primary font-bold tracking-tight">Dashboard</h1>
+<span class="text-[#252E3B]">/</span>
+<span class="text-[12px] text-[#A3AEBD]">Monday, 16 November 2026</span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Search Bar -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#A3AEBD]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container border border-[#252E3B] text-[12px] text-on-surface placeholder:text-[#A3AEBD] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Search transactions..." type="text">
+</div>
+<!-- Export Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Export CSV" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<!-- Sync Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Sync" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- "You" Profile -->
+<div class="flex items-center gap-space-sm pl-1 cursor-pointer select-none">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">You</span>
+</div>
+</div>
+</header>
+<!-- Main Content Body -->
+<main class="flex-1 p-margin flex flex-col gap-gutter bg-[#111319]"><div class="flex flex-col w-full">
+<!-- Interactive Modal Container for "Add Transaction" (Hidden by default, triggered via JS) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-space-lg bg-surface-container-lowest/80 backdrop-blur-sm" id="add-tx-modal">
+<div class="w-full max-w-lg bg-surface-container p-space-xl rounded-xl shadow-xl flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">New Ledger Entry</h2>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant transition-colors" onclick="document.getElementById('add-tx-modal').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Amount (KES)</label>
+<div class="flex items-center bg-surface-container-low rounded-lg px-4 h-11">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-bold mr-2">KES</span>
+<input class="w-full bg-transparent text-primary font-metric-large text-metric-large focus:outline-none placeholder:text-surface-variant" placeholder="0.00" type="number">
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Category</label>
+<select class="w-full h-11 bg-surface-container-low text-on-surface rounded-lg px-4 focus:outline-none text-body-md">
+<option>Food &amp; Groceries</option>
+<option>Transport &amp; Fuel</option>
+<option>Utilities &amp; Bills</option>
+<option>Shopping &amp; Retail</option>
+<option>Entertainment</option>
+<option>Income / Inflow</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Description / Party</label>
+<input class="w-full h-11 bg-surface-container-low text-on-surface rounded-lg px-4 focus:outline-none placeholder:text-on-surface-variant/60 text-body-md" placeholder="e.g. Naivas Supermarket or Matatu fare" type="text">
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-md pt-space-xs">
+<button class="px-space-lg h-11 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md transition-colors" onclick="document.getElementById('add-tx-modal').classList.add('hidden')" type="button">
+          Cancel
+        </button>
+<button class="px-space-xl h-11 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-body-md font-bold transition-transform active:scale-95" onclick="document.getElementById('add-tx-modal').classList.add('hidden')" type="button">
+          Save Entry
+        </button>
+</div>
+</div>
+</div>
+<!-- Primary Workspace Content (Empty State Flow) -->
+<div class="flex flex-col gap-gutter w-full">
+<!-- Card 1: "This month" Hero Ledger Status -->
+<section class="w-full rounded-xl bg-surface-container p-space-xl relative overflow-hidden shadow-sm interactive-card">
+<div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-gradient-to-br from-primary-container/10 via-transparent to-transparent pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg relative z-10">
+<!-- Left: Numbers-First Monetary State -->
+<div class="flex flex-col gap-2 min-w-0">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-semibold">This month</span>
+<span class="text-surface-variant">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">November 2026</span>
+</div>
+<div class="flex items-baseline gap-space-sm mt-1">
+<span class="font-display-currency text-display-currency text-primary tracking-tight font-extrabold select-none">
+              KES 0
+            </span>
+
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl leading-relaxed mt-1">
+            Add your first transaction or import a statement to see your month.
+          </p>
+</div>
+<!-- Right: Primary Transaction Inflow Actions -->
+<div class="flex flex-wrap sm:flex-nowrap items-center gap-space-md shrink-0">
+<button class="h-11 px-space-xl rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary-fixed transition-transform active:scale-95 shadow-sm" onclick="document.getElementById('add-tx-modal').classList.remove('hidden')" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Add transaction</span>
+</button>
+<button class="h-11 px-space-xl rounded-full bg-surface-container-high hover:bg-surface-container-highest text-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary">file_upload</span>
+<span>Import M-Pesa statement</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Card 2: "Get started with FynPet" Guided Onboarding Mosaic -->
+<section class="w-full rounded-xl bg-surface-container p-space-xl flex flex-col gap-space-xl shadow-sm interactive-card">
+<!-- Section Header -->
+<div class="flex flex-col gap-2 max-w-3xl">
+<div class="flex items-center gap-2.5">
+
+<span class="font-body-sm text-body-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+            Stored exclusively in your browser
+          </span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">
+          Get started with FynPet
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          FynPet keeps your ledger private on this device. Complete these three steps to begin tracking.
+        </p>
+</div>
+<!-- 3-Column Structured Step Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg w-full">
+<!-- Step 1 Tile -->
+<div class="group relative rounded-xl bg-surface-container-low p-space-lg flex flex-col justify-between gap-space-lg shadow-sm hover:bg-surface-container-high transition-colors">
+<div class="flex flex-col gap-space-md">
+<!-- Badge & Icon Row -->
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-label-md font-extrabold flex items-center justify-center shadow-sm">
+                1
+              </div>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">
+                Add or import transactions
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Type a transaction manually or bring in a PDF statement from Safaricom M-Pesa. Nothing is uploaded to cloud storage.
+              </p>
+</div>
+</div>
+<!-- Action Button: Exactly 44px (h-11) Target -->
+<div class="pt-2">
+<button class="w-full h-11 rounded-full bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-all active:scale-98" onclick="document.getElementById('add-tx-modal').classList.remove('hidden')" type="button">
+<span>Add or import</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Step 2 Tile -->
+<div class="group relative rounded-xl bg-surface-container-low p-space-lg flex flex-col justify-between gap-space-lg shadow-sm hover:bg-surface-container-high transition-colors">
+<div class="flex flex-col gap-space-md">
+<!-- Badge & Icon Row -->
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-label-md font-extrabold flex items-center justify-center shadow-sm">
+                2
+              </div>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">
+                Set a budget
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Set monthly spending guardrails for categories like Food &amp; Groceries, Transport, or Utilities.
+              </p>
+</div>
+</div>
+<!-- Action Button: Exactly 44px (h-11) Target -->
+<div class="pt-2">
+<button class="w-full h-11 rounded-full bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-all active:scale-98" type="button">
+<span>Set a budget</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Step 3 Tile -->
+<div class="group relative rounded-xl bg-surface-container-low p-space-lg flex flex-col justify-between gap-space-lg shadow-sm hover:bg-surface-container-high transition-colors">
+<div class="flex flex-col gap-space-md">
+<!-- Badge & Icon Row -->
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-label-md font-extrabold flex items-center justify-center shadow-sm">
+                3
+              </div>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">
+                Ask Fyn a question
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Ask questions about your spending and cash flow trends once your records are added.
+              </p>
+</div>
+</div>
+<!-- Action Button: Exactly 44px (h-11) Target -->
+<div class="pt-2">
+<button class="w-full h-11 rounded-full bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-all active:scale-98" type="button">
+<span>Ask Fyn</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Trust & Privacy Footnote Note inside the card -->
+<div class="flex items-center gap-3 pt-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span><span class="text-[12px]">Your records stay on this device until you sign in.</span></div>
+</section>
+</div>
+</div></main>
+</div>
+<!-- Tag in Bottom-Right Corner -->
+<div class="fixed bottom-6 right-6 z-50 pointer-events-none">
+<div class="flex items-center gap-2 bg-[#121720]/90 backdrop-blur-md border border-[#252E3B] px-3.5 py-1.5 rounded-full shadow-lg">
+<span class="w-1.5 h-1.5 rounded-full bg-[#A3AEBD]"></span>
+<span class="text-[12px] text-[#A3AEBD] tracking-wider">Sample data - design preview</span>
+</div>
+</div>
+
+
+</body></html>

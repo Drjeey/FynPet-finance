@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>Dashboard - FynPet KES Ledger</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest": "#32353b",
+            "inverse-primary": "#506600",
+            "on-secondary": "#003825",
+            "error": "#ffb4ab",
+            "surface-dim": "#111319",
+            "on-tertiary-container": "#4f5ac2",
+            "on-secondary-fixed-variant": "#005137",
+            "primary": "#ffffff",
+            "error-container": "#93000a",
+            "on-surface": "#e1e2ea",
+            "surface-container-lowest": "#0b0e13",
+            "inverse-on-surface": "#2e3036",
+            "on-surface-variant": "#c4c9ae",
+            "surface-container": "#1d2025",
+            "on-error": "#690005",
+            "surface-tint": "#aad600",
+            "surface-container-low": "#191c21",
+            "on-primary": "#283500",
+            "surface": "#111319",
+            "secondary": "#45dfa4",
+            "secondary-container": "#00bd85",
+            "on-background": "#e1e2ea",
+            "on-secondary-container": "#00452e",
+            "primary-fixed": "#c5f331",
+            "primary-fixed-dim": "#aad600",
+            "on-primary-fixed": "#161f00",
+            "outline": "#8e937a",
+            "secondary-fixed": "#68fcbf",
+            "on-error-container": "#ffdad6",
+            "surface-bright": "#36393f",
+            "secondary-fixed-dim": "#45dfa4",
+            "on-primary-fixed-variant": "#3b4d00",
+            "on-secondary-fixed": "#002114",
+            "tertiary-container": "#e0e0ff",
+            "on-tertiary-fixed": "#000767",
+            "surface-container-high": "#272a30",
+            "inverse-surface": "#e1e2ea",
+            "on-tertiary-fixed-variant": "#2f3aa3",
+            "tertiary-fixed": "#e0e0ff",
+            "tertiary-fixed-dim": "#bdc2ff",
+            "background": "#111319",
+            "on-primary-container": "#556d00",
+            "outline-variant": "#444934",
+            "on-tertiary": "#131e8c",
+            "tertiary": "#ffffff",
+            "primary-container": "#c5f331",
+            "surface-variant": "#32353b",
+            "tertiary-muted": "#7C8797"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "space-lg": "1.25rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.25rem",
+            "space-xl": "1.5rem"
+          },
+          fontFamily: {
+            "label-md": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "metric-regular": ["Manrope", "sans-serif"],
+            "headline-sm": ["Manrope", "sans-serif"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "metric-large": ["Manrope", "sans-serif"],
+            "headline-lg": ["Manrope", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "display-currency": ["Manrope", "sans-serif"]
+          },
+          fontSize: {
+            "label-md": ["13px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "metric-regular": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "metric-large": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+            "display-currency": ["44px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "800" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Keyframes for entrance and donut sweep */
+    @keyframes cardFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes sweepIn {
+      from {
+        stroke-dashoffset: 301.6;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .animate-card-fade-up {
+      animation: cardFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-donut-sweep {
+      stroke-dasharray: 301.6;
+      stroke-dashoffset: 301.6;
+      animation: sweepIn 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Staggered entrance delays */
+    .delay-row-1 { animation-delay: 50ms; }
+    .delay-row-2 { animation-delay: 100ms; }
+    .delay-row-3 { animation-delay: 150ms; }
+    .delay-row-4 { animation-delay: 200ms; }
+
+    /* Card hover lifting 2px with border brightening to #3A4658 */
+    .interactive-card {
+      transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 250ms ease;
+    }
+    .interactive-card:hover {
+      transform: translateY(-2px);
+      border-color: #3A4658 !important;
+    }
+
+    /* Buttons pressing down 1px on click */
+    .btn-press {
+      transition: transform 100ms ease, background-color 150ms ease, border-color 150ms ease;
+    }
+    .btn-press:active {
+      transform: translateY(1px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#111319] font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Desktop Fixed Sidebar (w-[248px]) -->
+<aside class="fixed left-0 top-0 bottom-0 w-[248px] h-screen bg-[#121720] border-r border-[#252E3B] flex flex-col justify-between p-space-lg z-50">
+<div class="flex flex-col gap-space-lg">
+<!-- Logo Branding: 36x36 lime rounded square with bold text "FP" in #0A0D12 -->
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg bg-[#C6F432] flex items-center justify-center select-none shadow-sm">
+<span class="font-['Manrope'] text-[18px] font-extrabold text-[#0A0D12] tracking-tighter leading-none">FP</span>
+</div>
+<div class="flex flex-col leading-none">
+<span class="font-['Manrope'] text-[18px] font-bold text-primary tracking-tight">FynPet</span>
+<span class="font-['Inter'] text-[12px] text-[#A3AEBD] tracking-normal mt-0.5">KES ledger</span>
+</div>
+</div>
+<!-- Ask Fyn AI Primary Action -->
+<button class="w-full h-11 rounded-full bg-[#C6F432] text-[#0A0D12] font-label-md text-label-md font-semibold flex items-center justify-center gap-space-sm hover:bg-[#b2dc2b] btn-press" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1">
+<a aria-current="page" class="h-11 px-space-md rounded-full flex items-center gap-space-md bg-surface-container text-[#C6F432] font-semibold btn-press" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="text-body-md">Dashboard</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>Transactions</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span>Budgets</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span>M-Pesa Import</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sync Status Pinned to Bottom -->
+<div class="flex flex-col gap-space-md pt-space-md border-t border-[#252E3B]">
+<div class="flex items-center gap-2 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="text-[12px] text-[#A3AEBD]">Saved on this device</span>
+</div>
+<button class="w-full h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md btn-press" type="button">
+        Sign in to sync
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrap (ml-[248px]) -->
+<div class="ml-[248px] flex flex-col min-h-screen">
+<!-- Top Bar -->
+<header class="sticky top-0 h-[72px] bg-[#111319]/90 backdrop-blur-xl border-b border-[#252E3B] z-40 px-margin flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<h1 class="font-headline-lg text-[28px] leading-tight text-primary font-bold tracking-tight">Dashboard</h1>
+<span class="text-[#252E3B]">/</span>
+<span class="text-[12px] text-[#A3AEBD]">Monday, 16 November 2026</span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Search Bar -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#A3AEBD]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container border border-[#252E3B] text-[12px] text-on-surface placeholder:text-[#A3AEBD] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Search transactions..." type="text"/>
+</div>
+<!-- Export Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Export CSV" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<!-- Sync Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Sync" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- "You" Profile -->
+<div class="flex items-center gap-space-sm pl-1 cursor-pointer select-none">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">You</span>
+</div>
+</div>
+</header>
+<!-- Main Content Body -->
+<main class="flex-1 p-margin flex flex-col gap-gutter bg-[#111319]">
+<!-- ROW 1: Hero Card (Net Cash Flow) + 2x2 Metric Tiles -->
+<div class="grid grid-cols-12 gap-gutter animate-card-fade-up delay-row-1">
+<!-- Hero Card: Net Cash Flow (6 cols) -->
+<div class="col-span-6 bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl flex flex-col justify-between interactive-card">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="text-[12px] text-[#A3AEBD] tracking-wider uppercase font-semibold">Net cash flow · This month</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-[12px] text-[#A3AEBD] border border-[#252E3B]">First use</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-1">
+<span class="font-display-currency text-[44px] leading-tight text-[#7C8797] tracking-tight font-extrabold">KES 0</span>
+</div>
+<span class="text-[12px] text-[#7C8797]">Awaiting first transaction</span>
+</div>
+<!-- Proportional Bar Baseline -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-container-highest w-0"></div>
+</div>
+<div class="flex items-center justify-between text-[12px] text-[#7C8797] pt-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span>Income: <strong class="font-metric-regular text-[#7C8797] font-semibold">KES 0</strong></span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span>Expenses: <strong class="font-metric-regular text-[#7C8797] font-semibold">KES 0</strong></span>
+</div>
+<span>Savings rate <strong class="text-[#7C8797]">0.0%</strong></span>
+</div>
+</div>
+<!-- Compact This month vs last month Block with zero comparison bars -->
+<div class="mt-2 pt-3 border-t border-[#252E3B]/60 flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[12px] text-[#A3AEBD]">This month vs last month</span>
+<span class="text-[12px] text-[#7C8797]">No previous period recorded</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<div class="w-12 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-container-highest w-0"></div>
+</div>
+<span class="text-[12px] text-[#7C8797]">0%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-md pt-space-lg">
+<button class="flex-1 h-11 rounded-full bg-[#C6F432] hover:bg-[#b2dc2b] text-[#0A0D12] font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs btn-press" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>+ Add transaction</span>
+</button>
+<button class="flex-1 h-11 rounded-full border border-[#252E3B] bg-transparent hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs btn-press" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#A3AEBD]">upload_file</span>
+<span>Import M-Pesa</span>
+</button>
+</div>
+</div>
+<!-- 2x2 Metric Tiles (6 cols) -->
+<div class="col-span-6 grid grid-cols-2 gap-gutter">
+<!-- Income -->
+<div class="bg-surface-container-low border border-[#252E3B] rounded-xl p-space-lg flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<span class="text-[12px] text-[#A3AEBD] tracking-wider uppercase font-semibold">Income</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD]">
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 my-space-xs">
+<span class="font-metric-large text-metric-large text-[#7C8797]">KES 0</span>
+<span class="text-[12px] text-[#A3AEBD]">Awaiting first credit or salary</span>
+</div>
+</div>
+<!-- Expenses -->
+<div class="bg-surface-container-low border border-[#252E3B] rounded-xl p-space-lg flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<span class="text-[12px] text-[#A3AEBD] tracking-wider uppercase font-semibold">Expenses</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD]">
+<span class="material-symbols-outlined text-[18px]">arrow_upward</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 my-space-xs">
+<span class="font-metric-large text-metric-large text-[#7C8797]">KES 0</span>
+<span class="text-[12px] text-[#A3AEBD]">No debits recorded yet</span>
+</div>
+</div>
+<!-- Total Saved -->
+<div class="bg-surface-container-low border border-[#252E3B] rounded-xl p-space-lg flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<span class="text-[12px] text-[#A3AEBD] tracking-wider uppercase font-semibold">Total saved</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD]">
+<span class="material-symbols-outlined text-[18px]">savings</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 my-space-xs">
+<span class="font-metric-large text-metric-large text-[#7C8797]">KES 0</span>
+<span class="text-[12px] text-[#A3AEBD]">0% of savings target</span>
+</div>
+</div>
+<!-- Transactions -->
+<div class="bg-surface-container-low border border-[#252E3B] rounded-xl p-space-lg flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<span class="text-[12px] text-[#A3AEBD] tracking-wider uppercase font-semibold">Transactions</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD]">
+<span class="material-symbols-outlined text-[18px]">sync_alt</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 my-space-xs">
+<span class="font-metric-large text-metric-large text-[#7C8797]">0</span>
+<span class="text-[12px] text-[#A3AEBD]">Total volume across accounts</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 2: Cash Flow (8 cols) + Spending by Category (4 cols) -->
+<div class="grid grid-cols-12 gap-gutter animate-card-fade-up delay-row-2">
+<!-- Cash Flow Chart Card (8 cols) -->
+<div class="col-span-8 bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Cash flow</span>
+<span class="text-[12px] text-[#A3AEBD]">Income and expenses</span>
+</div>
+<!-- Segmented Control 7D / 1M / 3M -->
+<div class="flex items-center gap-1 bg-surface-container p-1 rounded-full border border-[#252E3B]">
+<button class="h-7 px-3.5 rounded-full bg-[#C6F432] text-[#0A0D12] text-[12px] font-semibold btn-press" type="button">7D</button>
+<button class="h-7 px-3.5 rounded-full text-[#A3AEBD] hover:text-on-surface text-[12px] btn-press" type="button">1M</button>
+<button class="h-7 px-3.5 rounded-full text-[#A3AEBD] hover:text-on-surface text-[12px] btn-press" type="button">3M</button>
+</div>
+</div>
+<!-- Chart Area with Dashed Baseline & Centered Empty Message -->
+<div class="relative w-full h-56 flex flex-col items-center justify-center my-space-md">
+<svg class="absolute inset-0 w-full h-full text-surface-container-highest" preserveaspectratio="none" viewbox="0 0 600 200">
+<line stroke="currentColor" stroke-dasharray="4 6" stroke-width="1" x1="0" x2="600" y1="50" y2="50"></line>
+<line stroke="currentColor" stroke-dasharray="4 6" stroke-width="1" x1="0" x2="600" y1="100" y2="100"></line>
+<line stroke="currentColor" stroke-dasharray="4 6" stroke-width="1" x1="0" x2="600" y1="150" y2="150"></line>
+<line stroke="currentColor" stroke-width="1.5" x1="0" x2="600" y1="185" y2="185"></line>
+</svg>
+<!-- Centered Message -->
+<div class="relative z-10 flex flex-col items-center text-center gap-space-xs px-space-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD] mb-space-xs">
+<span class="material-symbols-outlined text-[24px]">query_stats</span>
+</div>
+<span class="font-body-lg text-body-lg font-semibold text-primary">No activity yet</span>
+<span class="text-body-md text-[#A3AEBD] max-w-sm">Add transactions or import an M-Pesa statement to see your cash flow.</span>
+</div>
+</div>
+<!-- Summary Line -->
+<div class="flex items-center justify-between pt-space-xs border-t border-[#252E3B]">
+<span class="text-[12px] text-[#7C8797]">No cash flow recorded this period.</span>
+<div class="flex items-center gap-space-md text-[12px] text-[#A3AEBD]">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-0.5 bg-secondary"></span>
+<span>Net inflow</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-0.5 bg-[#A3AEBD]"></span>
+<span>Baseline</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Spending by Category Card (4 cols) -->
+<div class="col-span-4 bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Spending by category</span>
+<span class="text-[12px] text-[#A3AEBD]">0 Total</span>
+</div>
+<!-- Empty Ring Graphic with clockwise sweeping muted grey ring -->
+<div class="relative flex items-center justify-center my-space-md py-1">
+<svg class="w-40 h-40 transform -rotate-90" viewbox="0 0 120 120">
+<circle class="text-[#252E3B]/40" cx="60" cy="60" fill="none" r="48" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-[#323B4A] animate-donut-sweep origin-center" cx="60" cy="60" fill="none" r="48" stroke="currentColor" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+<span class="font-['Manrope'] text-[24px] leading-tight text-[#7C8797] tracking-tight font-bold">KES 0</span>
+<span class="text-[12px] text-[#7C8797] uppercase tracking-wider mt-4">Expenses</span>
+</div>
+</div>
+<!-- Category Legend: Exact 6 categories with 0% -->
+<div class="flex flex-col gap-1.5 pt-space-xs">
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Food &amp; Groceries</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Transport</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Utilities</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Shopping</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Entertainment</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+<div class="flex items-center justify-between text-[#7C8797] text-[12px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#252E3B]"></span>
+<span>Other</span>
+</div>
+<span class="font-metric-regular text-[#7C8797]">0%</span>
+</div>
+</div>
+<!-- Summary Line -->
+<div class="pt-space-sm mt-space-xs border-t border-[#252E3B]">
+<span class="text-[12px] text-[#7C8797]">No categorical spending recorded.</span>
+</div>
+</div>
+</div>
+<!-- ROW 3: Budgets (4 cols) + Recent Transactions (8 cols) -->
+<div class="grid grid-cols-12 gap-gutter animate-card-fade-up delay-row-3">
+<!-- Budgets Card (4 cols) -->
+<div class="col-span-4 bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Budgets</span>
+<span class="text-[12px] text-[#A3AEBD]">Target caps &amp; limits</span>
+</div>
+<span class="material-symbols-outlined text-[20px] text-[#A3AEBD]">donut_small</span>
+</div>
+<div class="flex flex-col items-center text-center gap-space-sm py-space-xl my-auto">
+<div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD]">
+<span class="material-symbols-outlined text-[28px]">data_thresholding</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-primary font-semibold">No budgets yet</span>
+<p class="text-body-md text-[#A3AEBD] max-w-xs">
+              Set monthly guardrails for groceries, dining, or bills to prevent overspending before month end.
+            </p>
+</div>
+<div class="flex flex-col gap-2">
+<button class="w-full h-11 rounded-full border border-[#252E3B] bg-transparent hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs btn-press" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>+ Create budget</span>
+</button>
+<span class="text-[12px] text-[#7C8797] text-center">Set spending limits to monitor your cash flow.</span>
+</div>
+</div>
+<!-- Recent Transactions Card (8 cols) -->
+<div class="col-span-8 bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl flex flex-col justify-between interactive-card">
+<div class="flex items-center justify-between pb-space-sm border-b border-[#252E3B]/60">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Recent transactions</span>
+<span class="text-[12px] text-[#A3AEBD] ml-1">Latest activity</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-[12px] text-[#A3AEBD] border border-[#252E3B]">0 entries</span>
+</div>
+<!-- Centered Empty State Panel -->
+<div class="flex flex-col items-center justify-center text-center py-space-xl my-space-xs">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-[#A3AEBD] mb-space-md">
+<span class="material-symbols-outlined text-[32px]">receipt_long</span>
+</div>
+<h3 class="font-metric-regular text-metric-regular text-primary font-semibold">No transactions recorded yet</h3>
+<!-- Exact required phrase -->
+<p class="text-body-md text-[#A3AEBD] max-w-md mt-space-xs mb-space-lg">
+              Saved on this device. Sign in to back up and sync.
+            </p>
+<!-- Two Action Buttons -->
+<div class="flex flex-wrap items-center justify-center gap-space-md w-full max-w-lg">
+<button class="flex-1 min-w-[200px] h-[48px] px-6 rounded-full bg-[#C6F432] hover:bg-[#b2dc2b] text-[#0A0D12] font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs btn-press" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>+ Add your first transaction</span>
+</button>
+<button class="flex-1 min-w-[200px] h-[48px] px-6 rounded-full border border-[#252E3B] bg-transparent hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium flex items-center justify-center gap-space-xs btn-press" type="button">
+<span class="material-symbols-outlined text-[20px] text-[#A3AEBD]">upload_file</span>
+<span>Import an M-Pesa statement</span>
+</button>
+</div>
+</div>
+<!-- Footer -->
+<div class="flex items-center justify-between text-[#A3AEBD] text-[12px] pt-space-sm border-t border-[#252E3B]">
+<span>Showing 0 of 0 transactions</span>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="text-[#7C8797]">Local ledger ready</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 4: Slim Strip (Emergency Fund + Savings Streak + Ask Fyn Prompt Area) -->
+<div class="grid grid-cols-12 gap-gutter bg-surface-container-low border border-[#252E3B] rounded-xl p-space-xl items-center interactive-card animate-card-fade-up delay-row-4">
+<!-- Emergency Fund Target -->
+<div class="col-span-4 flex items-center gap-space-md pr-space-lg border-r border-[#252E3B]">
+<div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+<svg class="w-12 h-12 transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="2, 6" stroke-width="3"></path>
+</svg>
+<span class="material-symbols-outlined text-[18px] text-[#A3AEBD] absolute">flag</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] text-[#A3AEBD] uppercase tracking-wider font-semibold">Emergency fund</span>
+<button class="text-label-md text-primary font-semibold text-left hover:text-[#C6F432] flex items-center gap-1 btn-press" type="button">
+<span>Set a target →</span>
+</button>
+<span class="text-[12px] text-[#7C8797]">0 months of living expenses</span>
+</div>
+</div>
+<!-- Savings Streak -->
+<div class="col-span-3 flex items-center gap-space-md px-space-lg border-r border-[#252E3B]">
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<span class="w-3 h-3 rounded-full bg-surface-container border border-[#252E3B]"></span>
+<span class="w-3 h-3 rounded-full bg-surface-container border border-[#252E3B]"></span>
+<span class="w-3 h-3 rounded-full bg-surface-container border border-[#252E3B]"></span>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] text-[#A3AEBD] uppercase tracking-wider font-semibold">Savings streak</span>
+<span class="text-label-md text-primary font-semibold">0 months</span>
+<span class="text-[12px] text-[#7C8797]">Sustain positive net flow</span>
+</div>
+</div>
+<!-- Ask Fyn Prompt Area with Suggestion Chips -->
+<div class="col-span-5 flex flex-col gap-space-xs pl-space-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#C6F432]">auto_awesome</span>
+<input class="w-full h-11 pl-10 pr-4 rounded-full bg-surface-container border border-[#252E3B] text-on-surface text-[12px] placeholder:text-[#A3AEBD] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Ask Fyn about getting started..." type="text"/>
+</div>
+<!-- Quick Suggestion Chips -->
+<div class="flex items-center gap-space-xs flex-wrap pt-1">
+<button class="h-7 px-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-[#252E3B] text-[#A3AEBD] hover:text-on-surface text-[12px] transition-colors whitespace-nowrap btn-press" type="button">
+              How do I import M-Pesa statements?
+            </button>
+<button class="h-7 px-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-[#252E3B] text-[#A3AEBD] hover:text-on-surface text-[12px] transition-colors whitespace-nowrap btn-press" type="button">
+              How does local storage work?
+            </button>
+<button class="h-7 px-3 rounded-full bg-surface-container hover:bg-surface-container-high border border-[#252E3B] text-[#A3AEBD] hover:text-on-surface text-[12px] transition-colors whitespace-nowrap btn-press" type="button">
+              What budgets do you recommend?
+            </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Tag in Bottom-Right Corner -->
+<div class="fixed bottom-6 right-6 z-50 pointer-events-none">
+<div class="flex items-center gap-2 bg-[#121720]/90 backdrop-blur-md border border-[#252E3B] px-3.5 py-1.5 rounded-full shadow-lg">
+<span class="w-1.5 h-1.5 rounded-full bg-[#A3AEBD]"></span>
+<span class="text-[12px] text-[#A3AEBD] tracking-wider">Sample data - design preview</span>
+</div>
+</div>
+</body></html>

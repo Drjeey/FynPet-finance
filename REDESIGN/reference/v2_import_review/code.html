@@ -1,0 +1,702 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_dashboard" name="shell-type">
+<title>Dashboard - FynPet KES Ledger</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest": "#32353b",
+            "inverse-primary": "#506600",
+            "on-secondary": "#003825",
+            "error": "#ffb4ab",
+            "surface-dim": "#111319",
+            "on-tertiary-container": "#4f5ac2",
+            "on-secondary-fixed-variant": "#005137",
+            "primary": "#ffffff",
+            "error-container": "#93000a",
+            "on-surface": "#e1e2ea",
+            "surface-container-lowest": "#0b0e13",
+            "inverse-on-surface": "#2e3036",
+            "on-surface-variant": "#c4c9ae",
+            "surface-container": "#1d2025",
+            "on-error": "#690005",
+            "surface-tint": "#aad600",
+            "surface-container-low": "#191c21",
+            "on-primary": "#283500",
+            "surface": "#111319",
+            "secondary": "#45dfa4",
+            "secondary-container": "#00bd85",
+            "on-background": "#e1e2ea",
+            "on-secondary-container": "#00452e",
+            "primary-fixed": "#c5f331",
+            "primary-fixed-dim": "#aad600",
+            "on-primary-fixed": "#161f00",
+            "outline": "#8e937a",
+            "secondary-fixed": "#68fcbf",
+            "on-error-container": "#ffdad6",
+            "surface-bright": "#36393f",
+            "secondary-fixed-dim": "#45dfa4",
+            "on-primary-fixed-variant": "#3b4d00",
+            "on-secondary-fixed": "#002114",
+            "tertiary-container": "#e0e0ff",
+            "on-tertiary-fixed": "#000767",
+            "surface-container-high": "#272a30",
+            "inverse-surface": "#e1e2ea",
+            "on-tertiary-fixed-variant": "#2f3aa3",
+            "tertiary-fixed": "#e0e0ff",
+            "tertiary-fixed-dim": "#bdc2ff",
+            "background": "#111319",
+            "on-primary-container": "#556d00",
+            "outline-variant": "#444934",
+            "on-tertiary": "#131e8c",
+            "tertiary": "#ffffff",
+            "primary-container": "#c5f331",
+            "surface-variant": "#32353b",
+            "tertiary-muted": "#7C8797"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "space-lg": "1.25rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.25rem",
+            "space-xl": "1.5rem"
+          },
+          fontFamily: {
+            "label-md": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "metric-regular": ["Manrope", "sans-serif"],
+            "headline-sm": ["Manrope", "sans-serif"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "metric-large": ["Manrope", "sans-serif"],
+            "headline-lg": ["Manrope", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "display-currency": ["Manrope", "sans-serif"]
+          },
+          fontSize: {
+            "label-md": ["13px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "metric-regular": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "metric-large": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+            "display-currency": ["44px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "800" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Keyframes for entrance and donut sweep */
+    @keyframes cardFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes sweepIn {
+      from {
+        stroke-dashoffset: 301.6;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .animate-card-fade-up {
+      animation: cardFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-donut-sweep {
+      stroke-dasharray: 301.6;
+      stroke-dashoffset: 301.6;
+      animation: sweepIn 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Staggered entrance delays */
+    .delay-row-1 { animation-delay: 50ms; }
+    .delay-row-2 { animation-delay: 100ms; }
+    .delay-row-3 { animation-delay: 150ms; }
+    .delay-row-4 { animation-delay: 200ms; }
+
+    /* Card hover lifting 2px with border brightening to #3A4658 */
+    .interactive-card {
+      transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 250ms ease;
+    }
+    .interactive-card:hover {
+      transform: translateY(-2px);
+      border-color: #3A4658 !important;
+    }
+
+    /* Buttons pressing down 1px on click */
+    .btn-press {
+      transition: transform 100ms ease, background-color 150ms ease, border-color 150ms ease;
+    }
+    .btn-press:active {
+      transform: translateY(1px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#111319] font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Desktop Fixed Sidebar (w-[248px]) -->
+<aside class="fixed left-0 top-0 bottom-0 w-[248px] h-screen bg-[#121720] border-r border-[#252E3B] flex flex-col justify-between p-space-lg z-50">
+<div class="flex flex-col gap-space-lg">
+<!-- Logo Branding: 36x36 lime rounded square with bold text "FP" in #0A0D12 -->
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg bg-[#C6F432] flex items-center justify-center select-none shadow-sm">
+<span class="font-['Manrope'] text-[18px] font-extrabold text-[#0A0D12] tracking-tighter leading-none">FP</span>
+</div>
+<div class="flex flex-col leading-none">
+<span class="font-['Manrope'] text-[18px] font-bold text-primary tracking-tight">FynPet</span>
+<span class="font-['Inter'] text-[12px] text-[#A3AEBD] tracking-normal mt-0.5">KES ledger</span>
+</div>
+</div>
+<!-- Ask Fyn AI Primary Action -->
+<button class="w-full h-11 rounded-full bg-[#C6F432] text-[#0A0D12] font-label-md text-label-md font-semibold flex items-center justify-center gap-space-sm hover:bg-[#b2dc2b] btn-press" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1">
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="text-body-md">Dashboard</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>Transactions</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span>Budgets</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md bg-surface-container text-primary font-medium btn-press text-body-md" href="#"><span class="material-symbols-outlined text-[20px] text-primary-container">account_balance_wallet</span><span>M-Pesa Import</span></a>
+<a class="h-11 px-space-md rounded-full flex items-center gap-space-md text-[#A3AEBD] hover:bg-surface-container hover:text-on-surface btn-press text-body-md" href="#">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sync Status Pinned to Bottom -->
+<div class="flex flex-col gap-space-md pt-space-md border-t border-[#252E3B]">
+<div class="flex items-center gap-2 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="text-[12px] text-[#A3AEBD]">Saved on this device</span>
+</div>
+<button class="w-full h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md btn-press" type="button">
+        Sign in to sync
+      </button>
+</div>
+</aside>
+<!-- Main Content Wrap (ml-[248px]) -->
+<div class="ml-[248px] flex flex-col min-h-screen">
+<!-- Top Bar -->
+<header class="sticky top-0 h-[72px] bg-[#111319]/90 backdrop-blur-xl border-b border-[#252E3B] z-40 px-margin flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<h1 class="font-headline-lg text-[28px] leading-tight text-primary font-bold tracking-tight">M-Pesa import</h1>
+<span class="text-[#252E3B]">/</span>
+<span class="text-[12px] text-[#A3AEBD]">Monday, 16 November 2026</span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Search Bar -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#A3AEBD]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container border border-[#252E3B] text-[12px] text-on-surface placeholder:text-[#A3AEBD] focus:outline-none focus:border-[#C6F432] transition-colors" placeholder="Search transactions..." type="text">
+</div>
+<!-- Export Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Export CSV" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<!-- Sync Button -->
+<button class="w-10 h-10 rounded-full border border-[#252E3B] bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-[#A3AEBD] hover:text-on-surface btn-press" title="Sync" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- "You" Profile -->
+<div class="flex items-center gap-space-sm pl-1 cursor-pointer select-none">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">You</span>
+</div>
+</div>
+</header>
+<!-- Main Content Body -->
+<main class="flex-1 p-margin flex flex-col gap-gutter bg-[#111319]"><div class="flex flex-col w-full pb-28 pb-32">
+<!-- Stepper Header -->
+<section class="animate-card-fade-up delay-row-1 mb-8">
+<div class="bg-surface-container-low rounded-xl p-space-lg flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+<div>
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-1">M-Pesa import</p>
+<h2 class="font-headline-md text-headline-md text-primary font-bold">Review classified transactions</h2>
+</div>
+<!-- Stepper Pill Pipeline -->
+<nav aria-label="Import progress" class="flex items-center gap-2 bg-surface-container rounded-full p-1.5 self-start md:self-auto">
+<!-- Step 1: Upload (Completed) -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high text-secondary">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="font-label-md text-label-md font-medium text-on-surface">1 Upload</span>
+</div>
+<div class="w-4 h-0.5 bg-surface-container-highest"></div>
+<!-- Step 2: Review (Active Lime) -->
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary-fixed shadow-sm">
+<span class="w-2 h-2 rounded-full bg-on-primary-fixed"></span>
+<span class="font-label-md text-label-md font-bold tracking-tight">2 Review</span>
+</div>
+<div class="w-4 h-0.5 bg-surface-container-highest"></div>
+<!-- Step 3: Done (Upcoming) -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span class="font-label-md text-label-md">3 Done</span>
+</div>
+</nav>
+</div>
+</section>
+<!-- Summary Card & Reconciliation Metric -->
+<section class="animate-card-fade-up delay-row-2 mb-6">
+<div class="bg-surface-container-low rounded-xl p-space-xl flex flex-col gap-5">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0 text-primary-container">
+<span class="material-symbols-outlined text-[26px]">fact_check</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold mb-1">
+              We found 58 transactions. 51 look good, 6 are already in FynPet, 1 needs your check.
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant">We read your PDF on this device.</p>
+</div>
+</div>
+<!-- Metric Snapshot Split -->
+<div class="flex items-center gap-4 bg-surface-container px-4 py-3 rounded-lg shrink-0"><div class="flex flex-col"><span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Money in</span><span class="font-metric-regular text-metric-regular text-secondary whitespace-nowrap">KES 85,000</span></div><div class="w-px h-8 bg-surface-container-highest"></div><div class="flex flex-col"><span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Money out</span><span class="font-metric-regular text-metric-regular text-primary whitespace-nowrap">KES 53,600</span></div></div>
+</div>
+<!-- Reconciliation Confirmation Pill Strip -->
+<div class="flex items-center gap-2.5 pt-4 bg-surface-container-high/40 rounded-lg px-4 py-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">
+          Totals match your statement: money in <span class="font-semibold text-secondary">KES 85,000</span>, money out <span class="font-semibold text-primary">KES 53,600</span>.
+        </span>
+</div>
+</div>
+</section>
+<!-- Attention Section: Needs your check (1) -->
+<section class="animate-card-fade-up delay-row-3 mb-6">
+<div class="flex items-center justify-between mb-3 px-1">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+<h4 class="font-headline-sm text-headline-sm text-primary font-bold">Needs your check (1)</h4>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Action required to categorize accurately</span>
+</div>
+<!-- Emphasized Action Card -->
+<div class="interactive-card bg-surface-container-low rounded-xl p-space-lg flex flex-col xl:flex-row xl:items-center justify-between gap-5" id="check-item-1">
+<div class="flex items-start gap-4 min-w-0">
+<div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0 text-amber-400">
+<span class="material-symbols-outlined text-[24px]">help</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-3 flex-wrap">
+<span class="font-metric-regular text-metric-regular text-primary font-bold truncate">Paybill 888820 - Unknown</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Reference #SK8219AA</span>
+</div>
+<div class="flex items-center gap-3 mt-1.5 flex-wrap">
+<span class="font-body-md text-body-md text-on-surface-variant">5 Nov</span>
+<span class="text-surface-container-highest">•</span>
+<span class="font-metric-regular text-metric-regular text-error whitespace-nowrap font-bold">-KES 3,200</span>
+<span class="text-surface-container-highest">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Recipient: "KILIFI RETAIL VENTURES LTD"</span>
+</div>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-3 self-end xl:self-auto flex-wrap">
+<!-- Category selector popover toggle -->
+<div class="relative">
+<button aria-expanded="false" class="h-11 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 btn-press" id="category-trigger" onclick="toggleCategoryMenu()" type="button">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Category:</span>
+<span class="font-semibold text-primary" id="current-category-label">Other</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">arrow_drop_down</span>
+</button>
+<!-- Dropdown Options using ONLY the strictly permitted categories -->
+<div class="hidden absolute right-0 bottom-12 mb-2 w-56 rounded-xl bg-surface-container-high p-2 shadow-2xl z-50 flex flex-col gap-1" id="category-menu">
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Food &amp; Groceries')" type="button">
+<span>Food &amp; Groceries</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Transport')" type="button">
+<span>Transport</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Utilities')" type="button">
+<span>Utilities</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Entertainment')" type="button">
+<span>Entertainment</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Health')" type="button">
+<span>Health</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Shopping')" type="button">
+<span>Shopping</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Savings')" type="button">
+<span>Savings</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Income')" type="button">
+<span>Income</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg text-on-surface hover:bg-surface-container-highest font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Transfer')" type="button">
+<span>Transfer</span>
+</button>
+<button class="w-full text-left px-3 py-2 rounded-lg bg-surface-container-lowest text-primary-container font-body-md text-body-md flex items-center justify-between" onclick="selectCategory('Other')" type="button">
+<span>Other</span>
+<span class="material-symbols-outlined text-[16px]">check</span>
+</button>
+</div>
+</div>
+
+<button class="h-11 px-5 rounded-full bg-surface-container-highest hover:bg-surface-bright text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium btn-press flex items-center gap-1.5" onclick="skipItem()" type="button">
+<span class="material-symbols-outlined text-[18px]">block</span>
+<span>Skip this one</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Collapsible Section: Already in FynPet (6) -->
+<section class="animate-card-fade-up delay-row-3 mb-6">
+<div class="bg-surface-container-low rounded-xl overflow-hidden transition-all duration-300">
+<div class="p-space-lg flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0 text-on-surface-variant">
+<span class="material-symbols-outlined text-[22px]">content_copy</span>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<h4 class="font-headline-sm text-headline-sm text-primary font-bold">Already in FynPet (6)</h4>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Duplicate prevention</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              These match transactions already on this device and will be skipped.
+            </p>
+</div>
+</div>
+<button class="h-11 px-5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-medium flex items-center gap-2 btn-press shrink-0" onclick="toggleAccordion('duplicates-content', 'dup-chevron', 'dup-label')" type="button">
+<span id="dup-label">Show</span>
+<span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="dup-chevron">expand_more</span>
+</button>
+</div>
+<!-- Hidden Accordion Body -->
+<div class="hidden px-space-lg pb-space-lg pt-2 bg-surface-container-low" id="duplicates-content">
+<div class="bg-surface-container rounded-lg overflow-hidden">
+<div class="grid grid-cols-12 gap-3 px-4 py-2.5 bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase">
+<span class="col-span-3">Date &amp; Details</span>
+<span class="col-span-4">Counterparty</span>
+<span class="col-span-3">Category</span>
+<span class="col-span-2 text-right">Amount</span>
+</div>
+<div class="divide-y divide-surface-container-high">
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">04 Nov 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">KPLC PREPAID 99201</span>
+<span class="col-span-3">Utilities</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 2,000</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">03 Nov 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">NAIVAS SUPERMARKET WEST</span>
+<span class="col-span-3">Food &amp; Groceries</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 4,850</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">02 Nov 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">UBER TRIP KENYA</span>
+<span class="col-span-3">Transport</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 750</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">01 Nov 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">SAFARICOM POSTPAID</span>
+<span class="col-span-3">Utilities</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 3,000</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">31 Oct 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">JAVA HOUSE VALLEY ARCADE</span>
+<span class="col-span-3">Food &amp; Groceries</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 1,420</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface-variant hover:bg-surface-container-high/40">
+<span class="col-span-3 font-medium">30 Oct 2026</span>
+<span class="col-span-4 text-on-surface font-semibold">TOTAL SERVICE STATION NGONG</span>
+<span class="col-span-3">Transport</span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-on-surface-variant">-KES 5,000</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Collapsible Section: Looks good (51) -->
+<section class="animate-card-fade-up delay-row-4 mb-6">
+<div class="bg-surface-container-low rounded-xl overflow-hidden transition-all duration-300">
+<div class="p-space-lg flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0 text-secondary">
+<span class="material-symbols-outlined text-[22px]">task_alt</span>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<h4 class="font-headline-sm text-headline-sm text-primary font-bold">Suggested categories ready to save (51)</h4>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-label-sm font-semibold">Ready to commit</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Algorithmic classifications ready to save into your ledger.
+            </p>
+</div>
+</div>
+<button class="h-11 px-5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-medium flex items-center gap-2 btn-press shrink-0" onclick="toggleAccordion('classified-content', 'class-chevron', 'class-label')" type="button">
+<span id="class-label">Show all 51</span>
+<span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="class-chevron">expand_more</span>
+</button>
+</div>
+<!-- Preview Sample Rows + Collapsible Extension -->
+<div class="hidden px-space-lg pb-space-lg pt-2 bg-surface-container-low" id="classified-content">
+<div class="bg-surface-container rounded-lg overflow-hidden">
+<div class="grid grid-cols-12 gap-3 px-4 py-2.5 bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase">
+<span class="col-span-3">Date</span>
+<span class="col-span-4">Description</span>
+<span class="col-span-3">Assigned Category</span>
+<span class="col-span-2 text-right">Amount</span>
+</div>
+<div class="divide-y divide-surface-container-high">
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">06 Nov 2026</span>
+<span class="col-span-4 font-semibold">CONSULTING RETAINER KES</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-secondary text-label-sm font-semibold">Income</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-secondary font-bold">+KES 85,000</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">05 Nov 2026</span>
+<span class="col-span-4 font-semibold">QUICK MART KILIMANI</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-label-sm">Food &amp; Groceries</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-primary font-bold">-KES 6,420</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">04 Nov 2026</span>
+<span class="col-span-4 font-semibold">ZUKU FIBER INTERNET</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-label-sm">Utilities</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-primary font-bold">-KES 4,999</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">03 Nov 2026</span>
+<span class="col-span-4 font-semibold">BOLT TRIP WESTLANDS</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-label-sm">Transport</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-primary font-bold">-KES 420</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">02 Nov 2026</span>
+<span class="col-span-4 font-semibold">GOODLIFE PHARMACY SARIT</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-label-sm">Health</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-primary font-bold">-KES 1,850</span>
+</div>
+<div class="grid grid-cols-12 gap-3 px-4 py-3 items-center text-body-md text-on-surface hover:bg-surface-container-high/30">
+<span class="col-span-3 text-on-surface-variant font-medium">01 Nov 2026</span>
+<span class="col-span-4 font-semibold">MMF MONTHLY ALLOCATION</span>
+<span class="col-span-3"><span class="px-2.5 py-1 rounded-full bg-surface-container-high text-primary-container text-label-sm font-semibold">Savings</span></span>
+<span class="col-span-2 text-right font-metric-regular text-metric-regular text-primary font-bold">-KES 20,000</span>
+</div>
+</div>
+<div class="p-3 text-center bg-surface-container-high/60 text-body-sm text-on-surface-variant">
+            + 45 more categorized entries ready for local storage
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Strict Privacy Reassurance Card -->
+<section class="animate-card-fade-up delay-row-4 mb-8">
+<div class="bg-surface-container-low rounded-xl p-space-lg flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0 text-primary-container">
+<span class="material-symbols-outlined text-[20px]">security</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-semibold mb-1">How your data is handled</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised after you agree. Phone numbers are removed first.</p>
+</div>
+</div>
+</section>
+<!-- Sticky Footer Action Bar -->
+<footer class="fixed bottom-0 left-[248px] right-0 h-20 bg-surface-dim/95 backdrop-blur-md px-margin flex items-center justify-between z-40">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<div class="flex items-baseline gap-2">
+<span class="font-metric-regular text-metric-regular text-primary font-bold" id="footer-count">51 will be saved</span>
+<span class="text-on-surface-variant">•</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Expenses KES 41,200, Income KES 85,000</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<!-- Outlined Back Button (44px target) -->
+<button class="h-11 px-6 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold btn-press" type="button">
+        Back
+      </button>
+<!-- Primary Electric Lime Commitment Button (44px target) -->
+<button class="h-11 px-8 rounded-full bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-label-md font-bold flex items-center gap-2 btn-press shadow-md" id="save-button" onclick="commitTransactions()" type="button">
+<span class="material-symbols-outlined text-[18px]">cloud_done</span>
+<span>Save 51 transactions</span>
+</button>
+</div>
+</footer>
+</div>
+<script>
+  function toggleAccordion(contentId, chevronId, labelId) {
+    const content = document.getElementById(contentId);
+    const chevron = document.getElementById(chevronId);
+    const label = document.getElementById(labelId);
+    if (!content) return;
+
+    const isHidden = content.classList.contains('hidden');
+    if (isHidden) {
+      content.classList.remove('hidden');
+      chevron.style.transform = 'rotate(180deg)';
+      if (labelId === 'dup-label') label.textContent = 'Hide';
+      if (labelId === 'class-label') label.textContent = 'Hide all 51';
+    } else {
+      content.classList.add('hidden');
+      chevron.style.transform = 'rotate(0deg)';
+      if (labelId === 'dup-label') label.textContent = 'Show';
+      if (labelId === 'class-label') label.textContent = 'Show all 51';
+    }
+  }
+
+  function toggleCategoryMenu() {
+    const menu = document.getElementById('category-menu');
+    const trigger = document.getElementById('category-trigger');
+    if (!menu) return;
+    const isClosed = menu.classList.contains('hidden');
+    if (isClosed) {
+      menu.classList.remove('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+    } else {
+      menu.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function selectCategory(categoryName) {
+    const label = document.getElementById('current-category-label');
+    if (label) {
+      label.textContent = categoryName;
+    }
+    toggleCategoryMenu();
+
+    // Visual feedback of approval
+    const card = document.getElementById('check-item-1');
+    if (card) {
+      card.classList.add('bg-surface-container');
+    }
+
+    // Update footer counter to include this approved one
+    const footerCount = document.getElementById('footer-count');
+    const saveButton = document.getElementById('save-button');
+    if (footerCount && saveButton) {
+      footerCount.textContent = '52 will be saved';
+      saveButton.querySelector('span:last-child').textContent = 'Save 52 transactions';
+    }
+  }
+
+  function skipItem() {
+    const card = document.getElementById('check-item-1');
+    if (card) {
+      card.style.opacity = '0.4';
+      card.style.pointerEvents = 'none';
+      const label = document.getElementById('current-category-label');
+      if (label) label.textContent = 'Skipped';
+    }
+  }
+
+  function commitTransactions() {
+    const btn = document.getElementById('save-button');
+    if (!btn) return;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Saving to ledger...</span>';
+    setTimeout(() => {
+      btn.classList.remove('bg-primary-container', 'text-on-primary-fixed');
+      btn.classList.add('bg-secondary-container', 'text-on-secondary');
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span><span>Saved successfully</span>';
+    }, 700);
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('category-menu');
+    const trigger = document.getElementById('category-trigger');
+    if (!menu || !trigger) return;
+    if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script></main>
+</div>
+<!-- Tag in Bottom-Right Corner -->
+<div class="fixed bottom-6 right-6 z-50 pointer-events-none">
+<div class="flex items-center gap-2 bg-[#121720]/90 backdrop-blur-md border border-[#252E3B] px-3.5 py-1.5 rounded-full shadow-lg">
+<span class="w-1.5 h-1.5 rounded-full bg-[#A3AEBD]"></span>
+<span class="text-[12px] text-[#A3AEBD] tracking-wider">Sample data - design preview</span>
+</div>
+</div>
+
+
+</body></html>

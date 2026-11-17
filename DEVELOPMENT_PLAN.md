@@ -134,7 +134,8 @@ Rewrite the "Privacy guaranteed" and "encrypted" claims. Before the first AI use
 Move every "sum by period, type and category" into pure functions (`calc.js`). Store `currency` and `amount_kes` on save. All dashboards use `amount_kes`. Add the UGX rate to Settings. Fix the metric definitions (emergency fund = savings ÷ average monthly expenses over the last 3 months).
 **Test:** unit tests for each function, covering month ends and the Nairobi timezone.
 
-### ☐ B2 Sync v2 [F1, F2, F3] ⏱ 4–5 days
+### ◐ B2 Sync v2 [F1, F2, F3] ⏱ 4–5 days
+> **16 Nov 2026, implemented locally, not deployed:** soft deletes (tombstones), pending-change flags, pull-then-push with incremental cursors, last-write-wins, and a warning before sign-out when sync fails (`public/sync.js`, 19 unit tests). Browser-checked against a fake Supabase only; two real devices and a real Supabase project are still untested.
 Soft deletes (`deleted_at`), an outbox of changed rows, and an incremental pull (`updated_at > lastSync`) with last-write-wins. Sync shows its status and retries when the device comes back online.
 **Test:** two browser contexts: delete on A disappears on B; edit on B appears on A.
 
