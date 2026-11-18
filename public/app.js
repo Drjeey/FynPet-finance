@@ -1347,16 +1347,16 @@ function openEditBudget(id) {
   const b = state.budgets.find(x => x.id === id); if (!b) return;
   state.ui.editBudgetId = id;
   document.getElementById('budget-modal-title').textContent = 'Edit budget'; document.getElementById('b-save-label').textContent = 'Save changes';
-  fillBudgetCategories(id, b.category); document.getElementById('b-limit').value = String(b.limit);
+  fillBudgetCategories(id, b.category); document.getElementById('b-limit').value = String(b.limit); numericOnly(document.getElementById('b-limit'));
   setBudgetError('cat', ''); setBudgetError('limit', ''); updateBudgetHint();
   openModal('budget-modal');
 }
 function budgetCatChanged() { setBudgetError('cat', ''); updateBudgetHint(); }
-function budgetLimitInput() { setBudgetError('limit', ''); }
+function budgetLimitInput() { numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); }
 function budgetEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveBudget(); } }
 function useLastMonth() {
   const amount = Number(document.getElementById('b-hint').dataset.amount) || 0;
-  if (amount > 0) { document.getElementById('b-limit').value = String(amount); setBudgetError('limit', ''); document.getElementById('b-limit').focus(); }
+  if (amount > 0) { document.getElementById('b-limit').value = String(amount); numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); document.getElementById('b-limit').focus(); }
 }
 function saveBudget() {
   const category = document.getElementById('b-cat').value, limit = parseAmount(document.getElementById('b-limit').value), editing = state.ui.editBudgetId;
@@ -1380,11 +1380,11 @@ function openRaiseLimit(id) {
   const label = (CATS[row.budget.category] || CATS.other).label;
   document.getElementById('raise-title').textContent = `Raise ${label} limit`;
   document.getElementById('raise-info').textContent = `Current limit ${fmtKes(row.budget.limit)}. Spent ${fmtKes(row.spent)}.`;
-  document.getElementById('raise-limit').value = String(suggestRaise(row.spent));
+  document.getElementById('raise-limit').value = String(suggestRaise(row.spent)); numericOnly(document.getElementById('raise-limit'));
   const err = document.getElementById('raise-err'); err.hidden = true;
   openModal('budget-raise'); setTimeout(() => document.getElementById('raise-limit').select(), 60);
 }
-function raiseInput() { document.getElementById('raise-err').hidden = true; }
+function raiseInput() { numericOnly(document.getElementById('raise-limit')); document.getElementById('raise-err').hidden = true; }
 function raiseEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveRaise(); } }
 function saveRaise() {
   const b = state.budgets.find(x => x.id === state.ui.raiseId); if (!b) return;
@@ -1565,7 +1565,22 @@ function setFieldError(message) {
   document.getElementById('tx-amount-block').classList.toggle('invalid', Boolean(message));
   document.getElementById('tx-amount').setAttribute('aria-invalid', message ? 'true' : 'false');
 }
-function txAmountInput() { setFieldError(''); document.getElementById('tx-error').hidden = true; updateKesHint(); }
+// Keep money fields numeric and grouped: digits, one decimal point, thousands commas (also covers paste).
+function numericOnly(el) {
+  if (!el) return;
+  const raw = String(el.value), caret = el.selectionStart ?? raw.length;
+  const digitsBefore = raw.slice(0, caret).replace(/[^0-9.]/g, '').length;
+  let v = raw.replace(/[^0-9.]/g, ''); const i = v.indexOf('.');
+  if (i >= 0) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+  const [whole, dec] = v.split('.');
+  const out = whole.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (dec !== undefined ? '.' + dec.slice(0, 2) : '');
+  if (out === raw) return;
+  el.value = out;
+  let seen = 0, pos = out.length;
+  if (digitsBefore === 0) pos = 0; else for (let k = 0; k < out.length; k++) { if (out[k] !== ',') seen++; if (seen === digitsBefore) { pos = k + 1; break; } }
+  try { el.setSelectionRange(pos, pos); } catch { /* not focusable */ }
+}
+function txAmountInput() { numericOnly(document.getElementById('tx-amount')); setFieldError(''); document.getElementById('tx-error').hidden = true; updateKesHint(); }
 function txCurrencyChanged() { updateKesHint(); }
 function txDescInput() {
   if (state.ui.txCatManual) return;
@@ -1606,7 +1621,7 @@ function openEditTx(id) {
   document.getElementById('tx-save-label').textContent = 'Save changes';
   document.getElementById('tx-again-btn').hidden = true;
   setFieldError(''); document.getElementById('tx-error').hidden = true;
-  document.getElementById('tx-amount').value = String(tx.amount);
+  document.getElementById('tx-amount').value = String(tx.amount); numericOnly(document.getElementById('tx-amount'));
   document.getElementById('tx-desc').value = tx.description;
   document.getElementById('tx-type').value = tx.type;
   document.getElementById('tx-cat').value = tx.category; document.getElementById('tx-cat').hidden = true;
