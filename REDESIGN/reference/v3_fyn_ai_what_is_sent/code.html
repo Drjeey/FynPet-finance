@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>FynPet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "background": "#111319",
+          "surface-tint": "#aad600",
+          "inverse-primary": "#506600",
+          "on-primary-fixed": "#161f00",
+          "on-secondary-fixed": "#002114",
+          "surface-bright": "#36393f",
+          "on-primary-container": "#556d00",
+          "surface-container-low": "#191c21",
+          "primary": "#ffffff",
+          "tertiary-container": "#e0e0ff",
+          "inverse-surface": "#e1e2ea",
+          "on-tertiary": "#131e8c",
+          "surface-container-high": "#272a30",
+          "outline-variant": "#444934",
+          "on-surface-variant": "#c4c9ae",
+          "tertiary-fixed-dim": "#bdc2ff",
+          "on-primary-fixed-variant": "#3b4d00",
+          "secondary-fixed-dim": "#45dfa4",
+          "on-tertiary-container": "#4f5ac2",
+          "primary-fixed": "#c5f331",
+          "on-secondary-fixed-variant": "#005137",
+          "on-background": "#e1e2ea",
+          "on-primary": "#283500",
+          "outline": "#8e937a",
+          "error": "#ffb4ab",
+          "primary-fixed-dim": "#aad600",
+          "inverse-on-surface": "#2e3036",
+          "surface-dim": "#111319",
+          "secondary": "#45dfa4",
+          "on-error-container": "#ffdad6",
+          "on-secondary-container": "#00452e",
+          "on-secondary": "#003825",
+          "surface": "#111319",
+          "on-error": "#690005",
+          "tertiary-fixed": "#e0e0ff",
+          "surface-container-lowest": "#0b0e13",
+          "secondary-fixed": "#68fcbf",
+          "on-tertiary-fixed": "#000767",
+          "on-surface": "#e1e2ea",
+          "error-container": "#93000a",
+          "primary-container": "#c5f331",
+          "surface-variant": "#32353b",
+          "tertiary": "#ffffff",
+          "on-tertiary-fixed-variant": "#2f3aa3",
+          "surface-container": "#1d2025",
+          "surface-container-highest": "#32353b",
+          "secondary-container": "#00bd85"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "space-lg": "1.25rem",
+          "space-xs": "0.25rem",
+          "space-md": "0.75rem",
+          "gutter": "1.25rem",
+          "margin": "2rem",
+          "space-xl": "1.5rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Manrope"],
+          "headline-md": ["Manrope"],
+          "body-md": ["Inter"],
+          "metric-regular": ["Manrope"],
+          "label-md": ["Inter"],
+          "display-currency": ["Manrope"],
+          "body-lg": ["Inter"],
+          "metric-large": ["Manrope"],
+          "label-sm": ["Inter"],
+          "headline-lg": ["Manrope"],
+          "body-sm": ["Inter"]
+        },
+        "fontSize": {
+          "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "metric-regular": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "label-md": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+          "display-currency": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "metric-large": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @layer base {
+    html {
+      color-scheme: dark;
+      overscroll-behavior: none;
+    }
+    body {
+      background-color: #111319;
+      color: #e1e2ea;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+  .numeral {
+    font-family: 'Manrope', sans-serif;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+  .press-effect:active {
+    transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="min-h-screen bg-surface text-on-surface">
+<!-- Fixed Left Sidebar (248px width) -->
+<aside class="w-[248px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-surface-container-high flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-surface-container-high">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
+<span class="font-headline-md font-extrabold text-[15px] tracking-tight text-on-primary-fixed leading-none">FP</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-md font-bold text-headline-sm text-primary tracking-tight leading-tight">FynPet</div>
+<div class="font-label-sm text-label-sm text-outline font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center gap-2 press-effect transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-primary-fixed">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Sidebar Navigation Links -->
+<nav class="px-3 space-y-1" data-active-classes="bg-surface-container-high text-primary-fixed font-semibold border border-surface-variant" data-inactive-classes="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-medium border border-transparent">
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="dashboard" href="#">
+        Dashboard
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="transactions" href="#">
+        Transactions
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="budgets" href="#">
+        Budgets
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="analytics" href="#">
+        Analytics
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="mpesa-import" href="#">
+        M-Pesa Import
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="settings" href="#">
+        Settings
+      </a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync / Storage State -->
+<div class="p-4 border-t border-surface-container-high">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span>
+<span class="font-label-md text-body-sm text-on-surface-variant font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-9 rounded-xl border border-surface-container-high hover:bg-surface-container-low text-on-surface font-label-md text-label-md transition-colors press-effect flex items-center justify-center" type="button">
+      Sign in to sync
+    </button>
+</div>
+</aside>
+<!-- Persistent Desktop Header (72px) -->
+<header class="fixed top-0 left-0 right-0 h-[72px] pl-[248px] bg-surface/95 backdrop-blur-none border-b border-surface-container-high z-20">
+<div class="h-[72px] px-8 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-body-md text-on-surface-variant font-medium">Personal Finance</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Top Search -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-surface-container-low border border-surface-container-high font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-fixed transition-colors" placeholder="Search transactions..." type="text"/>
+<span class="material-symbols-outlined text-[18px] text-outline absolute left-3 top-2.5 select-none">search</span>
+</div>
+<!-- Sync Icon Button -->
+<button class="w-10 h-10 rounded-xl border border-surface-container-high hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors press-effect" title="Sync Status" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- User Avatar Initial -->
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-surface-variant flex items-center justify-center font-headline-md font-bold text-body-md text-primary-fixed select-none">
+        Y
+      </div>
+</div>
+</div>
+</header>
+<!-- Main Content (Adaptive pl-248 and pt-[72px]) -->
+<main class="pl-[248px] pt-[72px] min-h-screen bg-surface"><div class="flex flex-col w-full relative min-h-[calc(100vh-72px)] overflow-hidden">
+<!-- Underlying Settings Page (Dimmed Background Canvas) -->
+<div class="w-full p-8 max-w-[1160px] mx-auto select-none pointer-events-none opacity-40 filter blur-[1px]">
+<!-- Settings Header -->
+<div class="flex items-center justify-between mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage your account, synchronization, and AI preferences</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high border border-surface-variant text-on-surface-variant font-label-md text-body-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+          Connected locally
+        </span>
+</div>
+</div>
+<!-- Settings Grid -->
+<div class="grid grid-cols-12 gap-5">
+<!-- Account Card -->
+<div class="col-span-7 bg-surface-container-low border border-surface-container-high rounded-2xl p-6">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high border border-surface-variant flex items-center justify-center font-headline-md font-bold text-headline-sm text-primary-fixed">
+              W
+            </div>
+<div>
+<div class="font-headline-sm text-metric-regular text-primary">wanjiru@example.com</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Synced just now
+              </div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-high border border-surface-variant text-primary-fixed font-label-md text-body-sm">Pro tier</span>
+</div>
+<div class="space-y-3 pt-2">
+<div class="flex justify-between items-center py-2.5 border-b border-surface-container-high">
+<span class="font-body-md text-body-md text-on-surface-variant">Default currency</span>
+<span class="font-metric-regular text-metric-regular text-primary numeral">KES (KSh)</span>
+</div>
+<div class="flex justify-between items-center py-2.5 border-b border-surface-container-high">
+<span class="font-body-md text-body-md text-on-surface-variant">Ledger encryption</span>
+<span class="font-body-md text-body-md text-secondary">AES-256 on device</span>
+</div>
+</div>
+</div>
+<!-- Profile Quick Card -->
+<div class="col-span-5 bg-surface-container-low border border-surface-container-high rounded-2xl p-6">
+<div class="font-headline-sm text-headline-sm text-primary mb-1">Profile</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Personalization and reporting identities</p>
+<div class="p-4 rounded-xl bg-surface-container border border-surface-container-high mb-3">
+<div class="font-label-sm text-body-sm text-on-surface-variant uppercase">Full name</div>
+<div class="font-headline-sm text-metric-regular text-primary mt-1">Wanjiru Kamau</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container border border-surface-container-high">
+<div class="font-label-sm text-body-sm text-on-surface-variant uppercase">Tax residence</div>
+<div class="font-body-md text-body-md text-primary mt-1">Kenya (KRA Pin linked)</div>
+</div>
+</div>
+<!-- Privacy & Fyn AI Card (Active anchor behind modal) -->
+<div class="col-span-7 bg-surface-container-low border border-primary-container/40 rounded-2xl p-6 relative">
+<div class="flex items-start justify-between mb-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">auto_awesome</span>
+<span class="font-headline-sm text-headline-sm text-primary">Privacy and Fyn AI</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1.5 leading-relaxed">
+              Fyn assists with spending insights, monthly category variance, and automated M-Pesa ledger parsing.
+            </p>
+</div>
+<span class="w-10 h-6 bg-primary-container rounded-full inline-flex items-center justify-end px-1">
+<span class="w-4 h-4 rounded-full bg-on-primary-fixed"></span>
+</span>
+</div>
+<div class="mt-4 pt-4 border-t border-surface-container-high flex items-center justify-between">
+<span class="font-body-md text-body-md text-primary-fixed font-medium">Data sharing parameters</span>
+<span class="font-label-md text-body-sm text-on-surface-variant">Active permissions</span>
+</div>
+</div>
+<!-- Exchange Rates Card -->
+<div class="col-span-5 bg-surface-container-low border border-surface-container-high rounded-2xl p-6">
+<div class="font-headline-sm text-headline-sm text-primary mb-1">Exchange rates</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Central Bank of Kenya indicative feeds</p>
+<div class="space-y-2.5">
+<div class="flex justify-between items-center py-1.5">
+<span class="font-body-md text-body-md text-on-surface-variant">USD / KES</span>
+<span class="font-metric-regular text-metric-regular text-primary numeral">129.40</span>
+</div>
+<div class="flex justify-between items-center py-1.5">
+<span class="font-body-md text-body-md text-on-surface-variant">EUR / KES</span>
+<span class="font-metric-regular text-metric-regular text-primary numeral">141.25</span>
+</div>
+<div class="flex justify-between items-center py-1.5">
+<span class="font-body-md text-body-md text-on-surface-variant">GBP / KES</span>
+<span class="font-metric-regular text-metric-regular text-primary numeral">167.80</span>
+</div>
+</div>
+</div>
+<!-- Your Data Card -->
+<div class="col-span-12 bg-surface-container-low border border-surface-container-high rounded-2xl p-6 flex items-center justify-between">
+<div>
+<div class="font-headline-sm text-headline-sm text-primary">Your data</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Export your encrypted ledger records, download audit CSVs, or wipe local caches.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-md text-body-sm font-semibold" type="button">Export JSON</button>
+<button class="px-4 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-md text-body-sm font-semibold" type="button">Clear cache</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Scrim Overlay (Centered modal dialog container) -->
+<div class="fixed inset-0 pl-[248px] pt-[72px] bg-[#0b0e13]/80 backdrop-blur-sm z-40 flex items-center justify-center p-6" id="modalBackdrop">
+<!-- Modal Card (Strictly 480px width) -->
+<div aria-labelledby="modalTitle" aria-modal="true" class="w-[480px] bg-[#191c21] border border-white/10 rounded-2xl p-7 shadow-2xl relative flex flex-col transition-transform transform duration-150 ease-out" role="dialog">
+<!-- Header -->
+<div class="flex items-start justify-between pb-5 border-b border-white/5">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-bold tracking-tight" id="modalTitle">What Fyn AI sees</h2>
+<p class="font-body-sm text-body-sm text-[#A3AEBD] mt-1">Privacy and processing breakdown</p>
+</div>
+<button aria-label="Close dialog" class="w-11 h-11 -mr-2 -mt-2 rounded-xl flex items-center justify-center text-[#A3AEBD] hover:text-primary hover:bg-white/5 transition-colors press-effect focus:outline-none focus:ring-1 focus:ring-primary-container" id="closeModalX" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body Content -->
+<div class="pt-5 space-y-5">
+<!-- Section 1: Questions you ask -->
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[18px] text-primary-fixed">chat</span>
+<h3 class="font-headline-sm text-body-lg font-semibold text-primary">Questions you ask</h3>
+</div>
+<p class="font-body-md text-body-md text-[#A3AEBD] leading-relaxed">
+            Your name, monthly totals, budgets and up to 10 recent transactions are sent to Anthropic, through our server, to answer.
+          </p>
+</div>
+<!-- Section 2: Statement import -->
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[18px] text-secondary">receipt_long</span>
+<h3 class="font-headline-sm text-body-lg font-semibold text-primary">Statement import</h3>
+</div>
+<p class="font-body-md text-body-md text-[#A3AEBD] leading-relaxed">
+            Text read from your M-Pesa PDF, including dates, amounts and merchant or sender names, is sent the same way. The PDF itself stays on your device.
+          </p>
+</div>
+<!-- Section 3: Reassurance Box -->
+<div class="bg-white/[0.03] border border-white/5 rounded-xl p-3.5 flex items-start gap-3">
+<span class="material-symbols-outlined text-[18px] text-[#A3AEBD] shrink-0 mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-[#A3AEBD]/90 font-medium leading-normal">
+            Nothing is sent until you agree. You can turn this off any time.
+          </p>
+</div>
+</div>
+<!-- Action Buttons Footer -->
+<div class="flex items-center justify-end gap-3 pt-6 mt-3 border-t border-white/5">
+<button class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[#ff6b6b]/60 text-[#ff6b6b] hover:bg-[#ff6b6b]/10 font-label-md text-body-md font-medium transition-colors press-effect focus:outline-none" id="turnOffBtn" type="button">
+          Turn off Fyn AI
+        </button>
+<button class="min-h-[44px] px-5 py-2.5 rounded-xl border border-white/15 text-primary hover:bg-white/5 font-label-md text-body-md font-medium transition-colors press-effect focus:outline-none" id="closeModalBtn" type="button">
+          Close
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive script to handle close / turn off toggles -->
+<script>
+    (function () {
+      const modal = document.getElementById('modalBackdrop');
+      const closeX = document.getElementById('closeModalX');
+      const closeBtn = document.getElementById('closeModalBtn');
+      const turnOffBtn = document.getElementById('turnOffBtn');
+
+      function hideModal() {
+        if (modal) {
+          modal.style.display = 'none';
+        }
+      }
+
+      if (closeX) closeX.addEventListener('click', hideModal);
+      if (closeBtn) closeBtn.addEventListener('click', hideModal);
+      if (turnOffBtn) {
+        turnOffBtn.addEventListener('click', function () {
+          this.textContent = 'Turned off';
+          this.classList.add('opacity-50');
+          setTimeout(hideModal, 350);
+        });
+      }
+
+      // Close on escape key
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
+          hideModal();
+        }
+      });
+    })();
+  </script>
+</div></main>
+<!-- Bottom Right Design Preview Tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-surface-container-high border border-surface-variant font-label-sm text-body-sm text-on-surface-variant font-medium flex items-center gap-2 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

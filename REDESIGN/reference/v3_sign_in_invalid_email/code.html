@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>FynPet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "background": "#111319",
+          "surface-tint": "#aad600",
+          "inverse-primary": "#506600",
+          "on-primary-fixed": "#161f00",
+          "on-secondary-fixed": "#002114",
+          "surface-bright": "#36393f",
+          "on-primary-container": "#556d00",
+          "surface-container-low": "#191c21",
+          "primary": "#ffffff",
+          "tertiary-container": "#e0e0ff",
+          "inverse-surface": "#e1e2ea",
+          "on-tertiary": "#131e8c",
+          "surface-container-high": "#272a30",
+          "outline-variant": "#444934",
+          "on-surface-variant": "#c4c9ae",
+          "tertiary-fixed-dim": "#bdc2ff",
+          "on-primary-fixed-variant": "#3b4d00",
+          "secondary-fixed-dim": "#45dfa4",
+          "on-tertiary-container": "#4f5ac2",
+          "primary-fixed": "#c5f331",
+          "on-secondary-fixed-variant": "#005137",
+          "on-background": "#e1e2ea",
+          "on-primary": "#283500",
+          "outline": "#8e937a",
+          "error": "#ffb4ab",
+          "primary-fixed-dim": "#aad600",
+          "inverse-on-surface": "#2e3036",
+          "surface-dim": "#111319",
+          "secondary": "#45dfa4",
+          "on-error-container": "#ffdad6",
+          "on-secondary-container": "#00452e",
+          "on-secondary": "#003825",
+          "surface": "#111319",
+          "on-error": "#690005",
+          "tertiary-fixed": "#e0e0ff",
+          "surface-container-lowest": "#0b0e13",
+          "secondary-fixed": "#68fcbf",
+          "on-tertiary-fixed": "#000767",
+          "on-surface": "#e1e2ea",
+          "error-container": "#93000a",
+          "primary-container": "#c5f331",
+          "surface-variant": "#32353b",
+          "tertiary": "#ffffff",
+          "on-tertiary-fixed-variant": "#2f3aa3",
+          "surface-container": "#1d2025",
+          "surface-container-highest": "#32353b",
+          "secondary-container": "#00bd85"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "space-lg": "1.25rem",
+          "space-xs": "0.25rem",
+          "space-md": "0.75rem",
+          "gutter": "1.25rem",
+          "margin": "2rem",
+          "space-xl": "1.5rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Manrope"],
+          "headline-md": ["Manrope"],
+          "body-md": ["Inter"],
+          "metric-regular": ["Manrope"],
+          "label-md": ["Inter"],
+          "display-currency": ["Manrope"],
+          "body-lg": ["Inter"],
+          "metric-large": ["Manrope"],
+          "label-sm": ["Inter"],
+          "headline-lg": ["Manrope"],
+          "body-sm": ["Inter"]
+        },
+        "fontSize": {
+          "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "metric-regular": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "label-md": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+          "display-currency": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "metric-large": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @layer base {
+    html {
+      color-scheme: dark;
+      overscroll-behavior: none;
+    }
+    body {
+      background-color: #111319;
+      color: #e1e2ea;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+  .numeral {
+    font-family: 'Manrope', sans-serif;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+  .press-effect:active {
+    transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="min-h-screen bg-surface text-on-surface">
+<!-- Fixed Left Sidebar (248px width) -->
+<aside class="w-[248px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-surface-container-high flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-surface-container-high">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
+<span class="font-headline-md font-extrabold text-[15px] tracking-tight text-on-primary-fixed leading-none">FP</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-md font-bold text-headline-sm text-primary tracking-tight leading-tight">FynPet</div>
+<div class="font-label-sm text-label-sm text-outline font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center gap-2 press-effect transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-primary-fixed">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Sidebar Navigation Links -->
+<nav class="px-3 space-y-1" data-active-classes="bg-surface-container-high text-primary-fixed font-semibold border border-surface-variant" data-inactive-classes="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-medium border border-transparent">
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="dashboard" href="#">
+        Dashboard
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="transactions" href="#">
+        Transactions
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="budgets" href="#">
+        Budgets
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="analytics" href="#">
+        Analytics
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="mpesa-import" href="#">
+        M-Pesa Import
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="settings" href="#">
+        Settings
+      </a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync / Storage State -->
+<div class="p-4 border-t border-surface-container-high">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span>
+<span class="font-label-md text-body-sm text-on-surface-variant font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-9 rounded-xl border border-surface-container-high hover:bg-surface-container-low text-on-surface font-label-md text-label-md transition-colors press-effect flex items-center justify-center" type="button">
+      Sign in to sync
+    </button>
+</div>
+</aside>
+<!-- Persistent Desktop Header (72px) -->
+<header class="fixed top-0 left-0 right-0 h-[72px] pl-[248px] bg-surface/95 backdrop-blur-none border-b border-surface-container-high z-20">
+<div class="h-[72px] px-8 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-body-md text-on-surface-variant font-medium">Personal Finance</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Top Search -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-surface-container-low border border-surface-container-high font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-fixed transition-colors" placeholder="Search transactions..." type="text"/>
+<span class="material-symbols-outlined text-[18px] text-outline absolute left-3 top-2.5 select-none">search</span>
+</div>
+<!-- Sync Icon Button -->
+<button class="w-10 h-10 rounded-xl border border-surface-container-high hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors press-effect" title="Sync Status" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- User Avatar Initial -->
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-surface-variant flex items-center justify-center font-headline-md font-bold text-body-md text-primary-fixed select-none">
+        Y
+      </div>
+</div>
+</div>
+</header>
+<!-- Main Content (Adaptive pl-248 and pt-[72px]) -->
+<main class="pl-[248px] pt-[72px] min-h-screen bg-surface"><div class="flex flex-col w-full relative">
+<!-- Interactive Navigation State Updater for Settings -->
+<script>
+    (function() {
+      try {
+        const navLinks = document.querySelectorAll('nav[data-active-classes] a');
+        navLinks.forEach(link => {
+          if (link.getAttribute('data-path') === 'settings') {
+            link.className = 'flex items-center px-3 py-2.5 rounded-xl text-body-md font-semibold bg-surface-container-high text-primary-fixed border border-surface-variant transition-all duration-150';
+          } else {
+            link.className = 'flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150';
+          }
+        });
+      } catch (e) {}
+    })();
+  </script>
+<!-- Settings Page Backdrop Content (Dimmed and Inert behind Scrim) -->
+<div aria-hidden="true" class="w-full px-8 py-8 opacity-40 select-none pointer-events-none filter blur-[2px] transition-all duration-300">
+<div class="max-w-5xl mx-auto space-y-8">
+<!-- Settings Header -->
+<div class="flex items-center justify-between">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Preferences, local storage safeguards, and ledger defaults</p>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high text-label-sm font-label-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Local storage active</span>
+</div>
+</div>
+<!-- Settings Grid Sections -->
+<div class="grid grid-cols-12 gap-5">
+<!-- General Ledger Setup -->
+<div class="col-span-8 space-y-5">
+<div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container-high space-y-6">
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Ledger configuration</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Default primary currency and calculation baseline</p>
+</div>
+<span class="material-symbols-outlined text-outline">tune</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Base currency</label>
+<div class="h-11 px-4 rounded-xl bg-surface-container border border-surface-container-high flex items-center justify-between text-primary font-body-md text-body-md">
+<span>Kenyan Shilling (KES)</span>
+<span class="material-symbols-outlined text-[18px] text-outline">lock</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">First day of month</label>
+<div class="h-11 px-4 rounded-xl bg-surface-container border border-surface-container-high flex items-center justify-between text-primary font-body-md text-body-md">
+<span>1st of the calendar month</span>
+<span class="material-symbols-outlined text-[18px] text-outline">expand_more</span>
+</div>
+</div>
+</div>
+<div class="pt-2">
+<div class="flex items-center justify-between py-3 border-t border-surface-container-high">
+<div>
+<div class="font-label-md text-body-md text-primary font-medium">Automatic M-Pesa parsing</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Standardize SMS import formats for Safaricom statements</div>
+</div>
+<div class="w-11 h-6 rounded-full bg-secondary-container p-0.5 flex items-center justify-end">
+<div class="w-5 h-5 rounded-full bg-surface"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Data Safeguards -->
+<div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container-high space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Data export &amp; storage</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Export complete encrypted backup to offline JSON or CSV</p>
+</div>
+<button class="h-9 px-4 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md">Export</button>
+</div>
+</div>
+</div>
+<!-- Sync Callout Card in Background -->
+<div class="col-span-4 space-y-5">
+<div class="bg-surface-container-low rounded-2xl p-6 border border-surface-container-high flex flex-col justify-between h-full">
+<div class="space-y-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[22px]">cloud_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">Device storage only</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Transactions, custom tags, and budgets exist only on this browser profile. Sign in to enable end-to-end sync across other devices.
+              </p>
+</div>
+<div class="pt-6">
+<div class="h-10 w-full rounded-full bg-primary-container text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center">
+                Sync records
+              </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Centered Modal Scrim & Overlay (Backdrop Blur with Level 3 Luminosity) -->
+<div class="fixed inset-0 z-40 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center p-4 pl-[248px] pt-[72px]">
+<!-- Modal Dialog Window (440px fixed width, Level 3 Elevation) -->
+<div aria-labelledby="dialog-title" aria-modal="true" class="w-full max-w-[440px] bg-surface-container-low rounded-2xl border border-surface-container-highest shadow-2xl p-6 flex flex-col relative transition-all" role="dialog">
+<!-- Top Row: Segmented Switch & Close Target -->
+<div class="flex items-center justify-between gap-3 mb-6">
+<!-- Segmented Control: Sign In / Create Account -->
+<div class="inline-flex p-1 rounded-xl bg-surface-container border border-surface-container-high" role="tablist">
+<button aria-selected="true" class="h-9 px-4 rounded-lg bg-primary-container text-on-primary-fixed font-label-md text-label-md font-semibold shadow-sm transition-all press-effect" role="tab" type="button">
+            Sign in
+          </button>
+<button aria-selected="false" class="h-9 px-4 rounded-lg bg-transparent hover:text-on-surface text-on-surface-variant font-label-md text-label-md font-medium transition-all" role="tab" type="button">
+            Create account
+          </button>
+</div>
+<!-- 44px x 44px Close '✕' Button -->
+<button aria-label="Close dialog" class="w-11 h-11 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-primary border border-surface-container-high flex items-center justify-center transition-colors press-effect shrink-0" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Header Content -->
+<div class="space-y-1 mb-6">
+<h2 class="font-headline-md text-headline-md text-primary tracking-tight" id="dialog-title">
+          Sign in to sync
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Open your records on any device.
+        </p>
+</div>
+<!-- Authentication Form -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Field 1: Email (Invalid state with Coral Outlines and Error Helper) -->
+<div class="space-y-1.5 text-left">
+<label class="block font-label-md text-body-sm text-on-surface font-medium" for="signin-email">
+            Email
+          </label>
+<div class="relative">
+<input aria-describedby="email-error-msg" aria-invalid="true" class="w-full h-11 px-4 rounded-xl bg-surface-container border-2 border-[#FF6B6B] font-body-md text-body-md text-primary focus:outline-none transition-colors" id="signin-email" type="text" value="wanjiru@"/>
+<div class="absolute right-3.5 top-2.5 text-[#FF6B6B] pointer-events-none">
+<span class="material-symbols-outlined text-[20px]">error</span>
+</div>
+</div>
+<!-- Helper Error Message in Coral -->
+<p class="font-body-sm text-body-sm text-[#FF6B6B] flex items-center gap-1.5 pt-0.5" id="email-error-msg">
+<span>Enter a valid email address.</span>
+</p>
+</div>
+<!-- Field 2: Password with Forgot Link & Show Toggle (44px target) -->
+<div class="space-y-1.5 text-left pt-1">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-body-sm text-on-surface font-medium" for="signin-password">
+              Password
+            </label>
+<a class="font-label-md text-body-sm text-primary-fixed hover:underline focus:outline-none" href="#">
+              Forgot password?
+            </a>
+</div>
+<div class="relative">
+<input class="w-full h-11 pl-4 pr-12 rounded-xl bg-surface-container border border-surface-container-high font-body-md text-body-md text-primary placeholder:text-outline focus:outline-none focus:border-primary-fixed transition-colors" id="signin-password" placeholder="••••••••••••" type="password" value="secretKey123"/>
+<!-- 44px Tap Target Show/Hide Password Toggle -->
+<button aria-label="Toggle password visibility" class="w-11 h-11 absolute right-0 top-0 flex items-center justify-center text-on-surface-variant hover:text-on-surface focus:outline-none rounded-r-xl transition-colors" id="toggle-password-btn" type="button">
+<span class="material-symbols-outlined text-[19px]" id="pwd-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Primary Action: Full-width Lime Pill Button (44px height) -->
+<div class="pt-3">
+<button class="w-full h-11 px-5 rounded-full bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center gap-2 press-effect transition-colors duration-150" type="submit">
+<span>Sign in</span>
+</button>
+</div>
+<!-- Secondary Action: Continue without signing in -->
+<div class="flex items-center justify-center pt-1">
+<button class="h-11 px-4 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-body-md font-medium transition-colors press-effect" type="button">
+            Continue without signing in
+          </button>
+</div>
+</form>
+<!-- Note Text Below Form -->
+<div class="mt-4 pt-4 border-t border-surface-container-high text-center">
+<p class="font-body-sm text-body-sm text-outline leading-snug">
+          Your records stay on this device until you sign in.
+        </p>
+</div>
+</div>
+</div>
+<!-- Inline Script for Password Visibility Toggle Micro-interaction -->
+<script>
+    (function() {
+      const toggleBtn = document.getElementById('toggle-password-btn');
+      const pwdInput = document.getElementById('signin-password');
+      const pwdIcon = document.getElementById('pwd-icon');
+
+      if (toggleBtn && pwdInput && pwdIcon) {
+        toggleBtn.addEventListener('click', function() {
+          const isPassword = pwdInput.type === 'password';
+          pwdInput.type = isPassword ? 'text' : 'password';
+          pwdIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+        });
+      }
+    })();
+  </script>
+</div></main>
+<!-- Bottom Right Design Preview Tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-surface-container-high border border-surface-variant font-label-sm text-body-sm text-on-surface-variant font-medium flex items-center gap-2 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

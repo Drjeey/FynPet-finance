@@ -854,7 +854,7 @@ thead { position:sticky; top:0; z-index:10; }
 <button class="ni " data-click="goPage" data-click-args='["mpesa","$el"]' ><span class="icon" data-icon="import" aria-hidden="true"></span>M-Pesa Import</button>
 <button class="ni " data-click="goPage" data-click-args='["settings","$el"]' ><span class="icon" data-icon="settings" aria-hidden="true"></span>Settings</button></nav>
   <div class="sb-sync-status" id="sync-status"><div class="sync-dot local" id="sync-dot"></div><span id="sync-label" aria-live="polite">Saved on this device</span></div>
-  <div class="sb-foot"><button class="btn-secondary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in to sync</button></div>
+  <div class="sb-foot"><button class="btn-secondary" data-click="openAuth" data-click-args='["in"]'>Sign in to sync</button></div>
 </aside>
 
 <!-- ═══ MAIN ═══════════════════════════════════ -->
@@ -1091,58 +1091,38 @@ thead { position:sticky; top:0; z-index:10; }
 
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Settings</div><div class="ph-sub">Your profile, exchange rates and privacy preferences</div></div>
-      </div>
+      <div class="set-wrap">
+        <section class="card set-card" aria-labelledby="set-h-acct">
+          <header class="set-hd"><h2 id="set-h-acct">Account</h2><span class="chip" id="set-chip" hidden></span></header>
+          <div id="set-acct" aria-live="polite"></div>
+        </section>
 
-      <div class="config-grid"><div class="config-card"><h2 class="config-title">Account &amp; sync</h2><p class="config-sub">Keep your records on this device or sign in to sync them to your account.</p><div class="service-status"><p>Fyn AI <span id="claude-status" class="sb-key-status none">Checking…</span></p><p>Account sync <span id="sb-status" class="sb-key-status none">Checking…</span></p></div><div class="account-actions"><button class="btn-primary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in</button><button class="btn-secondary" data-click="syncNow">Sync now</button><button class="btn-ghost" data-click="recheckCloudConfig">Check connection</button><button class="btn-ghost" data-click="confirmSignOut">Sign out</button></div></div></div><div class="config-grid">
-        <div class="config-card">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--ink2);background:var(--bg2);padding:2px 7px;border-radius:4px">USR</span>
-            Profile</div>
-          <div class="config-sub">Your identity shown in the dashboard.</div>
-          <div class="form-row">
-            <div class="form-grp"><label class="form-lbl" for="cfg-name">Name</label><input class="form-input" type="text" id="cfg-name" placeholder="You" data-input="saveConfig" data-input-args='["name","$value"]'></div>
-          </div>
-        </div>
-        <div class="config-card">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--amber);background:var(--amberlt);padding:2px 7px;border-radius:4px">FIRE</span>
-            Independence Target</div>
-          <div class="config-sub">Your Financial Independence number (25× annual expenses).</div>
-          <div class="form-grp">
-            <label class="form-lbl" for="cfg-fire">Target Amount (KES)</label>
-            <input class="form-input" type="number" id="cfg-fire" placeholder="3000000" data-input="saveConfig" data-input-args='["fireTarget","$float:3000000"]'>
-          </div>
-          <button class="btn-primary" style="margin-top:12px;font-size:.75rem;width:100%;justify-content:center" data-click="saveAllConfig">Save Settings</button>
-        </div>
-      </div>
+        <section class="card set-card" aria-labelledby="set-h-prof">
+          <header class="set-hd"><h2 id="set-h-prof">Profile</h2></header>
+          <p class="muted">Used in greetings and your avatar.</p>
+          <div class="form-grp"><label class="form-lbl" for="cfg-name">Your name</label><input class="form-input" type="text" id="cfg-name" maxlength="40" autocomplete="given-name" data-keydown="profileEnter" data-keydown-args='["$event"]'></div>
+          <div class="set-acts"><button class="btn-primary" data-click="saveProfile">Save</button></div>
+        </section>
 
-      <div class="config-grid" style="margin-top:16px">
-        <div class="config-card">
-          <div class="config-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:var(--teal);background:var(--teallt);padding:2px 7px;border-radius:4px">FX</span>
-            Exchange Rates to KES</div>
-          <div class="config-sub">Editable estimates, not live rates. The KES conversion is saved with each transaction; changing rates affects new or edited transactions.</div>
-          <div class="form-row" style="margin-bottom:10px">
-            <div class="form-grp"><label class="form-lbl" for="cfg-rate-usd">1 USD =</label><input class="form-input" type="number" id="cfg-rate-usd" placeholder="130" data-input="saveConfig" data-input-args='["rate_USD","$value"]'></div>
-            <div class="form-grp"><label class="form-lbl" for="cfg-rate-eur">1 EUR =</label><input class="form-input" type="number" id="cfg-rate-eur" placeholder="145" data-input="saveConfig" data-input-args='["rate_EUR","$value"]'></div>
-          </div>
-          <div class="form-row">
-            <div class="form-grp"><label class="form-lbl" for="cfg-rate-gbp">1 GBP =</label><input class="form-input" type="number" id="cfg-rate-gbp" placeholder="165" data-input="saveConfig" data-input-args='["rate_GBP","$value"]'></div>
-            <div class="form-grp"><label class="form-lbl" for="cfg-rate-tzs">1 TZS =</label><input class="form-input" type="number" id="cfg-rate-tzs" placeholder="0.045" step="0.001" data-input="saveConfig" data-input-args='["rate_TZS","$value"]'></div>
-          </div>
-          <div class="form-row" style="margin-top:10px">
-            <div class="form-grp"><label class="form-lbl" for="cfg-rate-ugx">1 UGX =</label><input class="form-input" type="number" id="cfg-rate-ugx" placeholder="0.034" min="0.000001" step="any" data-input="saveConfig" data-input-args='["rate_UGX","$value"]'></div>
-          </div>
-        </div>
-        <div class="config-card">
-          <h2 class="config-title">Privacy &amp; AI</h2>
-          <div class="privacy-copy"><p>Your records are saved in this browser. Signing in lets you sync them across devices.</p><p>Fyn AI uses Anthropic after your consent. Advisor context or extracted statement text passes through Netlify; phone numbers are removed before Anthropic processing.</p></div>
-          <div class="account-actions"><button class="btn-secondary" data-click="openModal" data-click-args='["ai-consent-modal"]'>Review AI disclosure</button><button class="btn-ghost" data-click="revokeAiConsent">Turn off AI consent</button></div>
-          <h2 class="config-title" style="margin-top:24px">Data management</h2>
-          <div class="account-actions"><button class="btn-secondary" data-click="exportCSV">Export CSV</button><button class="btn-danger-sm" data-click="clearLocalData">Clear local data</button></div>
-        </div>
+        <section class="card set-card" aria-labelledby="set-h-fx">
+          <header class="set-hd"><h2 id="set-h-fx">Exchange rates</h2></header>
+          <p class="muted">Estimates, not live rates. Each transaction keeps the rate used when it was saved.</p>
+          <div class="rate-list" id="rate-list"></div>
+          <div class="set-acts"><button class="btn-primary" data-click="saveRates">Save rates</button></div>
+        </section>
+
+        <section class="card set-card" aria-labelledby="set-h-priv">
+          <header class="set-hd"><h2 id="set-h-priv">Privacy and Fyn AI</h2></header>
+          <p class="muted">Your records are saved in this browser. Fyn AI only sees data after you agree.</p>
+          <p class="set-status" id="set-ai-status"></p>
+          <div class="set-acts" id="set-ai-acts"></div>
+        </section>
+
+        <section class="card set-card" aria-labelledby="set-h-data">
+          <header class="set-hd"><h2 id="set-h-data">Your data</h2></header>
+          <p class="muted">Manage the records saved in this browser.</p>
+          <div class="set-acts"><button class="btn-secondary" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span>Export CSV</button><button class="btn-danger-sm" data-click="clearLocalData"><span data-icon="delete" aria-hidden="true"></span>Clear data on this device</button></div>
+        </section>
       </div>
     </div>
 
@@ -1216,29 +1196,53 @@ thead { position:sticky; top:0; z-index:10; }
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal" style="z-index:2000">
-  <div class="modal" style="max-width:380px;width:100%">
-    <div class="modal-hdr" style="margin-bottom:16px">
-      <div>
-        <div class="modal-title">Sign in to sync</div>
-        <div style="font-size:.75rem;color:var(--ink3);margin-top:3px">Save your data securely across devices</div>
+  <div class="modal auth-box" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-top"><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["auth-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div id="auth-form">
+      <div class="seg auth-seg" role="group" aria-label="Sign in or create account">
+        <button class="pb on" id="auth-tab-in" aria-pressed="true" data-click="setAuthTab" data-click-args='["in"]'>Sign in</button>
+        <button class="pb" id="auth-tab-up" aria-pressed="false" data-click="setAuthTab" data-click-args='["up"]'>Create account</button>
       </div>
+      <h2 class="auth-title" id="auth-title">Sign in to sync</h2>
+      <p class="muted" id="auth-sub">Open your records on any device.</p>
+      <div class="form-grp"><label class="form-lbl" for="auth-email">Email</label><input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" aria-describedby="auth-email-err" data-input="authInput" data-keydown="submitOnEnter"><p class="field-err" id="auth-email-err" role="alert" hidden></p></div>
+      <div class="form-grp"><label class="form-lbl" for="auth-password">Password</label>
+        <div class="pw-wrap"><input class="form-input" type="password" id="auth-password" autocomplete="current-password" aria-describedby="auth-pw-hint auth-pw-err" data-input="authInput" data-keydown="submitOnEnter"><button type="button" class="pw-toggle" id="auth-pw-toggle" aria-pressed="false" data-click="togglePassword">Show</button></div>
+        <p class="muted auth-hint" id="auth-pw-hint" hidden>At least 8 characters.</p><p class="field-err" id="auth-pw-err" role="alert" hidden></p></div>
+      <div class="auth-error" id="auth-error" role="alert" hidden></div>
+      <button class="btn-primary auth-submit" id="auth-submit-btn" data-click="submitAuth"><span class="spin" aria-hidden="true" hidden></span><span id="auth-submit-lbl">Sign in</span></button>
+      <button class="link auth-skip" id="auth-skip" data-click="skipAuth">Continue without signing in</button>
+      <p class="muted auth-foot">Your records stay on this device until you sign in.</p>
     </div>
-<div class="modal-body">    <div style="display:flex;gap:3px;margin-bottom:18px;background:var(--bg2);border-radius:8px;padding:3px">
-      <button id="auth-tab-in" data-click="setAuthTab" data-click-args='["in"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)">Sign In</button>
-      <button id="auth-tab-up" data-click="setAuthTab" data-click-args='["up"]' style="flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)">Create account</button>
+    <div id="auth-check" class="auth-check" hidden>
+      <div class="empty-ico ok"><span data-icon="check" aria-hidden="true"></span></div>
+      <h2 class="auth-title">Check your email</h2>
+      <p class="muted">We sent a link to <b id="auth-check-email"></b>. Open it to confirm your account, then come back and sign in.</p>
+      <button class="btn-primary auth-submit" data-click="authBackToSignIn">Go to sign in</button>
+      <button class="link auth-skip" data-click="authDifferentEmail">Use a different email</button>
     </div>
-    <div class="form-grp" style="margin-bottom:10px">
-      <label class="form-lbl" for="auth-email">Email</label>
-      <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+  </div>
+</div>
+
+<div class="modal-overlay" id="set-confirm" style="z-index:2100">
+  <div class="modal confirm-modal set-confirm" role="alertdialog" aria-modal="true" aria-labelledby="sc-title" aria-describedby="sc-sub">
+    <div class="sc-ico" id="sc-ico" aria-hidden="true"></div>
+    <h2 class="sc-title" id="sc-title"></h2>
+    <p class="muted" id="sc-sub"></p>
+    <div class="sc-acts" id="sc-acts"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ai-disclosure-modal">
+  <div class="modal add-modal raise-modal">
+    <div class="modal-hdr"><div class="modal-title">What Fyn AI sees</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["ai-disclosure-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <section class="disc"><h3>Questions you ask</h3><p class="muted">Your name, monthly totals, budgets and up to 10 recent transactions are sent to Anthropic, through our server, to answer.</p></section>
+      <section class="disc"><h3>Statement import</h3><p class="muted">Text read from your M-Pesa PDF, including dates, amounts and merchant or sender names, is sent the same way. The PDF itself stays on your device.</p></section>
+      <p class="disc-note">Nothing is sent until you agree. You can turn this off any time.</p>
     </div>
-    <div class="form-grp" style="margin-bottom:14px">
-      <label class="form-lbl" for="auth-password">Password</label>
-      <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" data-keydown="submitOnEnter">
-    </div>
-    <div id="auth-error" style="display:none;padding:8px 12px;background:var(--roselt);border:1px solid rgba(220,38,38,.15);border-radius:6px;font-size:.75rem;color:var(--rose);margin-bottom:12px"></div>
-    <button class="btn-primary" id="auth-submit-btn" style="width:100%;justify-content:center" data-click="submitAuth">Sign In</button>
-    <button data-click="skipAuth" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;font-size:.75rem;color:var(--ink3);cursor:pointer;text-align:center">Continue without signing in (local only)</button>
-</div>  </div>
+    <div class="modal-acts"><button class="btn-danger-sm" data-click="aiDisclosureOff">Turn off Fyn AI</button><button class="btn-secondary" data-click="closeModal" data-click-args='["ai-disclosure-modal"]'>Close</button></div>
+  </div>
 </div>
 
 <!-- MODALS -->

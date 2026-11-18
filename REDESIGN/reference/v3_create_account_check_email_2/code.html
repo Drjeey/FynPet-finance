@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>FynPet - Check your email</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#111319",
+          "surface": "#111319",
+          "surface-dim": "#111319",
+          "surface-bright": "#36393f",
+          "surface-container-lowest": "#0b0e13",
+          "surface-container-low": "#191c21",
+          "surface-container": "#1d2025",
+          "surface-container-high": "#272a30",
+          "surface-container-highest": "#32353b",
+          "surface-variant": "#32353b",
+          "primary": "#ffffff",
+          "primary-container": "#c5f331",
+          "primary-fixed": "#c5f331",
+          "primary-fixed-dim": "#aad600",
+          "on-primary": "#283500",
+          "on-primary-fixed": "#161f00",
+          "on-primary-container": "#556d00",
+          "secondary": "#45dfa4",
+          "secondary-container": "#00bd85",
+          "on-secondary": "#003825",
+          "on-surface": "#e1e2ea",
+          "on-surface-variant": "#a3aebd",
+          "outline": "#8e937a",
+          "outline-variant": "#444934"
+        },
+        fontFamily: {
+          "headline-sm": ["Manrope", "sans-serif"],
+          "headline-md": ["Manrope", "sans-serif"],
+          "headline-lg": ["Manrope", "sans-serif"],
+          "metric-regular": ["Manrope", "sans-serif"],
+          "metric-large": ["Manrope", "sans-serif"],
+          "display-currency": ["Manrope", "sans-serif"],
+          "body-sm": ["Inter", "sans-serif"],
+          "body-md": ["Inter", "sans-serif"],
+          "body-lg": ["Inter", "sans-serif"],
+          "label-sm": ["Inter", "sans-serif"],
+          "label-md": ["Inter", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @layer base {
+    html {
+      color-scheme: dark;
+      overscroll-behavior: none;
+    }
+    body {
+      background-color: #111319;
+      color: #e1e2ea;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+  .numeral {
+    font-family: 'Manrope', sans-serif;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+  .press-effect:active {
+    transform: translateY(1px);
+  }
+</style>
+</head>
+<body class="min-h-screen bg-surface text-on-surface">
+<!-- Left Persistent Sidebar (w-64 / 256px) -->
+<aside class="w-64 h-screen fixed left-0 top-0 bg-[#0b0e13] border-r border-[#1e222b] flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-[#1e222b]">
+<div class="w-10 h-10 rounded-xl bg-[#c5f331] flex items-center justify-center shrink-0 shadow-sm">
+<span class="font-headline-md font-extrabold text-[16px] tracking-tight text-[#161f00] leading-none">FP</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-md font-bold text-lg text-white tracking-tight leading-tight">FynPet</div>
+<div class="font-label-sm text-xs text-[#8e937a] font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn AI Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-[#c5f331] hover:bg-[#aad600] text-[#161f00] font-label-md text-sm font-semibold flex items-center justify-center gap-2 press-effect transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#161f00]">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Sidebar Navigation Links -->
+<nav class="px-3 space-y-1">
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#a3aebd] hover:text-white hover:bg-[#191c21] transition-all duration-150" href="#">
+        Dashboard
+      </a>
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#a3aebd] hover:text-white hover:bg-[#191c21] transition-all duration-150" href="#">
+        Transactions
+      </a>
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#a3aebd] hover:text-white hover:bg-[#191c21] transition-all duration-150" href="#">
+        Budgets
+      </a>
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#a3aebd] hover:text-white hover:bg-[#191c21] transition-all duration-150" href="#">
+        Analytics
+      </a>
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium text-[#a3aebd] hover:text-white hover:bg-[#191c21] transition-all duration-150" href="#">
+        M-Pesa Import
+      </a>
+<a class="flex items-center px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-[#272a30] text-[#c5f331] border border-white/5 shadow-sm transition-all duration-150" href="#">
+        Settings
+      </a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync / Storage Status -->
+<div class="p-4 border-t border-[#1e222b]">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-[#45dfa4] shrink-0"></span>
+<span class="font-label-md text-xs text-[#a3aebd] font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-11 min-h-[44px] rounded-xl border border-[#272a30] hover:bg-[#191c21] text-white font-label-md text-xs font-medium transition-colors press-effect flex items-center justify-center" type="button">
+      Sign in to sync
+    </button>
+</div>
+</aside>
+<!-- Persistent Desktop Header (72px) -->
+<header class="fixed top-0 left-0 right-0 h-[72px] pl-64 bg-[#111319]/95 border-b border-[#1e222b] z-20">
+<div class="h-[72px] px-8 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-sm text-[#a3aebd] font-medium">Personal Finance</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Top Search -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-[#191c21] border border-[#272a30] font-body-md text-sm text-white placeholder:text-[#8e937a] focus:outline-none focus:border-[#c5f331] transition-colors" placeholder="Search transactions..." type="text"/>
+<span class="material-symbols-outlined text-[18px] text-[#8e937a] absolute left-3 top-2.5 select-none">search</span>
+</div>
+<!-- Sync Icon Button (min 44px) -->
+<button class="w-11 h-11 rounded-xl border border-[#272a30] hover:bg-[#191c21] flex items-center justify-center text-[#a3aebd] hover:text-white transition-colors press-effect" title="Sync Status" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- User Avatar Circle -->
+<div class="w-10 h-10 rounded-full bg-[#272a30] border border-[#32353b] flex items-center justify-center font-headline-md font-bold text-sm text-[#c5f331] select-none">
+        Y
+      </div>
+</div>
+</div>
+</header>
+<!-- Main Page Background (Dimmed & Obscured Settings canvas behind modal) -->
+<main class="pl-64 pt-[72px] min-h-screen bg-[#111319]">
+<div class="p-8 max-w-6xl mx-auto w-full select-none pointer-events-none opacity-40 filter blur-[0.5px]">
+<!-- Settings Header Context -->
+<div class="flex items-baseline justify-between mb-8">
+<div>
+<h1 class="font-headline-lg text-3xl font-bold text-white tracking-tight">Settings</h1>
+<p class="font-body-md text-sm text-[#a3aebd] mt-1">Manage preferences, data persistence, and ledger configurations.</p>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#272a30] text-[#a3aebd] font-label-md text-xs font-medium">
+<span class="w-2 h-2 rounded-full bg-[#45dfa4]"></span>
+<span>Local device ledger</span>
+</div>
+</div>
+<!-- Underlying Settings Cards Grid -->
+<div class="grid grid-cols-12 gap-5">
+<!-- Account Card -->
+<div class="col-span-12 lg:col-span-7 bg-[#191c21] rounded-2xl p-6 border border-[#272a30]/50">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#272a30] flex items-center justify-center font-headline-md font-bold text-lg text-[#c5f331]">
+              FP
+            </div>
+<div>
+<div class="font-headline-sm text-base font-bold text-white">Saved on this device only</div>
+<p class="font-body-md text-sm text-[#a3aebd] mt-0.5">Your ledger records are preserved locally on this browser session.</p>
+</div>
+</div>
+<button class="px-5 py-2.5 rounded-xl bg-[#c5f331] text-[#161f00] font-label-md text-sm font-semibold" type="button">
+            Sign in to sync
+          </button>
+</div>
+</div>
+<!-- Profile Details Card -->
+<div class="col-span-12 lg:col-span-5 bg-[#191c21] rounded-2xl p-6 border border-[#272a30]/50">
+<div class="flex items-center justify-between mb-3">
+<span class="font-headline-sm text-sm font-bold text-white">Profile details</span>
+<span class="material-symbols-outlined text-[#a3aebd] text-[20px]">badge</span>
+</div>
+<div class="space-y-2">
+<div class="bg-[#1d2025] rounded-xl p-3 flex justify-between items-center text-sm">
+<span class="text-[#a3aebd]">Display name</span>
+<span class="text-white font-medium">Wanjiru</span>
+</div>
+<div class="bg-[#1d2025] rounded-xl p-3 flex justify-between items-center text-sm">
+<span class="text-[#a3aebd]">Primary currency</span>
+<span class="text-[#c5f331] font-bold">KES</span>
+</div>
+</div>
+</div>
+<!-- Exchange Rates Card -->
+<div class="col-span-12 lg:col-span-4 bg-[#191c21] rounded-2xl p-6 border border-[#272a30]/50">
+<h3 class="font-headline-sm text-sm font-bold text-white mb-1">Exchange rates</h3>
+<p class="font-body-sm text-xs text-[#a3aebd] mb-4">Central Bank of Kenya indicative rate</p>
+<div class="space-y-2">
+<div class="bg-[#1d2025] rounded-xl px-4 py-3 flex justify-between items-center text-sm">
+<span class="text-white font-medium">USD / KES</span>
+<span class="numeral font-bold text-white">129.45</span>
+</div>
+<div class="bg-[#1d2025] rounded-xl px-4 py-3 flex justify-between items-center text-sm">
+<span class="text-white font-medium">EUR / KES</span>
+<span class="numeral font-bold text-white">141.20</span>
+</div>
+</div>
+</div>
+<!-- Privacy & Fyn AI Card -->
+<div class="col-span-12 lg:col-span-4 bg-[#191c21] rounded-2xl p-6 border border-[#272a30]/50">
+<h3 class="font-headline-sm text-sm font-bold text-white mb-1">Privacy and Fyn AI</h3>
+<p class="font-body-sm text-xs text-[#a3aebd] mb-4">On-device ledger processing and privacy</p>
+<div class="bg-[#1d2025] rounded-xl p-3.5 flex items-center justify-between">
+<div class="space-y-0.5">
+<div class="text-sm font-medium text-white">Local heuristics</div>
+<div class="text-xs text-[#a3aebd]">Smart category tags</div>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-[#45dfa4]"></span>
+</div>
+</div>
+<!-- Your Data Card -->
+<div class="col-span-12 lg:col-span-4 bg-[#191c21] rounded-2xl p-6 border border-[#272a30]/50">
+<h3 class="font-headline-sm text-sm font-bold text-white mb-1">Your data</h3>
+<p class="font-body-sm text-xs text-[#a3aebd] mb-4">Export offline ledger or reset database</p>
+<div class="flex gap-2">
+<button class="flex-1 py-2.5 rounded-xl bg-[#272a30] text-white text-xs font-medium" type="button">
+            Export CSV
+          </button>
+<button class="flex-1 py-2.5 rounded-xl bg-[#272a30] text-white text-xs font-medium" type="button">
+            Backup JSON
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Semi-Transparent Dark Modal Overlay -->
+<div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="email-confirmation-modal">
+<!-- Centered 440px Wide Modal Card -->
+<div class="w-full max-w-[440px] rounded-2xl bg-[#151921] border border-white/10 p-7 relative shadow-2xl flex flex-col items-center text-center">
+<!-- Top Right Close Button (min 44x44px target) -->
+<button aria-label="Close dialog" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl absolute top-3 right-3 flex items-center justify-center text-[#a3aebd] hover:text-white hover:bg-white/5 transition-colors press-effect" onclick="document.getElementById('email-confirmation-modal').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined text-[20px] leading-none">close</span>
+</button>
+<!-- Mint (#45DFA4) Checkmark Badge Icon -->
+<div class="w-14 h-14 rounded-full bg-[#45dfa4]/15 border border-[#45dfa4]/30 flex items-center justify-center text-[#45dfa4] mx-auto mb-4">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1, 'wght' 600;">check</span>
+</div>
+<!-- Modal Title -->
+<h2 class="font-headline-md font-bold text-xl text-white tracking-tight mb-2">Check your email</h2>
+<!-- Description Body -->
+<p class="font-body-md text-sm text-[#a3aebd] max-w-[340px] mx-auto leading-relaxed mb-6">
+        We sent a link to <span class="text-white font-medium">wanjiru@example.com</span>. Open it to confirm your account, then come back and sign in.
+      </p>
+<!-- Action Button 1: Primary Full-Width Electric Lime (#C6F432) -->
+<button class="w-full h-11 min-h-[44px] px-6 rounded-xl bg-[#c5f331] hover:bg-[#aad600] text-[#0b0e13] font-label-md text-sm font-semibold flex items-center justify-center transition-opacity press-effect mb-3" type="button">
+        Go to sign in
+      </button>
+<!-- Action Button 2: Centered Ghost Text Button -->
+<button class="w-full min-h-[44px] px-4 rounded-xl font-label-md text-sm text-[#a3aebd] hover:text-white transition-colors flex items-center justify-center" type="button">
+        Use a different email
+      </button>
+</div>
+</div>
+</main>
+<!-- Bottom Right Design Preview Tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-[#272a30] border border-[#32353b] font-label-sm text-xs text-[#a3aebd] font-medium flex items-center gap-2 shadow-lg">
+<span class="w-1.5 h-1.5 rounded-full bg-[#c5f331]"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

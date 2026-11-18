@@ -3,6 +3,7 @@ import { icon, renderIcons } from './icons.js';
 import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
 import { csvText, csvRow } from './csv.js';
 import { filterTransactions, countFilters, quickRange, groupByDate } from './txfilter.js';
+import { isEmail, passwordError, authMessage, unsyncedCount, changesText, validateRates, accountView, RATE_CURRENCIES } from './settings.js';
 import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpenses, coverStatus, clampGoalMonths, independenceStatus, paceText, barHeights } from './analytics.js';
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
 import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason } from './importreview.js';
@@ -41,12 +42,12 @@ async function initCloudConfig() {
       } else {
         showLocalProfile();
         setSyncStatus('local', 'Sign in to sync');
-        setTimeout(() => openModal('auth-modal'), 1000);
+        setTimeout(() => openAuth('in'), 1000);
       }
     } else {
       showLocalProfile();
     }
-    updateCloudStatus('claude', cfg.aiEnabled, cfg.aiEnabled ? '✓ Ready (sign in to use)' : '⚠ Not configured in Netlify');
+    if (typeof renderSettings === 'function') renderSettings();
     updateCloudStatus('sb', Boolean(cfg.supabaseUrl && publicKey),
       cfg.supabaseUrl && publicKey ? '✓ Available — sign in to sync' : '⚠ Supabase URL or public key not set in Netlify');
   } catch(e) {
@@ -579,6 +580,7 @@ function setSyncStatus(status, label) {
   }
   if (typeof renderAttention === 'function') renderAttention();
   if (typeof renderMore === 'function') renderMore();
+  if (typeof renderSettings === 'function') renderSettings();
 }
 function dismissSyncBanner() { _bannerDismissed = true; document.getElementById('sync-banner').hidden = true; }
 
@@ -606,7 +608,7 @@ async function syncOnce(interactive) {
   let session;
   try { ({ data: { session } } = await sb.auth.getSession()); } catch (e) { return syncFailed(e); }
   if (!session) {
-    if (interactive) openModal('auth-modal');
+    if (interactive) openAuth('in');
     setSyncStatus('local', 'Sign in to sync');
     return { ok: false, error: 'Not signed in' };
   }
@@ -900,7 +902,7 @@ function attentionItems(now = new Date()) {
     const n = state.tombstones.length + state.transactions.filter(t => t.dirty).length + state.budgets.filter(b => b.dirty).length;
     if (n > 0) items.push({ kind: 'warn', icon: 'sync', html: `${n} change${n === 1 ? " isn't" : "s aren't"} backed up yet`, label: 'Sync now', action: 'syncNow', args: [] });
   } else if (getSbClient() && state.transactions.length >= 5) {
-    items.push({ kind: 'info', icon: 'info', html: 'Your records are only saved on this device', label: 'Sign in', action: 'openModal', args: ['auth-modal'] });
+    items.push({ kind: 'info', icon: 'info', html: 'Your records are only saved on this device', label: 'Sign in', action: 'openAuth', args: ['in'] });
   }
   const lastImport = state.imports.map(i => i.date).sort().at(-1);
   if (lastImport && (now - new Date(lastImport)) / 864e5 > 30) {
@@ -1749,7 +1751,7 @@ function renderMore() {
   document.getElementById('more-foot').hidden = signedIn;
   card.innerHTML = signedIn
     ? `<div class="ms-head"><span class="sync-dot ${dot}"></span><b>Signed in${state.ui.email ? ' as ' + escHtml(state.ui.email) : ''}</b></div><p>${escHtml(label)}</p><div class="ms-acts"><button class="btn-secondary" data-click="syncNow">Sync now</button><button class="btn-danger-sm" data-click="confirmSignOut">Sign out</button></div>`
-    : `<div class="ms-head"><span class="sync-dot local"></span><b>Saved on this device</b></div><p>Sign in to back up your records and use them on another device.</p><button class="btn-secondary" data-click="openModal" data-click-args='["auth-modal"]'>Sign in to sync</button>`;
+    : `<div class="ms-head"><span class="sync-dot local"></span><b>Saved on this device</b></div><p>Sign in to back up your records and use them on another device.</p><button class="btn-secondary" data-click="openAuth" data-click-args='["in"]'>Sign in to sync</button>`;
 }
 
 // The phone layout calls the first page "Home"; larger screens call it "Dashboard".
@@ -2060,57 +2062,89 @@ function renderImportHistory() {
 // ═══════════════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════════════
-let _authTab = 'in';
+let _authTab = 'in', _authBusy = false;
 
+function openAuth(tab = 'in') {
+  document.getElementById('auth-form').hidden = false; document.getElementById('auth-check').hidden = true;
+  document.getElementById('auth-email').value = ''; document.getElementById('auth-password').value = '';
+  setAuthTab(tab); setAuthBusy(false);
+  openModal('auth-modal'); setTimeout(() => document.getElementById('auth-email').focus(), 60);
+}
 function setAuthTab(tab) {
-  _authTab = tab;
-  const inBtn = document.getElementById('auth-tab-in');
-  const upBtn = document.getElementById('auth-tab-up');
-  const submitBtn = document.getElementById('auth-submit-btn');
-  const pwInput = document.getElementById('auth-password');
-  if (tab === 'in') {
-    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
-    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
-    submitBtn.textContent = 'Sign In';
-    pwInput.autocomplete = 'current-password';
-  } else {
-    upBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)';
-    inBtn.style.cssText = 'flex:1;padding:7px;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;background:transparent;color:var(--ink3)';
-    submitBtn.textContent = 'Create Account';
-    pwInput.autocomplete = 'new-password';
-  }
-  document.getElementById('auth-error').style.display = 'none';
+  _authTab = tab === 'up' ? 'up' : 'in';
+  const up = _authTab === 'up';
+  [['auth-tab-in', !up], ['auth-tab-up', up]].forEach(([id, on]) => { const b = document.getElementById(id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  document.getElementById('auth-title').textContent = up ? 'Create your account' : 'Sign in to sync';
+  document.getElementById('auth-sub').hidden = up;
+  document.getElementById('auth-sub').textContent = 'Open your records on any device.';
+  document.getElementById('auth-pw-hint').hidden = !up;
+  document.getElementById('auth-submit-lbl').textContent = up ? 'Create account' : 'Sign in';
+  document.getElementById('auth-password').autocomplete = up ? 'new-password' : 'current-password';
+  clearAuthErrors();
+}
+function clearAuthErrors() {
+  ['auth-email-err', 'auth-pw-err', 'auth-error'].forEach(id => { const e = document.getElementById(id); e.textContent = ''; e.hidden = true; });
+  ['auth-email', 'auth-password'].forEach(id => document.getElementById(id).setAttribute('aria-invalid', 'false'));
+}
+function authInput() { if (!_authBusy) clearAuthErrors(); }
+function showAuthError(field, message) {
+  const box = field === 'email' ? 'auth-email-err' : field === 'password' ? 'auth-pw-err' : 'auth-error';
+  const e = document.getElementById(box); e.textContent = message; e.hidden = false;
+  if (field) document.getElementById(field === 'email' ? 'auth-email' : 'auth-password').setAttribute('aria-invalid', 'true');
+}
+function setAuthBusy(busy) {
+  _authBusy = busy;
+  ['auth-email', 'auth-password'].forEach(id => { document.getElementById(id).disabled = busy; });
+  const btn = document.getElementById('auth-submit-btn'); btn.disabled = busy; btn.classList.toggle('busy', busy);
+  btn.querySelector('.spin').hidden = !busy;
+  document.getElementById('auth-submit-lbl').textContent = busy ? (_authTab === 'up' ? 'Creating account...' : 'Signing in...') : (_authTab === 'up' ? 'Create account' : 'Sign in');
+  document.getElementById('auth-skip').disabled = busy;
+}
+function togglePassword() {
+  const input = document.getElementById('auth-password'), btn = document.getElementById('auth-pw-toggle'), show = input.type === 'password';
+  input.type = show ? 'text' : 'password'; btn.textContent = show ? 'Hide' : 'Show'; btn.setAttribute('aria-pressed', String(show));
 }
 
 async function submitAuth() {
+  if (_authBusy) return;
   const sb = getSbClient();
-  if (!sb) { showToast('Supabase not connected', 'error'); return; }
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  if (!email || !password) { _showAuthError('Enter email and password'); return; }
-  const btn = document.getElementById('auth-submit-btn');
-  btn.textContent = 'Please wait…'; btn.disabled = true;
-  document.getElementById('auth-error').style.display = 'none';
+  const email = document.getElementById('auth-email').value.trim(), password = document.getElementById('auth-password').value;
+  clearAuthErrors();
+  if (!sb) { showAuthError('', 'Sign-in is not available here.'); return; }
+  if (!isEmail(email)) { showAuthError('email', 'Enter a valid email address.'); document.getElementById('auth-email').focus(); return; }
+  const pwError = passwordError(password, _authTab);
+  if (pwError) { showAuthError('password', pwError); document.getElementById('auth-password').focus(); return; }
+  setAuthBusy(true);
   try {
     const result = _authTab === 'in'
       ? await sb.auth.signInWithPassword({ email, password })
       : await sb.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
     if (result.error) throw result.error;
     if (_authTab === 'up') {
-      showToast('Account created! Check your email to confirm.', 'success');
-      btn.textContent = 'Create Account'; btn.disabled = false;
+      if (result.data?.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length === 0) throw new Error('User already registered');
+      if (!result.data?.session) {
+        setAuthBusy(false);
+        document.getElementById('auth-check-email').textContent = email;
+        document.getElementById('auth-form').hidden = true; document.getElementById('auth-check').hidden = false;
+        return;
+      }
     }
-    // onAuthStateChange handles the rest on SIGNED_IN event
-  } catch(e) {
-    _showAuthError(e.message || 'Authentication failed');
-    btn.textContent = _authTab === 'in' ? 'Sign In' : 'Create Account';
-    btn.disabled = false;
+    // onAuthStateChange handles the rest on the SIGNED_IN event
+  } catch (e) {
+    setAuthBusy(false);
+    const { field, message } = authMessage(e);
+    showAuthError(field, message);
+    document.getElementById(field === 'email' ? 'auth-email' : 'auth-password').focus();
   }
 }
-
-function _showAuthError(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg; el.style.display = 'block';
+function authBackToSignIn() {
+  const email = document.getElementById('auth-check-email').textContent;
+  document.getElementById('auth-check').hidden = true; document.getElementById('auth-form').hidden = false;
+  setAuthTab('in'); document.getElementById('auth-email').value = email; document.getElementById('auth-password').focus();
+}
+function authDifferentEmail() {
+  document.getElementById('auth-check').hidden = true; document.getElementById('auth-form').hidden = false;
+  setAuthTab('up'); document.getElementById('auth-email').value = ''; document.getElementById('auth-email').focus();
 }
 
 function skipAuth() {
@@ -2124,15 +2158,7 @@ async function signOut(force = false) {
   // Push pending changes before the cache is cleared. If that fails and something is unsynced, ask first.
   if (!force && activeProfile !== 'local') {
     const result = sb ? await syncNow() : { ok: false };
-    if (!result.ok && hasUnsyncedChanges()) {
-      askConfirm({
-        title: 'Sign out without syncing?',
-        sub: 'Your latest changes could not be synced. If you sign out now they will be removed from this device.',
-        okLabel: 'Sign out anyway',
-        onOk: () => { closeModal('confirm-modal'); signOut(true); },
-      });
-      return;
-    }
+    if (!result.ok && hasUnsyncedChanges()) { openUnsyncedConfirm(); return; }
   }
   if (sb) await sb.auth.signOut().catch(e => console.error('Sign-out error:', e));
   // Remove this account's cached data from the device, then show the local profile.
@@ -2141,7 +2167,101 @@ async function signOut(force = false) {
     switchProfile('local');
   }
   setSyncStatus('local', 'Signed out');
-  showToast('Signed out — account data removed from this device', 'info');
+  showToast('Signed out. Account data removed from this device', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+const RATE_LABEL = { USD: 'US dollar', EUR: 'Euro', GBP: 'British pound', TZS: 'Tanzanian shilling', UGX: 'Ugandan shilling' };
+function loadSettingsPage() {
+  document.getElementById('cfg-name').value = CFG.get('name') || '';
+  renderRateList(); renderSettings();
+}
+function renderRateList() {
+  const rates = exchangeRates();
+  document.getElementById('rate-list').innerHTML = RATE_CURRENCIES.map(code => `
+    <div class="rate-row"><label for="rate-${code}"><b>1 ${code} =</b><small>${RATE_LABEL[code]}</small></label>
+      <div class="rate-in"><input class="form-input" type="text" inputmode="decimal" autocomplete="off" id="rate-${code}" value="${escHtml(String(rates[code] ?? ''))}" aria-describedby="rate-${code}-err" data-input="rateInput" data-input-args='["${code}"]'><span>KES</span></div>
+      <p class="field-err" id="rate-${code}-err" role="alert" hidden></p></div>`).join('');
+}
+function rateInput(code) { const e = document.getElementById(`rate-${code}-err`); e.hidden = true; document.getElementById(`rate-${code}`).setAttribute('aria-invalid', 'false'); }
+function saveRates() {
+  const inputs = Object.fromEntries(RATE_CURRENCIES.map(c => [c, document.getElementById(`rate-${c}`).value]));
+  const { values, errors, ok } = validateRates(inputs);
+  RATE_CURRENCIES.forEach(c => {
+    const e = document.getElementById(`rate-${c}-err`); e.textContent = errors[c] || ''; e.hidden = !errors[c];
+    document.getElementById(`rate-${c}`).setAttribute('aria-invalid', errors[c] ? 'true' : 'false');
+  });
+  if (!ok) { document.getElementById(`rate-${RATE_CURRENCIES.find(c => errors[c])}`).focus(); return; }
+  RATE_CURRENCIES.forEach(c => CFG.set('rate_' + c, String(values[c])));
+  showToast('Exchange rates saved', 'success');
+}
+function profileEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveProfile(); } }
+function saveProfile() {
+  const name = document.getElementById('cfg-name').value.trim() || 'You';
+  CFG.set('name', name);
+  document.getElementById('tb-name').textContent = name;
+  document.getElementById('tb-av').textContent = name.charAt(0).toUpperCase();
+  if (typeof renderMore === 'function') renderMore();
+  showToast('Profile saved', 'success');
+}
+
+function renderSettings() {
+  const foot = document.querySelector('.sb-foot .btn-secondary'); if (foot) foot.hidden = activeProfile !== 'local';
+  const host = document.getElementById('set-acct'); if (!host) return;
+  const cfg = window._cloudConfig, available = Boolean(cfg?.supabaseUrl && (cfg?.supabasePublicKey || cfg?.supabaseAnonKey));
+  const signedIn = activeProfile !== 'local';
+  const dot = document.getElementById('sync-dot').className.replace('sync-dot', '').trim() || 'local';
+  const view = accountView({ signedIn, email: state.ui.email, dot, label: document.getElementById('sync-label').textContent, available });
+  const chip = document.getElementById('set-chip'); chip.hidden = !(view.state === 'synced' || view.state === 'syncing' || view.state === 'problem');
+  chip.textContent = view.state === 'synced' ? view.headline : view.state === 'syncing' ? 'Syncing...' : 'Not synced'; chip.className = 'chip ' + (view.state === 'synced' ? 'up' : view.state === 'problem' ? 'warn' : '');
+  const aiLine = signedIn ? (cfg?.aiEnabled ? 'Fyn AI is available on your account.' : 'Fyn AI is not set up in this environment.') : '';
+  if (!signedIn) {
+    host.innerHTML = `<p class="set-status"><span class="sync-dot local"></span>${escHtml(view.headline)}</p><p class="muted">${escHtml(view.note)}</p>
+      <div class="set-acts"><button class="btn-primary" data-click="openAuth" data-click-args='["in"]' ${available ? '' : 'disabled'}>Sign in</button><button class="btn-secondary" data-click="openAuth" data-click-args='["up"]' ${available ? '' : 'disabled'}>Create account</button></div>`;
+  } else {
+    const problem = view.state === 'problem';
+    host.innerHTML = `<p class="set-status"><span class="sync-dot ${problem ? 'syncing' : 'connected'}"></span>${escHtml(problem ? view.headline : view.headline)}</p>
+      <p class="set-email"><small class="muted">Signed-in email</small><b>${escHtml(view.email || '')}</b></p>
+      <div class="set-acts"><button class="btn-primary" data-click="syncNow">${problem ? 'Try again' : 'Sync now'}</button><button class="btn-secondary" data-click="confirmSignOut">Sign out</button></div>
+      <p class="muted set-note">${escHtml(aiLine)}</p>`;
+  }
+  const agreed = CFG.get('aiConsent') === AI_CONSENT_VERSION;
+  document.getElementById('set-ai-status').innerHTML = agreed ? '<span class="sync-dot connected"></span>Fyn AI: you have agreed' : '<span class="sync-dot local"></span>Fyn AI: off. You will be asked before the next request.';
+  document.getElementById('set-ai-acts').innerHTML = agreed
+    ? `<button class="btn-secondary" data-click="openModal" data-click-args='["ai-disclosure-modal"]'>Review what is sent</button><button class="link" data-click="revokeAiConsent">Turn off Fyn AI</button>`
+    : `<button class="btn-primary" data-click="reviewAndTurnOn">Review and turn on</button>`;
+}
+function revokeAiConsent() { localStorage.removeItem('fynpet_cfg_aiConsent'); renderSettings(); showToast('Fyn AI turned off', 'info'); }
+function aiDisclosureOff() { closeModal('ai-disclosure-modal'); revokeAiConsent(); }
+async function reviewAndTurnOn() { await ensureAiConsent(); renderSettings(); }
+
+// Confirm dialogs (clear data, sign out, sign out with unsynced changes)
+let _scActions = [];
+function openSetConfirm({ tone = 'danger', icon = 'delete', title, sub, actions }) {
+  _scActions = actions;
+  const ico = document.getElementById('sc-ico'); ico.className = 'sc-ico ' + tone; ico.innerHTML = `<span data-icon="${icon}"></span>`; if (typeof renderIcons === 'function') renderIcons(ico);
+  document.getElementById('sc-title').textContent = title; document.getElementById('sc-sub').textContent = sub;
+  document.getElementById('sc-acts').innerHTML = actions.map((a, i) => `<button class="${a.cls}" data-click="setConfirmAct" data-click-args='[${i}]'>${escHtml(a.label)}</button>`).join('');
+  openModal('set-confirm');
+}
+function setConfirmAct(i) { const a = _scActions[i]; closeModal('set-confirm'); a?.fn?.(); }
+function clearLocalData() {
+  openSetConfirm({ title: 'Clear data on this device?', sub: 'All transactions and budgets saved in this browser will be removed. Records already synced to your account are not affected.',
+    actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Clear data', cls: 'btn-danger', fn: () => { localStorage.clear(); location.reload(); } }] });
+}
+function confirmSignOut() {
+  const n = unsyncedCount({ signedIn: activeProfile !== 'local', transactions: state.transactions, budgets: state.budgets, tombstones: state.tombstones, lastSyncAt: SyncMeta.get().lastSyncAt });
+  if (n > 0) { openUnsyncedConfirm(n); return; }
+  openSetConfirm({ tone: 'info', icon: 'sync', title: 'Sign out?', sub: 'Your synced records stay on your account. Data on this device will be cleared so the next person cannot see it.',
+    actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Sign out', cls: 'btn-primary', fn: () => signOut() }] });
+}
+function openUnsyncedConfirm(count) {
+  const n = count ?? unsyncedCount({ signedIn: true, transactions: state.transactions, budgets: state.budgets, tombstones: state.tombstones, lastSyncAt: SyncMeta.get().lastSyncAt });
+  openSetConfirm({ tone: 'warn', icon: 'alert', title: 'Some changes are not synced', sub: `${changesText(Math.max(n, 1))} If you sign out now they will be lost.`,
+    actions: [{ label: 'Sync first', cls: 'btn-primary', fn: async () => { const r = await syncNow({ interactive: true }); if (r.ok) showToast('Synced. You can sign out now.', 'success'); else showToast('Could not sync. Your changes are still on this device.', 'error'); } },
+      { label: 'Sign out anyway', cls: 'btn-danger-sm', fn: () => signOut(true) }, { label: 'Cancel', cls: 'link' }] });
 }
 
 // ─── Profiles: keep each account's data separate on this device ───
@@ -2199,13 +2319,6 @@ function saveConfig(key,val){
     showToast('Enter an exchange rate greater than zero','error'); return;
   }
   CFG.set(key,val);
-}
-function saveAllConfig(){
-  CFG.set('name',document.getElementById('cfg-name').value.trim()||'You');
-  CFG.set('fireTarget',parseFloat(document.getElementById('cfg-fire').value)||3000000);
-  document.getElementById('tb-name').textContent=CFG.get('name');
-  document.getElementById('tb-av').textContent=CFG.get('name').charAt(0).toUpperCase();
-  showToast('Profile saved','success');
 }
 function toggleKeyVis(inputId,btn){
   const inp=document.getElementById(inputId);
@@ -2280,22 +2393,6 @@ function goPage(id,navEl){
   document.getElementById('content').scrollTop=0;
 }
 
-function loadSettingsPage() {
-  // Populate profile, FIRE, and exchange rate fields
-  [['cfg-name','name'],['cfg-fire','fireTarget'],
-   ['cfg-rate-usd','rate_USD'],['cfg-rate-eur','rate_EUR'],['cfg-rate-gbp','rate_GBP'],['cfg-rate-tzs','rate_TZS'],['cfg-rate-ugx','rate_UGX']
-  ].forEach(([id,key]) => {
-    const el = document.getElementById(id);
-    if (el) { const v = CFG.get(key); if (v) el.value = v; }
-  });
-  // Reflect current cloud connection state
-  const cfg = window._cloudConfig;
-  updateCloudStatus('claude', cfg?.aiEnabled ? true : false, cfg?.aiEnabled ? '✓ Ready (sign in to use)' : '✕ Not configured');
-  const publicKey = cfg?.supabasePublicKey || cfg?.supabaseAnonKey;
-  updateCloudStatus('sb', Boolean(cfg?.supabaseUrl && publicKey), cfg?.supabaseUrl && publicKey ? 'Available — sign in to sync' : 'Not available in this environment');
-}
-
-
 // ═══════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════
@@ -2335,7 +2432,6 @@ document.addEventListener('keydown',e=>{
     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
   }
 });
-function revokeAiConsent(){localStorage.removeItem('fynpet_cfg_aiConsent');showToast('AI consent turned off. You will be asked before the next AI request.','info');}
 
 let _toastTimer=null;
 let _toastAction = null;
@@ -2363,15 +2459,13 @@ function readArgs(el,type){
   try{return JSON.parse(el.getAttribute(`data-${type}-args`)||'[]')}catch{return[]}
 }
 
-function confirmSignOut(){if(confirm('Sign out?'))signOut()}
-function clearLocalData(){if(confirm('Clear ALL local data on this device? Data synced to your account is not affected.')){localStorage.clear();location.reload()}}
 function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
-  openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveAllConfig, saveBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveBudget,
   saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
   toggleMobSidebar, toggleKeyVis,

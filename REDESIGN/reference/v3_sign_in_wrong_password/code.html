@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>FynPet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "background": "#111319",
+          "surface-tint": "#aad600",
+          "inverse-primary": "#506600",
+          "on-primary-fixed": "#161f00",
+          "on-secondary-fixed": "#002114",
+          "surface-bright": "#36393f",
+          "on-primary-container": "#556d00",
+          "surface-container-low": "#191c21",
+          "primary": "#ffffff",
+          "tertiary-container": "#e0e0ff",
+          "inverse-surface": "#e1e2ea",
+          "on-tertiary": "#131e8c",
+          "surface-container-high": "#272a30",
+          "outline-variant": "#444934",
+          "on-surface-variant": "#c4c9ae",
+          "tertiary-fixed-dim": "#bdc2ff",
+          "on-primary-fixed-variant": "#3b4d00",
+          "secondary-fixed-dim": "#45dfa4",
+          "on-tertiary-container": "#4f5ac2",
+          "primary-fixed": "#c5f331",
+          "on-secondary-fixed-variant": "#005137",
+          "on-background": "#e1e2ea",
+          "on-primary": "#283500",
+          "outline": "#8e937a",
+          "error": "#ffb4ab",
+          "primary-fixed-dim": "#aad600",
+          "inverse-on-surface": "#2e3036",
+          "surface-dim": "#111319",
+          "secondary": "#45dfa4",
+          "on-error-container": "#ffdad6",
+          "on-secondary-container": "#00452e",
+          "on-secondary": "#003825",
+          "surface": "#111319",
+          "on-error": "#690005",
+          "tertiary-fixed": "#e0e0ff",
+          "surface-container-lowest": "#0b0e13",
+          "secondary-fixed": "#68fcbf",
+          "on-tertiary-fixed": "#000767",
+          "on-surface": "#e1e2ea",
+          "error-container": "#93000a",
+          "primary-container": "#c5f331",
+          "surface-variant": "#32353b",
+          "tertiary": "#ffffff",
+          "on-tertiary-fixed-variant": "#2f3aa3",
+          "surface-container": "#1d2025",
+          "surface-container-highest": "#32353b",
+          "secondary-container": "#00bd85"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "space-lg": "1.25rem",
+          "space-xs": "0.25rem",
+          "space-md": "0.75rem",
+          "gutter": "1.25rem",
+          "margin": "2rem",
+          "space-xl": "1.5rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Manrope"],
+          "headline-md": ["Manrope"],
+          "body-md": ["Inter"],
+          "metric-regular": ["Manrope"],
+          "label-md": ["Inter"],
+          "display-currency": ["Manrope"],
+          "body-lg": ["Inter"],
+          "metric-large": ["Manrope"],
+          "label-sm": ["Inter"],
+          "headline-lg": ["Manrope"],
+          "body-sm": ["Inter"]
+        },
+        "fontSize": {
+          "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "metric-regular": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "label-md": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+          "display-currency": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "metric-large": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @layer base {
+    html {
+      color-scheme: dark;
+      overscroll-behavior: none;
+    }
+    body {
+      background-color: #111319;
+      color: #e1e2ea;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+  .numeral {
+    font-family: 'Manrope', sans-serif;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+  .press-effect:active {
+    transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="min-h-screen bg-surface text-on-surface">
+<!-- Fixed Left Sidebar (248px width) -->
+<aside class="w-[248px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-surface-container-high flex flex-col justify-between z-30 select-none">
+<div>
+<!-- Brand Logo Header -->
+<div class="h-[72px] px-6 flex items-center gap-3 border-b border-surface-container-high">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
+<span class="font-headline-md font-extrabold text-[15px] tracking-tight text-on-primary-fixed leading-none">FP</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-md font-bold text-headline-sm text-primary tracking-tight leading-tight">FynPet</div>
+<div class="font-label-sm text-label-sm text-outline font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Quick Ask Fyn Button -->
+<div class="p-4">
+<button class="w-full h-11 px-4 rounded-xl bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center gap-2 press-effect transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-primary-fixed">auto_awesome</span>
+<span>Ask Fyn AI</span>
+</button>
+</div>
+<!-- Sidebar Navigation Links -->
+<nav class="px-3 space-y-1" data-active-classes="bg-surface-container-high text-primary-fixed font-semibold border border-surface-variant" data-inactive-classes="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-medium border border-transparent">
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="dashboard" href="#">
+        Dashboard
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="transactions" href="#">
+        Transactions
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="budgets" href="#">
+        Budgets
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="analytics" href="#">
+        Analytics
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="mpesa-import" href="#">
+        M-Pesa Import
+      </a>
+<a class="flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low border border-transparent transition-all duration-150" data-path="settings" href="#">
+        Settings
+      </a>
+</nav>
+</div>
+<!-- Pinned Bottom Sync / Storage State -->
+<div class="p-4 border-t border-surface-container-high">
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span>
+<span class="font-label-md text-body-sm text-on-surface-variant font-medium">Saved on this device</span>
+</div>
+<button class="w-full h-9 rounded-xl border border-surface-container-high hover:bg-surface-container-low text-on-surface font-label-md text-label-md transition-colors press-effect flex items-center justify-center" type="button">
+      Sign in to sync
+    </button>
+</div>
+</aside>
+<!-- Persistent Desktop Header (72px) -->
+<header class="fixed top-0 left-0 right-0 h-[72px] pl-[248px] bg-surface/95 backdrop-blur-none border-b border-surface-container-high z-20">
+<div class="h-[72px] px-8 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-body-md text-on-surface-variant font-medium">Personal Finance</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Top Search -->
+<div class="relative w-72">
+<input class="w-full h-10 pl-9 pr-4 rounded-xl bg-surface-container-low border border-surface-container-high font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-fixed transition-colors" placeholder="Search transactions..." type="text"/>
+<span class="material-symbols-outlined text-[18px] text-outline absolute left-3 top-2.5 select-none">search</span>
+</div>
+<!-- Sync Icon Button -->
+<button class="w-10 h-10 rounded-xl border border-surface-container-high hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors press-effect" title="Sync Status" type="button">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+<!-- User Avatar Initial -->
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-surface-variant flex items-center justify-center font-headline-md font-bold text-body-md text-primary-fixed select-none">
+        Y
+      </div>
+</div>
+</div>
+</header>
+<!-- Main Content (Adaptive pl-248 and pt-[72px]) -->
+<main class="pl-[248px] pt-[72px] min-h-screen bg-surface"><div class="flex flex-col w-full relative min-h-[calc(100vh-72px)] overflow-hidden">
+<!-- Interactive script to highlight 'Settings' nav in the shell sidebar -->
+<script>
+    (function() {
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('data-path') === 'settings') {
+          link.className = 'flex items-center px-3 py-2.5 rounded-xl text-body-md bg-surface-container-high text-primary-fixed font-semibold transition-all duration-150';
+        } else {
+          link.className = 'flex items-center px-3 py-2.5 rounded-xl text-body-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all duration-150';
+        }
+      });
+    })();
+  </script>
+<!-- Background: Dimmed Settings Workspace Backdrop -->
+<div class="p-8 w-full max-w-7xl mx-auto space-y-8 select-none pointer-events-none opacity-40 filter blur-[1px]">
+<!-- Settings Title Bar -->
+<div class="flex items-center justify-between">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage device storage, local ledger preferences, and account sync.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1.5 rounded-full bg-surface-container-high font-label-md text-body-sm text-secondary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+          Local ledger active
+        </span>
+</div>
+</div>
+<!-- Settings Mock Sections -->
+<div class="grid grid-cols-12 gap-5">
+<!-- Device & Storage Panel -->
+<div class="col-span-8 bg-surface-container rounded-2xl p-6 space-y-6">
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high">
+<div>
+<div class="font-headline-sm text-headline-sm text-primary">Device storage &amp; backup</div>
+<div class="font-body-md text-body-md text-on-surface-variant mt-0.5">Encrypted local SQLite storage in browser memory</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[24px]">phonelink_lock</span>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl">
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Cached records</div>
+<div class="font-headline-md text-metric-large text-primary numeral mt-1">1,428</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl">
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Local space</div>
+<div class="font-headline-md text-metric-large text-primary numeral mt-1">2.4 MB</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl">
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Last integrity check</div>
+<div class="font-headline-md text-metric-large text-primary numeral mt-1">Today</div>
+</div>
+</div>
+<div class="space-y-4 pt-2">
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">database</span>
+<div>
+<div class="font-headline-sm text-body-md text-primary font-semibold">Ledger export</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Export transactions to JSON or CSV for offline archive</div>
+</div>
+</div>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-body-sm" type="button">Export</button>
+</div>
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">delete_sweep</span>
+<div>
+<div class="font-headline-sm text-body-md text-primary font-semibold">Wipe local cache</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Remove unauthenticated receipts and ledger rows on this browser</div>
+</div>
+</div>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-error font-label-md text-body-sm" type="button">Clear data</button>
+</div>
+</div>
+</div>
+<!-- General Preferences Column -->
+<div class="col-span-4 space-y-5">
+<div class="bg-surface-container rounded-2xl p-6 space-y-4">
+<div class="font-headline-sm text-headline-sm text-primary">Ledger currency</div>
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="font-label-md text-body-md text-primary-fixed font-bold">KES</span>
+<span class="font-body-md text-body-md text-on-surface">Kenyan Shilling</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">check</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Standard ledger decimal alignment (0.00 KES).</div>
+</div>
+<div class="bg-surface-container rounded-2xl p-6 space-y-4">
+<div class="font-headline-sm text-headline-sm text-primary">Security &amp; PIN lock</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface">Require biometric or PIN on launch</span>
+<div class="w-11 h-6 rounded-full bg-primary-container p-0.5 flex items-center justify-end">
+<div class="w-5 h-5 rounded-full bg-on-primary-fixed"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Dimmed Scrim / Overlay Layer -->
+<div class="absolute inset-0 bg-surface-container-lowest/80 backdrop-blur-[2px] z-40 flex items-center justify-center p-6">
+<!-- Centered Modal Dialog (440px) -->
+<div aria-labelledby="modal-headline" aria-modal="true" class="w-[440px] max-w-full bg-surface-container rounded-2xl p-6 relative shadow-2xl animate-in fade-in zoom-in-95 duration-150" role="dialog">
+<!-- Close Button (44px target) -->
+<button aria-label="Close dialog" class="w-11 h-11 rounded-full absolute top-4 right-4 flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors press-effect" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+<!-- Segmented Control: Sign in vs Create account -->
+<div class="w-full bg-surface-container-low p-1 rounded-full flex items-center mb-6">
+<button class="flex-1 h-9 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-body-sm font-semibold flex items-center justify-center transition-colors" type="button">
+          Sign in
+        </button>
+<button class="flex-1 h-9 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-body-sm font-medium flex items-center justify-center transition-colors" type="button">
+          Create account
+        </button>
+</div>
+<!-- Header Content -->
+<div class="text-left mb-6">
+<h2 class="font-headline-md text-headline-md text-primary tracking-tight" id="modal-headline">Sign in to sync</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Open your records on any device.</p>
+</div>
+<!-- Sign In Form -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="space-y-1.5 text-left">
+<label class="block font-label-md text-body-sm font-medium text-on-surface" for="signin-email">Email</label>
+<div class="h-11 w-full bg-surface-container-low rounded-xl px-4 flex items-center">
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface focus:outline-none" id="signin-email" placeholder="name@domain.com" type="email" value="wanjiru@example.com"/>
+</div>
+</div>
+<!-- Password Field with Coral Error State -->
+<div class="space-y-1.5 text-left">
+<div class="flex items-center justify-between">
+<label class="block font-label-md text-body-sm font-medium text-on-surface" for="signin-password">Password</label>
+<a class="h-6 flex items-center font-label-md text-body-sm text-primary-fixed hover:text-primary-fixed-dim font-medium transition-colors" href="#">
+              Forgot password?
+            </a>
+</div>
+<div class="relative h-11 w-full bg-surface-container-low rounded-xl px-4 flex items-center ring-1 ring-error bg-error-container/10">
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface pr-12 focus:outline-none tracking-widest" id="signin-password" placeholder="Enter your password" type="password" value="secretPasswd123"/>
+<!-- Show/Hide Toggle (44px target) -->
+<button aria-label="Toggle password visibility" class="w-11 h-11 absolute right-0 top-0 flex items-center justify-center text-outline hover:text-on-surface transition-colors" id="toggle-password-btn" onclick="const input = document.getElementById('signin-password'); const isPass = input.type === 'password'; input.type = isPass ? 'text' : 'password'; this.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Error Box Banner directly above Primary Button -->
+<div class="rounded-xl p-3 bg-error-container/20 ring-1 ring-error/50 flex items-start gap-2.5 text-left">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">error</span>
+<span class="font-body-sm text-body-sm text-error leading-snug">
+            That email or password is not right. Check them and try again.
+          </span>
+</div>
+<!-- Primary Action Button (44px height) -->
+<div class="pt-1">
+<button class="w-full h-11 rounded-full bg-primary-container hover:bg-primary-fixed-dim text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center transition-colors press-effect" type="submit">
+            Sign in
+          </button>
+</div>
+<!-- Secondary Action Button -->
+<div class="pt-1 flex flex-col items-center gap-3">
+<button class="h-11 px-6 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-body-sm font-medium flex items-center justify-center transition-colors press-effect" type="button">
+            Continue without signing in
+          </button>
+<!-- Persistent Data Disclaimer -->
+<p class="font-body-sm text-body-sm text-outline text-center px-2">
+            Your records stay on this device until you sign in.
+          </p>
+</div>
+</form>
+</div>
+</div>
+</div></main>
+<!-- Bottom Right Design Preview Tag -->
+<div class="fixed bottom-4 right-4 z-50">
+<div class="px-3 py-1.5 rounded-full bg-surface-container-high border border-surface-variant font-label-sm text-body-sm text-on-surface-variant font-medium flex items-center gap-2 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>
