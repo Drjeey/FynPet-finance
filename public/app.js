@@ -3,6 +3,7 @@ import { icon, renderIcons } from './icons.js';
 import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
 import { csvText, csvRow } from './csv.js';
 import { filterTransactions, countFilters, quickRange, groupByDate } from './txfilter.js';
+import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpenses, coverStatus, clampGoalMonths, independenceStatus, paceText, barHeights } from './analytics.js';
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
 import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason } from './importreview.js';
 import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount } from './addflow.js';
@@ -1414,96 +1415,127 @@ let _keepTxFilters = false;
 
 // ─── Budgets page ──────────────────────────────────────────
 // ─── Analytics ─────────────────────────────────────────────
-function renderAnalytics(){
-  const totalSaved=totalKes(state.transactions.filter(t=>t.type==='savings'));
-  const fireTarget=CFG.getNum('fireTarget',3000000);
-  const firePct=Math.min((totalSaved/fireTarget)*100,100);
-  const allDates=new Set(state.transactions.map(t=>t.date?.slice(0,7)).filter(Boolean));
-  const avgMoSav=allDates.size>0?totalSaved/allDates.size:0;
-  const yrs=avgMoSav>0?((fireTarget-totalSaved)/(avgMoSav*12)).toFixed(1):'∞';
-  document.getElementById('fire-saved-lbl').textContent=`KES ${totalSaved.toLocaleString()} saved`;
-  document.getElementById('fire-target-lbl').textContent=`Target: KES ${fireTarget.toLocaleString()}`;
-  document.getElementById('fire-fill').style.width=firePct+'%';
-  document.getElementById('fire-stats').innerHTML=[
-    {v:firePct.toFixed(1)+'%',l:'Progress'},{v:yrs+' yrs',l:'At current rate'},
-    {v:'KES '+(avgMoSav>0?(avgMoSav/1000).toFixed(1)+'K':'0'),l:'Avg monthly savings'},{v:'KES '+(fireTarget/1000).toFixed(0)+'K',l:'FIRE Target'}
-  ].map(s=>`<div class="fs"><div class="fs-v">${s.v}</div><div class="fs-l">${s.l}</div></div>`).join('');
-  drawTrendChart();renderHealthFactors();renderMonthlyTable();
+// Three plain questions (saving, cover, goal) and a monthly summary. Maths lives in analytics.js.
+const AN_QUESTIONS = {
+  saving: 'Am I saving enough each month?',
+  cover: 'Do I have enough saved if something goes wrong?',
+  goal: 'How can I reach my long-term target faster?',
+};
+let _anAsk = null;
+function anNow() { return new Date(); }
+function setBar(prefix, pct, label) {
+  document.getElementById(prefix + '-fill').style.width = pct + '%';
+  const track = document.getElementById(prefix + '-track');
+  track.setAttribute('aria-valuenow', String(Math.round(pct))); track.setAttribute('aria-valuetext', label);
+}
+function renderAnalytics() {
+  const has = anHasData(state.transactions);
+  document.getElementById('an-empty').hidden = has;
+  document.getElementById('an-body').hidden = !has;
+  if (!has) return;
+  const rows = monthlyRows(state.transactions, anNow(), exchangeRates());
+  renderSavingChart(rows);
+  const cover = coverStatus(state.transactions, anNow(), exchangeRates(), CFG.getNum('efGoalMonths', 6));
+  document.getElementById('an-cover-months').textContent = cover.months.toFixed(1) + ' months';
+  setBar('an-cover', cover.pct, `${cover.months.toFixed(1)} of ${cover.goal} months`);
+  const tick = document.getElementById('an-cover-tick');
+  tick.hidden = cover.tick3 == null; if (cover.tick3 != null) tick.style.left = cover.tick3 + '%';
+  const tl = document.getElementById('an-cover-tick-l'); tl.hidden = cover.tick3 == null; if (cover.tick3 != null) tl.style.left = cover.tick3 + '%';
+  document.getElementById('an-cover-goal-l').textContent = `${cover.goal} months`;
+  document.getElementById('an-cover-note').textContent = cover.met ? `You have reached your goal of ${cover.goal} months.` : 'Aim for 3 to 6 months.';
+  const goal = independenceStatus(state.transactions, anNow(), exchangeRates(), CFG.getNum('fireTarget', 3000000));
+  document.getElementById('an-goal-saved').textContent = fmtKes(goal.saved);
+  document.getElementById('an-goal-of').textContent = ` of ${fmtKes(goal.target)}`;
+  document.getElementById('an-goal-pct').textContent = goal.pct.toFixed(1) + '%';
+  setBar('an-goal', goal.pct, goal.pct.toFixed(1) + ' percent');
+  document.getElementById('an-goal-pace').textContent = paceText(goal.years);
+  renderMonthlySummary(rows);
+}
+function renderSavingChart(rows) {
+  const heights = barHeights(rows), cur = rows[rows.length - 1];
+  document.getElementById('an-chart').innerHTML = rows.map((r, i) => `
+    <button type="button" class="an-col${r.current ? ' cur' : ''}" data-click="anSelBar" data-click-args='[${i}]' aria-label="${escHtml(r.title)}: saved ${fmtKes(r.saved)}${r.rate != null ? ', savings rate ' + Math.round(r.rate) + '%' : ''}">
+      <span class="an-tip" role="tooltip"><b>${escHtml(r.title)}</b>Saved ${fmtKes(r.saved)}<br>Savings rate ${r.rate != null ? Math.round(r.rate) + '%' : 'no income'}</span>
+      <span class="an-bar"><i style="height:${heights[i]}%"></i></span>
+      <span class="an-lbl">${escHtml(r.label)}</span>
+    </button>`).join('');
+  document.getElementById('an-sentence').textContent = savingsSentence(cur, fmtKes);
+  document.getElementById('an-sav-table').innerHTML = `<table class="txt an-table"><thead><tr><th>Month</th><th class="r">Saved</th><th class="r">Savings rate</th></tr></thead><tbody>${
+    [...rows].reverse().map(r => `<tr><td>${escHtml(r.title)}</td><td class="r nw">${fmtKes(r.saved)}</td><td class="r nw">${r.rate != null ? Math.round(r.rate) + '%' : '-'}</td></tr>`).join('')}</tbody></table>`;
+}
+function anToggleTable() {
+  const btn = document.getElementById('an-toggle'), on = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? 'View as chart' : 'View as table';
+  document.getElementById('an-chart').hidden = on; document.getElementById('an-sav-table').hidden = !on;
+}
+function anSelBar(i) {
+  document.querySelectorAll('#an-chart .an-col').forEach((c, k) => c.classList.toggle('sel', k === i && !c.classList.contains('sel')));
+}
+function renderMonthlySummary(rows) {
+  const list = [...rows].reverse(), tone = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+  const signed = n => (n > 0 ? '+' : n < 0 ? '-' : '') + fmtKes(Math.abs(n));
+  document.getElementById('monthly-table').innerHTML = list.map(r => `<tr>
+    <td class="nw"><b>${escHtml(r.title)}</b>${r.current ? ' <span class="chip ok">This month</span>' : ''}</td>
+    <td class="r nw">${fmtKes(r.income)}</td><td class="r nw">${fmtKes(r.expenses)}</td>
+    <td class="r nw an-saved">${fmtKes(r.saved)}</td><td class="r nw ${tone(r.net)}">${signed(r.net)}</td>
+    <td class="r nw">${r.rate != null ? r.rate.toFixed(1) + '%' : '-'}</td></tr>`).join('');
+  document.getElementById('monthly-cards').innerHTML = list.map(r => `<article class="an-mcard">
+    <h3>${escHtml(r.title)}${r.current ? ' <span class="chip ok">This month</span>' : ''}</h3>
+    <dl><div><dt>Income</dt><dd>${fmtKes(r.income)}</dd></div><div><dt>Expenses</dt><dd>${fmtKes(r.expenses)}</dd></div>
+    <div><dt>Saved</dt><dd class="an-saved">${fmtKes(r.saved)}</dd></div><div><dt>Net</dt><dd class="${tone(r.net)}">${signed(r.net)}</dd></div>
+    <div><dt>Savings rate</dt><dd>${r.rate != null ? r.rate.toFixed(1) + '%' : '-'}</dd></div></dl></article>`).join('');
 }
 
-function drawTrendChart(){
-  const c=document.getElementById('trend-canvas');if(!c)return;
-  const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=150*dpr;
-  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
-  const W=c.offsetWidth,H=150;ctx.clearRect(0,0,W,H);
-  const now=new Date();const months=[],labels=[];
-  for(let i=5;i>=0;i--){
-    const m=new Date(monthKey(now,-i)+'-01T12:00:00Z');
-    const ms=monthKey(now,-i);
-    const s=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='savings'));
-    months.push(s);labels.push(m.toLocaleDateString('en',{month:'short'}));
-  }
-  if(months.every(v=>v===0)){ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font='12px Inter';ctx.fillText('Add savings transactions to see trend',W/2,H/2);return}
-  const maxV=Math.max(...months,1);const pL=10,pR=10,pT=14,pB=22,cW=W-pL-pR,cH=H-pT-pB;
-  const step=cW/(labels.length-1||1);const pts=months.map((v,i)=>({x:pL+i*step,y:pT+cH*(1-v/maxV)}));
-  ctx.strokeStyle='rgba(28,25,23,.05)';ctx.lineWidth=1;
-  for(let i=0;i<=3;i++){const y=pT+cH*(1-i/3);ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke()}
-  const grad=ctx.createLinearGradient(0,pT,0,H);grad.addColorStop(0,'rgba(55,48,163,.14)');grad.addColorStop(1,'rgba(55,48,163,0)');
-  ctx.beginPath();ctx.moveTo(pts[0].x,cH+pT);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,cH+pT);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.strokeStyle='#3b5bfc';ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
-  ctx.fillStyle='#526071';ctx.textAlign='center';ctx.font=`12px JetBrains Mono`;
-  labels.forEach((l,i)=>ctx.fillText(l,pL+i*step,H-5));
+// Savings goal (months of expenses) and long-term target
+function setAnError(id, message) {
+  const el = document.getElementById(id); el.textContent = message || ''; el.hidden = !message;
+}
+function openGoalDialog() {
+  const monthly = avgMonthlyExpenses(state.transactions, anNow(), exchangeRates());
+  document.getElementById('an-goal-input').value = String(CFG.getNum('efGoalMonths', 6));
+  document.getElementById('an-goal-hint').textContent = 'Most people aim for 3 to 6 months.' + (monthly > 0 ? ` Your monthly expenses average ${fmtKes(Math.round(monthly))}.` : '');
+  setAnError('an-goal-err', '');
+  openModal('an-goal-modal'); setTimeout(() => document.getElementById('an-goal-input').select(), 60);
+}
+function goalInput() { setAnError('an-goal-err', ''); }
+function goalEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveGoal(); } }
+function saveGoal() {
+  const months = clampGoalMonths(document.getElementById('an-goal-input').value);
+  if (months == null) { setAnError('an-goal-err', 'Enter a number between 1 and 24.'); document.getElementById('an-goal-input').focus(); return; }
+  CFG.set('efGoalMonths', String(months)); closeModal('an-goal-modal'); renderAnalytics(); showToast('Savings goal updated', 'success');
+}
+function openTargetDialog() {
+  const s = independenceStatus(state.transactions, anNow(), exchangeRates(), CFG.getNum('fireTarget', 3000000));
+  const input = document.getElementById('an-target-input'); input.value = String(s.target); numericOnly(input);
+  const use = document.getElementById('an-target-use'); use.hidden = s.suggested <= 0; use.dataset.amount = String(s.suggested);
+  document.getElementById('an-target-hint').textContent = s.suggested > 0 ? `A common rule is 25 times your yearly expenses. For you that is about ${fmtKes(s.suggested)}.` : 'A common rule is 25 times your yearly expenses. Add some expenses to see yours.';
+  setAnError('an-target-err', '');
+  openModal('an-target-modal'); setTimeout(() => input.select(), 60);
+}
+function targetInput() { numericOnly(document.getElementById('an-target-input')); setAnError('an-target-err', ''); }
+function targetEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveTarget(); } }
+function useSuggestedTarget() {
+  const input = document.getElementById('an-target-input'); input.value = document.getElementById('an-target-use').dataset.amount || ''; numericOnly(input); setAnError('an-target-err', ''); input.focus();
+}
+function saveTarget() {
+  const value = parseAmount(document.getElementById('an-target-input').value);
+  if (!Number.isFinite(value) || value <= 0) { setAnError('an-target-err', 'Enter a target greater than zero.'); document.getElementById('an-target-input').focus(); return; }
+  CFG.set('fireTarget', String(value)); closeModal('an-target-modal'); renderAnalytics(); showToast('Target updated', 'success');
 }
 
-function renderHealthFactors(){
-  const now=new Date(),ms=monthKey(now);
-  const inc=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='income'));
-  const exp=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='expense'));
-  const sav=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='savings'));
-  const sr=inc>0?(sav/inc)*100:0;
-  const em=emergencyFundMonths(state.transactions, now, exchangeRates());
-  const ba=state.budgets.length>0?(state.budgets.filter(b=>{
-    const s=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.category===b.category&&t.type==='expense'));
-    return s<=b.limit;
-  }).length/state.budgets.length)*100:0;
-  const factors=[
-    {label:'SR',name:`Savings Rate (${sr.toFixed(0)}%)`,pct:Math.min(sr*5,100),color:'#059669',v:sr>=20?'Excellent':sr>=10?'Good':'Needs work'},
-    {label:'EF',name:`Emergency Fund (${em.toFixed(1)} mo)`,pct:Math.min((em/6)*100,100),color:'#D97706',v:em>=6?'Excellent':em>=3?'Good':'Low'},
-    {label:'BA',name:`Budget Adherence (${ba.toFixed(0)}%)`,pct:ba,color:'#3730A3',v:ba>=80?'Good':'Needs work'},
-    {label:'ER',name:`Expense/Income Ratio (${inc>0?((exp/inc)*100).toFixed(0):0}%)`,pct:Math.max(0,100-(inc>0?(exp/inc)*100:100)),color:'#7C3AED',v:inc>0&&exp/inc<0.7?'Healthy':'High'},
-  ];
-  document.getElementById('health-factors').innerHTML=factors.map(f=>`
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${f.color};background:${f.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center;letter-spacing:.02em">${f.label}</div>
-      <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:.75rem;font-weight:500;color:var(--ink)">${f.name}</div>
-          <div style="font-size:.75rem;font-weight:700;color:${f.color};font-family:var(--fm)">${f.v}</div>
-        </div>
-        <div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden">
-          <div style="height:100%;border-radius:2px;width:${f.pct}%;background:${f.color};transition:width .8s ease"></div>
-        </div>
-      </div>
-    </div>`).join('');
+// "Ask Fyn about this": one question per card. Consent is asked first unless it was already given.
+function askFynAbout(kind) {
+  _anAsk = AN_QUESTIONS[kind]; if (!_anAsk) return;
+  if (CFG.get('aiConsent') === AI_CONSENT_VERSION) { sendAnalyticsQuestion(); return; }
+  document.getElementById('an-ask-q').textContent = _anAsk;
+  openModal('an-ask-modal');
 }
-
-function renderMonthlyTable(){
-  const now=new Date();
-  document.getElementById('monthly-table').innerHTML=Array.from({length:6},(_,i)=>{
-    const m=new Date(monthKey(now,-i)+'-01T12:00:00Z');
-    const ms=monthKey(now,-i);
-    const inc=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='income'));
-    const exp=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='expense'));
-    const sav=totalKes(state.transactions.filter(t=>t.date?.startsWith(ms)&&t.type==='savings'));
-    const rate=inc>0?((sav/inc)*100).toFixed(1):0,net=inc-exp;
-    return `<tr><td style="font-weight:600">${m.toLocaleDateString('en',{month:'short',year:'numeric'})}</td>
-      <td><span class="td-mono pos">+${inc.toLocaleString()}</span></td>
-      <td><span class="td-mono neg">-${exp.toLocaleString()}</span></td>
-      <td><span class="td-mono" style="color:var(--blue)">${sav.toLocaleString()}</span></td>
-      <td><span class="td-mono ${parseFloat(rate)>=20?'pos':'neg'}">${rate}%</span></td>
-      <td><span class="td-mono ${net>=0?'pos':'neg'}">${net>=0?'+':''}${net.toLocaleString()}</span></td></tr>`;
-  }).join('');
+function confirmAsk() { CFG.set('aiConsent', AI_CONSENT_VERSION); closeModal('an-ask-modal'); sendAnalyticsQuestion(); }
+async function sendAnalyticsQuestion() {
+  const q = _anAsk; _anAsk = null; if (!q) return;
+  if (!state.ui.advisorOpen) toggleAdvisor();
+  setAdvTab('chat', document.querySelector('.ap-tab'));
+  await sendAdvisorMessage_raw(q);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2338,7 +2370,7 @@ function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveAllConfig, saveBudget,
   saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
@@ -2363,7 +2395,7 @@ const ACTIONS = {
 });
 function delay(ms){return new Promise(r=>setTimeout(r,ms))}
 
-let _resizeTimer;window.addEventListener('resize',()=>{clearTimeout(_resizeTimer);_resizeTimer=setTimeout(()=>{drawMainChart(_chartPeriod);drawTrendChart?.()},120)})
+let _resizeTimer;window.addEventListener('resize',()=>{clearTimeout(_resizeTimer);_resizeTimer=setTimeout(()=>{drawMainChart(_chartPeriod)},120)})
 
 // ═══════════════════════════════════════════════════════════
 // BOOT

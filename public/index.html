@@ -990,24 +990,49 @@ thead { position:sticky; top:0; z-index:10; }
 
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
-      <div class="page-header">
-        <div class="ph-left"><div class="ph-title">Analytics</div><div class="ph-sub">Understand your recorded spending and savings</div></div>
-        <div class="ph-acts"><button class="btn-primary" data-click="runAiAnalysis">Get AI Analysis</button></div>
+      <div class="card tx-empty an-empty" id="an-empty" hidden>
+        <div class="empty-ico"><span data-icon="chart" aria-hidden="true"></span></div>
+        <h3>No data yet</h3>
+        <p class="muted">Add a few transactions and your savings picture appears here. Records are saved on this device.</p>
+        <div class="tx-head-acts">
+          <button class="btn-primary" data-click="openAddTx"><span data-icon="plus" aria-hidden="true"></span>Add transaction</button>
+          <button class="btn-secondary" data-click="goPage" data-click-args='["mpesa",null]'><span data-icon="import" aria-hidden="true"></span>Import M-Pesa statement</button>
+        </div>
       </div>
-      <div class="fire-card">
-        <div class="fire-hdr"><div class="fire-title">FIRE Progress</div><div class="fire-tag">Financial Independence</div></div>
-        <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink2);font-family:var(--fm);margin-bottom:5px"><span id="fire-saved-lbl">KES 0 saved</span><span id="fire-target-lbl">Target: KES 3,000,000</span></div>
-        <div class="fire-trk"><div class="fire-fill" id="fire-fill" style="width:0%"></div></div>
-        <div class="fire-stats" id="fire-stats"></div>
-      </div>
-      <div class="an-grid">
-        <div class="chart-card"><div class="cc-title" style="margin-bottom:3px">6-Month Savings Trend</div><div class="cc-sub">Net savings per month</div><canvas id="trend-canvas" height="150"></canvas></div>
-        <div class="chart-card"><div class="cc-title" style="margin-bottom:3px">Financial Health Score</div><div class="cc-sub">Key metrics breakdown</div><div id="health-factors" style="margin-top:12px;display:flex;flex-direction:column;gap:9px"></div></div>
-      </div>
-      <div class="table-card" style="margin-top:14px">
-        <div class="tt"><div class="tt-title">Monthly Summary</div></div>
-        <table><thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Saved</th><th>Rate</th><th>Net</th></tr></thead>
-        <tbody id="monthly-table"></tbody></table>
+
+      <div id="an-body">
+        <section class="card an-card" aria-labelledby="an-h-save">
+          <header class="an-hd"><h2 id="an-h-save">Am I saving?</h2><button class="btn-secondary an-small" id="an-toggle" aria-pressed="false" data-click="anToggleTable">View as table</button></header>
+          <div id="an-chart" class="an-chart" role="group" aria-label="Money saved each month"></div>
+          <div id="an-sav-table" class="an-mini-table" hidden></div>
+          <p class="an-sentence" id="an-sentence"></p>
+          <footer class="an-ft"><span></span><button class="btn-secondary an-small" data-click="askFynAbout" data-click-args='["saving"]'><span data-icon="spark" aria-hidden="true"></span>Ask Fyn about this</button></footer>
+        </section>
+
+        <section class="card an-card" aria-labelledby="an-h-cover">
+          <header class="an-hd"><h2 id="an-h-cover">Am I covered if something goes wrong?</h2></header>
+          <p class="an-big"><b id="an-cover-months">0.0 months</b><span> of expenses saved</span></p>
+          <div class="an-bar-wrap"><div class="an-track" role="progressbar" aria-label="Months of expenses saved" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="an-cover-track"><i id="an-cover-fill"></i><u id="an-cover-tick" hidden></u></div>
+            <div class="an-scale"><span>0</span><span id="an-cover-tick-l" hidden>3 months</span><span id="an-cover-goal-l">6 months</span></div></div>
+          <p class="muted" id="an-cover-note">Aim for 3 to 6 months.</p>
+          <footer class="an-ft"><button class="btn-primary an-small" data-click="openGoalDialog">Set a savings goal</button><button class="btn-secondary an-small" data-click="askFynAbout" data-click-args='["cover"]'><span data-icon="spark" aria-hidden="true"></span>Ask Fyn about this</button></footer>
+        </section>
+
+        <section class="card an-card" aria-labelledby="an-h-goal">
+          <header class="an-hd"><h2 id="an-h-goal">How close am I to my goal?</h2></header>
+          <p class="an-big"><b id="an-goal-saved">KES 0</b><span id="an-goal-of"> of KES 3,000,000</span><em id="an-goal-pct">0%</em></p>
+          <div class="an-bar-wrap"><div class="an-track" role="progressbar" aria-label="Progress toward your target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="an-goal-track"><i id="an-goal-fill"></i></div></div>
+          <p class="an-pace" id="an-goal-pace"></p>
+          <p class="muted">A common rule is 25 times your yearly expenses.</p>
+          <footer class="an-ft"><button class="btn-secondary an-small" data-click="openTargetDialog">Change target</button><button class="btn-secondary an-small" data-click="askFynAbout" data-click-args='["goal"]'><span data-icon="spark" aria-hidden="true"></span>Ask Fyn about this</button></footer>
+        </section>
+
+        <section class="card an-card" aria-labelledby="an-h-month">
+          <header class="an-hd"><h2 id="an-h-month">Monthly summary</h2><button class="btn-secondary an-small" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span>Export CSV</button></header>
+          <div class="txt-wrap an-desk"><table class="txt an-table"><thead><tr><th>Month</th><th class="r">Income</th><th class="r">Expenses</th><th class="r">Saved</th><th class="r">Net</th><th class="r">Savings rate</th></tr></thead><tbody id="monthly-table"></tbody></table></div>
+          <div class="an-cards" id="monthly-cards"></div>
+          <p class="muted an-note">Saved is money moved to savings. Net is income minus expenses.</p>
+        </section>
       </div>
     </div>
 
@@ -1348,6 +1373,42 @@ thead { position:sticky; top:0; z-index:10; }
 </div>
 
 <div id="row-menu" class="row-menu" role="menu" hidden></div>
+
+<div class="modal-overlay" id="an-goal-modal">
+  <div class="modal add-modal raise-modal">
+    <div class="modal-hdr"><div class="modal-title">Set a savings goal</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["an-goal-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <div class="form-grp"><label class="form-lbl" for="an-goal-input">How many months of expenses do you want saved?</label><input class="form-input" type="text" id="an-goal-input" inputmode="decimal" autocomplete="off" aria-describedby="an-goal-hint an-goal-err" data-input="goalInput" data-keydown="goalEnter" data-keydown-args='["$event"]'></div>
+      <p class="muted" id="an-goal-hint"></p>
+      <p class="field-err" id="an-goal-err" role="alert" hidden></p>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["an-goal-modal"]'>Cancel</button><button class="btn-primary" data-click="saveGoal">Save goal</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="an-target-modal">
+  <div class="modal add-modal raise-modal">
+    <div class="modal-hdr"><div class="modal-title">Change your target</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["an-target-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <div class="form-grp"><label class="form-lbl" for="an-target-input">Target amount (KES)</label><input class="form-input" type="text" id="an-target-input" inputmode="decimal" autocomplete="off" aria-describedby="an-target-hint an-target-err" data-input="targetInput" data-keydown="targetEnter" data-keydown-args='["$event"]'></div>
+      <p class="muted" id="an-target-hint"></p>
+      <button class="link" type="button" id="an-target-use" data-click="useSuggestedTarget" hidden>Use this amount</button>
+      <p class="field-err" id="an-target-err" role="alert" hidden></p>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["an-target-modal"]'>Cancel</button><button class="btn-primary" data-click="saveTarget">Save target</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="an-ask-modal">
+  <div class="modal add-modal raise-modal">
+    <div class="modal-hdr"><div class="modal-title">Ask Fyn about this?</div><button class="modal-close" aria-label="Close dialog" data-click="closeModal" data-click-args='["an-ask-modal"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <p class="muted">Fyn AI will see your name, monthly totals, budgets and up to 10 recent transactions to answer. Nothing is sent until you agree.</p>
+      <div class="an-q"><span class="form-lbl">Your question</span><p id="an-ask-q"></p></div>
+    </div>
+    <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["an-ask-modal"]'>Cancel</button><button class="btn-primary" data-click="confirmAsk">Agree and ask</button></div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="ai-consent-modal"><div class="modal" style="max-width:420px"><div class="modal-hdr"><h2 class="modal-title" id="consent-title">Before you use AI</h2><button class="modal-close" aria-label="Close without agreeing" data-click="answerAiConsent" data-click-args='[false]'><span data-icon="close" aria-hidden="true"></span></button></div><div class="modal-body consent-body"><p>FynPet uses Anthropic to answer questions and extract transactions from M-Pesa statements.</p><section><h3>Advisor questions</h3><p>Your profile name, monthly totals, budgets and up to 10 recent transaction summaries are sent through Netlify to Anthropic.</p></section><section><h3>Statement import</h3><p>The PDF opens locally. Extracted text, including dates, amounts and merchant or counterparty names, is sent through Netlify to Anthropic after consent.</p></section><section><h3>Your choice</h3><p>Phone numbers are removed before Anthropic processing. You can use manual records and CSV export without AI. Turn off consent in Settings at any time.</p></section></div><div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>Agree and continue</button></div></div></div>
 
