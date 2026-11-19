@@ -8,6 +8,7 @@ import { isEmail, passwordError, authMessage, unsyncedCount, changesText, valida
 import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpenses, coverStatus, clampGoalMonths, independenceStatus, paceText, barHeights } from './analytics.js';
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
 import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason, selectionTotals } from './importreview.js';
+import { parseStatement } from './mpesa.js';
 import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount, amountError } from './addflow.js';
 
 // ═══════════════════════════════════════════════════════════
@@ -1741,7 +1742,8 @@ function execDel(){
 // ═══════════════════════════════════════════════════════════
 // MPESA IMPORT
 // ═══════════════════════════════════════════════════════════
-const IMPORT_PRIVACY = 'The PDF is opened in your browser and never uploaded. The transaction text (dates, amounts, merchant and counterparty names) is sent through Netlify to Anthropic to be categorised after you agree. Phone numbers are removed first.';
+const IMPORT_PRIVACY = 'The PDF is opened in your browser and never uploaded. This statement\'s layout was not recognised, so its transaction text (dates, amounts, merchant and counterparty names) was sent through Netlify to Anthropic to be read, after you agreed. Phone numbers are removed first.';
+const IMPORT_PRIVACY_LOCAL = 'The PDF was opened and read in your browser. Nothing from it was uploaded or sent to AI.';
 let imp = { step: 'upload', file: null, cancelled: false, rows: [], rejected: 0, repeats: 0, failedParts: [], chunks: [], byChunk: [], classified: null, recon: null, range: { from: '', to: '' } };
 const CAT_OPTIONS = key => CAT_KEYS.map(k => `<option value="${k}"${k === key ? ' selected' : ''}>${escHtml((CATS[k] || CATS.other).label)}</option>`).join('');
 const IMPORT_STATUS_TEXT = { success: 'Success', partial: 'Partly imported', failed: 'Failed' };
@@ -1805,7 +1807,7 @@ async function readPdfText(file, password) {
 
 // ─── Step 2: reading (nothing is saved here) ───
 function renderReading(stage, detail = '') {
-  const stages = ['Opening PDF in your browser', 'Reading transactions', 'Categorising with Fyn AI', 'Checking for duplicates', 'Preparing review'];
+  const stages = ['Opening PDF in your browser', 'Reading transactions', imp.method === 'ai' ? 'Categorising with Fyn AI' : 'Sorting into categories', 'Checking for duplicates', 'Preparing review'];
   document.getElementById('imp-reading').innerHTML = `<div class="card imp-reading">
     <div class="card-hdr"><h2>Reading your statement</h2></div>
     <p class="muted">Nothing is saved until you confirm.</p>
@@ -1839,7 +1841,10 @@ function buildReview() {
   const { rows, repeats } = dedupeWithinFile(imp.byChunk.flat());
   imp.rows = rows; imp.repeats = repeats;
   imp.classified = classifyRows(rows, state.transactions, imp.range);
-  imp.recon = reconcile(rows, imp.totals, { rangeSet: Boolean(imp.range.from || imp.range.to) });
+  // Read on the device: check every row against the statement's running balance instead of a totals line.
+  imp.recon = imp.method === 'rules'
+    ? { status: imp.local.balance.mismatches ? 'balance-off' : imp.local.balance.checked ? 'balanced' : 'unavailable', ...imp.local.balance }
+    : reconcile(rows, imp.totals, { rangeSet: Boolean(imp.range.from || imp.range.to) });
 }
 
 async function runImport() {
@@ -1847,18 +1852,31 @@ async function runImport() {
   const from = document.getElementById('imp-from').value, to = document.getElementById('imp-to').value;
   if (from && to && from > to) { impError('The start date is after the end date.'); return; }
   impError('');
-  // Sign in and consent come first, so nobody waits for a PDF to read and then hits a wall.
-  try {
-    if (!(await getAccessToken())) throw new Error('Sign in to use AI features.');
-    if (!(await ensureAiConsent())) throw new Error('AI features are off until you agree to send data to Claude.');
-  } catch (e) { impFail(e, false); return; }
-  Object.assign(imp, { cancelled: false, rows: [], rejected: 0, repeats: 0, failedParts: [], byChunk: [], range: { from, to } });
+  Object.assign(imp, { cancelled: false, rows: [], rejected: 0, repeats: 0, failedParts: [], byChunk: [], range: { from, to }, method: 'rules', local: null });
   impStep('reading'); renderReading(1);
   try {
     const text = await readPdfText(imp.file, document.getElementById('pdf-pw').value);
     if (imp.cancelled) return;
     if (!text.trim()) throw new Error('No text found in this PDF. Scanned statements are not supported.');
     renderReading(2);
+    // First choice: read the statement on this device with fixed rules (no sign-in, nothing sent anywhere).
+    const local = parseStatement(text);
+    if (local.recognized) {
+      renderReading(3);
+      // A description the person has categorised before keeps their category.
+      const rows = local.rows.map(r => ({ ...r, category: categoryForDescription(state.transactions, r.description, r.type) || r.category }));
+      Object.assign(imp, { local, byChunk: [rows], rejected: local.unreadable });
+      renderReading(4); await delay(250);
+      buildReview();
+      renderReading(5); await delay(250);
+      renderImportReview(); impStep('review');
+      return;
+    }
+    // Layout not recognised: Fyn AI can read it, after sign-in and consent.
+    imp.method = 'ai';
+    if (!(await getAccessToken())) throw new Error('Statement layout not recognised, and Fyn AI needs you to sign in.');
+    if (!(await ensureAiConsent())) throw new Error('AI features are off until you agree to send data to Claude.');
+    if (imp.cancelled) return;
     imp.chunks = splitChunks(text); imp.totals = statementTotals(text);
     if (!(await parseChunks(imp.chunks.map((_, i) => i)))) return;
     renderReading(4); await delay(250);
@@ -1879,7 +1897,7 @@ function impFail(error, record = true) {
   document.getElementById('imp-failed').innerHTML = `<div class="card imp-result bad">
     <span class="res-ico bad">${icon('alert')}</span><h2>Couldn't read this statement</h2>
     <p><b>${escHtml(reason.text)}</b></p><p class="muted">${escHtml(reason.next)}</p>
-    <div class="imp-actions">${reason.code === 'signin' ? '<button class="btn-primary" data-click="openModal" data-click-args=\'["auth-modal"]\'>Sign in</button>' : ''}<button class="${reason.code === 'signin' ? 'btn-secondary' : 'btn-primary'}" data-click="impBack">Try again</button></div></div>`;
+    <div class="imp-actions">${['signin', 'layout'].includes(reason.code) && getSbClient() ? '<button class="btn-primary" data-click="openAuth" data-click-args=\'["in"]\'>Sign in</button>' : ''}<button class="${['signin', 'layout'].includes(reason.code) && getSbClient() ? 'btn-secondary' : 'btn-primary'}" data-click="impBack">Try again</button></div></div>`;
   impStep('failed');
 }
 
@@ -1906,7 +1924,9 @@ function renderImportReview() {
   if (check) parts.push(`${check} ${check === 1 ? 'needs' : 'need'} your check`);
   const sentence = `We found ${total} transaction${total === 1 ? '' : 's'}. ` + (parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts.at(-1) : parts[0]) + '.';
   const r = imp.recon;
-  const totals = r.status === 'match' ? `<div class="imp-banner ok">${icon('check')}<p><b>Totals match your statement:</b> money in ${fmtKes(r.moneyIn)}, money out ${fmtKes(r.moneyOut)}.</p></div>`
+  const totals = r.status === 'balanced' ? `<div class="imp-banner ok">${icon('check')}<p><b>Every row matches your statement's running balance</b> (${r.checked} checked).</p></div>`
+    : r.status === 'balance-off' ? `<div class="imp-banner warn">${icon('alert')}<p><b>${r.mismatches} row${r.mismatches === 1 ? " doesn't" : "s don't"} match your statement's running balance.</b> A row may have been misread. Look through the amounts before saving.</p></div>`
+    : r.status === 'match' ? `<div class="imp-banner ok">${icon('check')}<p><b>Totals match your statement:</b> money in ${fmtKes(r.moneyIn)}, money out ${fmtKes(r.moneyOut)}.</p></div>`
     : r.status === 'differs' ? `<div class="imp-banner warn">${icon('alert')}<p><b>Totals differ from your statement.</b> We read money in ${fmtKes(r.moneyIn)} (statement ${fmtKes(r.statementIn)}) and money out ${fmtKes(r.moneyOut)} (statement ${fmtKes(r.statementOut)}). Look through the rows before saving. Charges and fees are not imported.</p></div>`
     : r.status === 'skipped' ? `<div class="imp-banner">${icon('info')}<p>The totals check is skipped because you set a date range.</p></div>`
     : `<div class="imp-banner">${icon('info')}<p>We couldn't find totals in this statement to check against. Look through the rows before saving.</p></div>`;
@@ -1915,13 +1935,16 @@ function renderImportReview() {
   if (c.outside.length) notes.push(`${c.outside.length} row${c.outside.length === 1 ? '' : 's'} outside your date range ${c.outside.length === 1 ? 'was' : 'were'} left out.`);
   if (imp.repeats) notes.push(`${imp.repeats} repeated row${imp.repeats === 1 ? '' : 's'} in the file ${imp.repeats === 1 ? 'was' : 'were'} counted once.`);
   if (imp.rejected) notes.push(`${imp.rejected} row${imp.rejected === 1 ? '' : 's'} could not be read and ${imp.rejected === 1 ? 'was' : 'were'} skipped.`);
+  const local = imp.method === 'rules' ? imp.local : null;
+  if (local?.notCompleted) notes.push(`${local.notCompleted} failed or reversed row${local.notCompleted === 1 ? ' was' : 's were'} skipped.`);
+  if (local?.charges.count) notes.push(`${local.charges.count} M-Pesa charge${local.charges.count === 1 ? '' : 's'} (${fmtKes(local.charges.total)}) ${local.charges.count === 1 ? 'is' : 'are'} not imported.`);
   document.getElementById('imp-review').innerHTML = `
     <div class="card imp-summary"><h2>${escHtml(sentence)}</h2><p class="muted">We read your PDF on this device.${notes.length ? ' ' + escHtml(notes.join(' ')) : ''}</p></div>
     ${totals}${failed}
     ${check ? `<section class="card"><div class="card-hdr"><h2>Needs your check (${check})</h2></div><ul class="rv-list">${c.check.map(row => reviewRow(row, 'check')).join('')}</ul></section>` : ''}
     ${dups ? `<details class="card imp-fold"><summary>Already in FynPet (${dups}) <span class="muted">These will be skipped</span></summary><ul class="rv-list">${c.duplicates.map(row => reviewRow(row, 'dup')).join('')}</ul></details>` : ''}
     <details class="card imp-fold"${c.fresh.length && !check ? ' open' : ''}><summary>Looks good (${c.fresh.length}) <span class="muted">Suggested categories, ready to save</span></summary><ul class="rv-list">${c.fresh.map(row => reviewRow(row, 'fresh')).join('')}</ul></details>
-    <section class="card privacy-note"><h3>How your data is handled</h3><p>${escHtml(IMPORT_PRIVACY)}</p></section>
+    <section class="card privacy-note"><h3>How your data is handled</h3><p>${escHtml(imp.method === 'ai' ? IMPORT_PRIVACY : IMPORT_PRIVACY_LOCAL)}</p></section>
     <div class="imp-footer" role="region" aria-label="Save"><div class="imp-foot-text" id="imp-foot-text" aria-live="polite"></div><button class="btn-secondary" data-click="impBack">Back</button><button class="btn-primary" id="imp-save" data-click="impSave"></button></div>`;
   updateReviewFooter();
 }

@@ -59,6 +59,9 @@ test('monthly net is rounded to cents', () => {
   const tx = (type, amount) => ({ type, amount, currency: 'KES', category: 'other', date: '2026-11-05' });
   const [row] = monthlyRows([tx('income', 0.3), tx('expense', 0.1), tx('expense', 0.2)], new Date('2026-11-16T09:00:00Z'), undefined, 1);
   assert.equal(row.net, 0);
+  // 0.3 - 0.1 is 0.19999999999999998 in floating point; without rounding this would not equal 0.2.
+  const [uneven] = monthlyRows([tx('income', 0.3), tx('expense', 0.1)], new Date('2026-11-16T09:00:00Z'), undefined, 1);
+  assert.equal(uneven.net, 0.2);
 });
 
 test('emergency cover uses this month when there is no earlier spending (Fyn and Analytics share this figure)', () => {

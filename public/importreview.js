@@ -90,6 +90,7 @@ export function failureReason(error) {
   const text = String(error?.message || error || '');
   if (error?.name === 'PasswordException' || /password/i.test(text)) return { code: 'password', short: 'Wrong password', text: 'The password did not unlock the PDF.', next: 'Check the password Safaricom gave you (usually your National ID number) and try again.' };
   if (/no text|scanned/i.test(text)) return { code: 'no-text', short: 'No text found', text: 'No text was found in the PDF. Scanned statements are not supported.', next: 'Download the statement again from Safaricom as a PDF and try again.' };
+  if (/layout not recognised/i.test(text)) return { code: 'layout', short: 'Layout not recognised', text: "FynPet couldn't recognise this statement's layout, so Fyn AI is needed to read it.", next: 'Sign in to let Fyn AI read it, or add the transactions by hand. Your PDF stays on this device.' };
   if (/sign in/i.test(text)) return { code: 'signin', short: 'Not signed in', text: 'You need to sign in to read statements with Fyn AI.', next: 'Sign in, then try again. Your PDF stays on this device.' };
   if (/agree/i.test(text)) return { code: 'consent', short: 'AI not agreed', text: 'AI features are off until you agree to the disclosure.', next: 'Choose "Agree and continue" when asked, or add transactions by hand.' };
   if (/limit/i.test(text)) return { code: 'limit', short: 'Daily limit', text: "You've used today's AI quota.", next: 'It resets at midnight UTC. Try again tomorrow.' };
