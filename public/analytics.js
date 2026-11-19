@@ -17,7 +17,8 @@ export function monthlyRows(transactions, now = new Date(), rates = DEFAULT_RATE
     const income = sumKes(transactions, { type: 'income', ...range }, rates);
     const expenses = sumKes(transactions, { type: 'expense', ...range }, rates);
     const saved = sumKes(transactions, { type: 'savings', ...range }, rates);
-    rows.push({ key, label: monthShort(key), title: monthTitle(key), income, expenses, saved, net: income - expenses,
+    // Net is rounded to cents so a break-even month reads as zero, not as a stray fraction of a shilling.
+    rows.push({ key, label: monthShort(key), title: monthTitle(key), income, expenses, saved, net: Math.round((income - expenses) * 100) / 100,
       rate: income > 0 ? Math.round((saved / income) * 1000) / 10 : null, current: i === 0 });
   }
   return rows;

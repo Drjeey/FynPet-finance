@@ -24,7 +24,9 @@ export function budgetRows(budgets, transactions, now = new Date(), rates = DEFA
 
 // The one-line summary at the top of the page.
 export function budgetSummary(rows, now = new Date()) {
-  const limit = rows.reduce((sum, row) => sum + row.budget.limit, 0), spent = rows.reduce((sum, row) => sum + row.spent, 0);
+  // Summed in whole cents so many budgets never drift by floating-point fractions.
+  const cents = value => Math.round(value * 100);
+  const limit = rows.reduce((sum, row) => sum + cents(row.budget.limit), 0) / 100, spent = rows.reduce((sum, row) => sum + cents(row.spent), 0) / 100;
   const left = round2(limit - spent);
   return { count: rows.length, limit, spent, left, over: left < 0, overCount: rows.filter(row => row.over).length,
     pctUsed: limit > 0 ? Math.round((spent / limit) * 100) : 0, perDay: left > 0 ? Math.round(left / daysLeftInMonth(now)) : 0 };

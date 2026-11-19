@@ -66,20 +66,6 @@ export function periodBounds(period = 'month', now = new Date(), previous = fals
   return { from: `${monthKey(now, (previous ? -count : 0) - count + 1)}-01`, to: monthEnd(last) };
 }
 
-export function periodStats(transactions, period = 'month', now = new Date(), rates = DEFAULT_RATES) {
-  const current = periodBounds(period, now), previous = periodBounds(period, now, true);
-  const total = (type, bounds) => sumKes(transactions, { type, ...bounds }, rates);
-  const income = total('income', current), exp = total('expense', current), sav = total('savings', current);
-  const pInc = total('income', previous), pExp = total('expense', previous);
-  return {
-    income, exp, sav, totalSaved: total('savings', {}),
-    savingsRate: income > 0 ? (sav / income * 100).toFixed(1) : '0.0',
-    incChg: pInc > 0 ? ((income - pInc) / pInc * 100).toFixed(1) : '0',
-    expChg: pExp > 0 ? ((exp - pExp) / pExp * 100).toFixed(1) : '0',
-    txCount: transactions.filter(tx => !tx.deletedAt && !tx.deleted_at && tx.date >= current.from && tx.date <= current.to).length,
-  };
-}
-
 export function chartSeries(transactions, period = 'month', now = new Date(), rates = DEFAULT_RATES) {
   const bounds = periodBounds(period, now);
   const buckets = [];
@@ -107,16 +93,6 @@ export function chartSeries(transactions, period = 'month', now = new Date(), ra
     income: buckets.map(bucket => sumKes(transactions, { ...bucket, type: 'income' }, rates)),
     expenses: buckets.map(bucket => sumKes(transactions, { ...bucket, type: 'expense' }, rates)),
   };
-}
-
-// Use the last three completed months, including months with no expenses.
-// A partial current month must not make the emergency fund look larger.
-export function emergencyFundMonths(transactions, now = new Date(), rates = DEFAULT_RATES) {
-  const expenses = sumKes(transactions, {
-    type: 'expense', from: `${monthKey(now, -3)}-01`, to: monthEnd(monthKey(now, -1)),
-  }, rates);
-  const savings = sumKes(transactions, { type: 'savings' }, rates);
-  return expenses > 0 ? savings / (expenses / 3) : 0;
 }
 
 // ── Dashboard helpers ───────────────────────────────────────

@@ -29,7 +29,9 @@ before(async () => {
     insert into auth.users values ('${A}'), ('${B}');
   `);
   await db.exec(readFileSync(new URL('../supabase/migrations/001_init.sql', import.meta.url), 'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/migrations/002_receipt_unique_live_only.sql', import.meta.url), 'utf8'));
 });
+
 
 const tx = (id, extra = '') =>
   `insert into public.transactions (id, description, amount, type, category, date${extra ? ', external_ref' : ''})
@@ -82,4 +84,13 @@ test('updated_at is maintained by the trigger', async () => {
   await as('authenticated', A, `update public.transactions set notes = 'edited' where id = 'a1'`);
   const after = (await as('authenticated', A, `select updated_at from public.transactions where id = 'a1'`)).rows[0].updated_at;
   assert.ok(after > before);
+});
+
+test('a deleted import frees its receipt, so the same statement can be imported again', async () => {
+  await as('authenticated', A, tx('r1', 'RCP1234567'));
+  await assert.rejects(as('authenticated', A, tx('r2', 'RCP1234567')), /duplicate key/);   // two live copies: still refused
+  await as('authenticated', A, `update public.transactions set deleted_at = now() where id = 'r1'`);
+  await as('authenticated', A, tx('r3', 'RCP1234567'));                                     // re-import after delete: allowed
+  const live = await as('authenticated', A, `select id from public.transactions where external_ref = 'RCP1234567' and deleted_at is null`);
+  assert.deepEqual(live.rows.map(r => r.id), ['r3']);
 });

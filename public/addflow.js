@@ -1,7 +1,5 @@
 // Pure rules for the Add transaction form: no DOM, storage or network.
 
-export const ALL_CATEGORIES = ['food', 'transport', 'utilities', 'entertainment', 'health', 'shopping', 'savings', 'income', 'transfer', 'other'];
-
 // Categories offered for each type. "More" in the form still lists every category.
 const FOR_TYPE = {
   expense: ['food', 'transport', 'utilities', 'entertainment', 'health', 'shopping', 'other'],
@@ -44,6 +42,17 @@ export function categoryForDescription(transactions, description, type) {
 const LABELS = { food: 'Food & Groceries', transport: 'Transport', utilities: 'Utilities', entertainment: 'Entertainment', health: 'Health', shopping: 'Shopping', savings: 'Savings', income: 'Income', transfer: 'Transfer', other: 'Other' };
 // What is saved when the person leaves the description empty.
 export const defaultDescription = (category, type) => type === 'income' ? 'Income' : (LABELS[category] || 'Transaction');
+
+// Largest amount accepted for one transaction or budget. The database column is numeric(14,2), and the
+// statement import already rejects rows above this, so typed amounts use the same ceiling.
+export const MAX_AMOUNT = 1e9;
+
+// Inline error for a money field ('' when the value is fine). `what` names the field in the message.
+export function amountError(value, what = 'an amount') {
+  if (!Number.isFinite(value) || value <= 0) return `Enter ${what} greater than zero.`;
+  if (value > MAX_AMOUNT) return `Enter ${what} up to 1,000,000,000.`;
+  return '';
+}
 
 // "12,50" and "1 200.5" are accepted. Returns a number rounded to cents, or NaN.
 export function parseAmount(text) {

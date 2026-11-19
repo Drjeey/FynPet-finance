@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { convertToKes, amountKes, sumKes, categoryTotals, nairobiDate, monthKey, periodBounds, periodStats, chartSeries, emergencyFundMonths } from '../public/calc.js';
+import { convertToKes, amountKes, sumKes, categoryTotals, nairobiDate, monthKey, periodBounds, chartSeries } from '../public/calc.js';
+import { coverStatus } from '../public/analytics.js';
 
 const tx = (amount, currency = 'KES', extra = {}) => ({ amount, currency, type: 'expense', category: 'food', date: '2026-10-10', ...extra });
 
@@ -47,18 +48,18 @@ test('calendar periods cross years and leap days without missing dates', () => {
 });
 
 test('dashboard comparisons use converted amounts across the month boundary', () => {
-  const stats = periodStats([
+  const records = [
     tx(10, 'USD', { type: 'income', date: '2026-11-01' }),
     tx(650, 'KES', { type: 'income', date: '2026-10-31' }),
     tx(5, 'USD', { type: 'savings', date: '2026-11-01' }),
     tx(2, 'USD', { date: '2026-11-01' }),
-  ], 'month', new Date('2026-10-31T21:01Z'));
-  assert.equal(stats.income, 1300);
-  assert.equal(stats.exp, 260);
-  assert.equal(stats.sav, 650);
-  assert.equal(stats.savingsRate, '50.0');
-  assert.equal(stats.incChg, '100.0');
-  assert.equal(stats.txCount, 3);
+  ];
+  const now = new Date('2026-10-31T21:01Z');   // already 1 November in Nairobi
+  const s = monthSummary(records, now);
+  assert.equal(s.income, 1300);
+  assert.equal(s.expenses, 260);
+  assert.equal(s.prevIncome, 650);
+  assert.equal(sumKes(records, { type: 'savings', ...periodBounds('month', now) }), 650);
 });
 
 test('chart buckets include every day exactly once and match period totals', () => {
@@ -77,8 +78,8 @@ test('emergency coverage uses three complete months and includes empty months', 
   const records = [tx(3000, 'KES', { type: 'savings' }),
     tx(10, 'USD', { date: '2026-07-31' }), tx(1700, 'KES', { date: '2026-09-01' }),
     tx(999999, 'KES', { date: '2026-10-01' }), tx(999999, 'KES', { date: '2026-06-30' })];
-  assert.equal(emergencyFundMonths(records, new Date('2026-10-21T12:00Z')), 3);
-  assert.equal(emergencyFundMonths([], new Date('2026-10-21T12:00Z')), 0);
+  assert.equal(coverStatus(records, new Date('2026-10-21T12:00Z')).months, 3);
+  assert.equal(coverStatus([], new Date('2026-10-21T12:00Z')).months, 0);
 });
 
 import { monthSummary, daysLeftInMonth, categoryShares, niceScale } from '../public/calc.js';

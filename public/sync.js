@@ -30,6 +30,23 @@ export function markSynced(records, confirmed) {
   });
 }
 
+// One live transaction per M-Pesa receipt (the server enforces this with a unique index).
+// If this device imported a receipt that another device had already saved to the account, the local
+// copy has never reached the server (no syncedAt); pushing it would fail and block every later sync.
+// Those never-synced copies are dropped in favour of the copy the server already has.
+// Returns { records, dropped } where dropped lists the removed ids.
+export function dropReceiptDuplicates(records) {
+  const onServer = new Set(records.filter(r => r.externalRef && r.syncedAt).map(r => r.externalRef));
+  const seen = new Set(), kept = [], dropped = [];
+  for (const record of records) {
+    const ref = record.externalRef;
+    if (ref && !record.syncedAt && (onServer.has(ref) || seen.has(ref))) { dropped.push(record.id); continue; }
+    if (ref) seen.add(ref);
+    kept.push(record);
+  }
+  return { records: kept, dropped };
+}
+
 // Add (or refresh) a tombstone. Returns a new list.
 export function addTombstone(tombstones, table, id, deletedAt) {
   return [...tombstones.filter(t => !(t.table === table && t.id === id)), { table, id, deletedAt }];

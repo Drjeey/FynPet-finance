@@ -62,6 +62,12 @@ export function statementTotals(text) {
 
 const total = rows => rows.reduce((sum, row) => sum + cents(row.amount), 0) / 100;
 
+// What the review footer shows for the rows the person chose: count, money in and money out (in cents, so it adds up).
+export function selectionTotals(rows) {
+  const chosen = rows.filter(row => row.include);
+  return { count: chosen.length, moneyIn: total(chosen.filter(row => row.type === 'income')), moneyOut: total(chosen.filter(row => row.type !== 'income')) };
+}
+
 // Compare what we read with the statement's own totals. `rows` is everything we read, before any filtering.
 export function reconcile(rows, totals, { rangeSet = false } = {}) {
   const moneyIn = total(rows.filter(row => row.type === 'income'));

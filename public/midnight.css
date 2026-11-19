@@ -94,7 +94,6 @@ input { caret-color:var(--accent); }
 .modal-overlay { background:rgba(5,7,10,.72); }
 .table-card th { color:var(--ink2); }
 .table-card td { border-color:var(--border); }
-.cat-pill { border-radius:999px; }
 .pb, .fb, .pg { color:var(--ink2); background:var(--surface2); border-color:var(--border); }
 .pb.on, .fb.on, .pg.on { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
 #toast { background:var(--surface3); color:var(--ink); border:1px solid var(--border2); }
@@ -254,7 +253,7 @@ input { caret-color:var(--accent); }
 .msg-bubble.user { background:var(--accent); color:var(--on-accent); }
 #advisor-panel { background:var(--surface); border-color:var(--border); }
 .ap-header, .ap-tabs { background:var(--surface); }
-.sc-badge.up, .st-pill.manual { background:var(--teallt); color:var(--teal); }
+.sc-badge.up { background:var(--teallt); color:var(--teal); }
 .sc-badge.dn { background:var(--roselt); color:var(--rose); }
 .empty { color:var(--ink2); }
 .form-input, .tx-search, #tx-search { background:var(--surface2); color:var(--ink); border-color:var(--border2); }

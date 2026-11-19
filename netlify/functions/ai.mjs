@@ -160,7 +160,11 @@ export default async (req) => {
   let body;
   try { body = await req.json(); } catch { return error(400, 'Invalid request body.'); }
 
-  const quota = await consumeDailyQuota(user.id, body.mode === 'import' ? IMPORT_CHUNK_COST : 1);
+  if (body?.mode !== 'advisor' && body?.mode !== 'import') return error(400, 'Unknown AI mode.');
+
+  let quota;
+  try { quota = await consumeDailyQuota(user.id, body.mode === 'import' ? IMPORT_CHUNK_COST : 1); }
+  catch (e) { console.error('Quota store error', e?.message); return error(503, 'The AI service is busy. Please try again in a minute.'); }
   if (!quota.ok) return error(429, `Daily AI limit reached (${quota.limit} requests). It resets at midnight UTC.`);
 
   try {

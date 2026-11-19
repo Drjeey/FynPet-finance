@@ -478,25 +478,6 @@ tbody tr { border-bottom:1px solid var(--border); transition:background .12s; cu
 tbody tr:last-child { border-bottom:none; }
 tbody tr:hover { background:var(--surface2); }
 td { padding:11px 14px; font-size:.79rem; vertical-align:middle; }
-.td-ico { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
-.td-main { font-weight:600; font-size:.8rem; margin-bottom:1px; color:var(--ink); }
-.td-sub { font-size:.75rem; color:var(--ink3); }
-.td-mono { font-family:var(--fm); font-weight:600; font-size:.8rem; }
-.td-mono.pos{color:var(--teal)}.td-mono.neg{color:var(--rose)}
-.cat-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:.75rem; font-weight:600; }
-.st-pill { padding:3px 9px; border-radius:5px; font-size:.75rem; font-weight:600; }
-.st-pill.manual { background:var(--teallt); color:var(--teal); }
-.st-pill.ai { background:var(--purplt); color:var(--purple); }
-.st-pill.import { background:var(--bluelt); color:var(--blue); }
-.row-acts { display:flex; gap:5px; opacity:0; transition:opacity .13s; }
-tbody tr:hover .row-acts { opacity:1; }
-.ra {
-  width:26px; height:26px; border-radius:5px; border:1px solid var(--border);
-  background:var(--surface); cursor:pointer; display:flex; align-items:center;
-  justify-content:center; font-size:.75rem; transition:all .12s;
-}
-.ra:hover { border-color:var(--border2); box-shadow:var(--shadow); }
-.ra.del:hover { background:var(--rose); color:white; border-color:var(--rose); }
 .tf { padding:11px 22px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); background:var(--surface2); }
 .tf-info { font-size:.75rem; color:var(--ink3); font-family:var(--fm); }
 .pag { display:flex; gap:3px; }
@@ -816,9 +797,6 @@ thead { position:sticky; top:0; z-index:10; }
   .search-wrap input { width:100px; }
   table { font-size:.75rem; }
   th, td { padding:8px 10px; }
-
-  /* Gamification badges 3-col on mobile */
-  #gamification-card [style*="repeat(6,1fr)"] { grid-template-columns:repeat(3,1fr) !important; }
 
   /* Bottom nav */
   #mob-nav {

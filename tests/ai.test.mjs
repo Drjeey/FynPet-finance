@@ -114,6 +114,12 @@ test('enforces the per-user daily quota', async () => {
   assert.equal((await call({ mode: 'advisor', message: 'q' })).status, 429);
 });
 
+test('an unknown mode is refused without using any of the daily quota', async () => {
+  usage.clear();
+  assert.equal((await call({ mode: 'something-else' })).status, 400);
+  assert.equal(usage.size, 0);
+});
+
 test('statement chunks cost a fifth of an advisor question against the daily quota', async () => {
   usage.clear();
   anthropicReply = message(JSON.stringify({ transactions: [] }));

@@ -1,14 +1,14 @@
-import { DEFAULT_RATES, convertToKes, amountKes, sumKes, categoryTotals, nairobiDate, monthKey, periodBounds, periodStats, chartSeries, emergencyFundMonths, monthSummary, daysLeftInMonth, categoryShares, niceScale } from './calc.js';
+import { DEFAULT_RATES, convertToKes, amountKes, sumKes, categoryTotals, nairobiDate, monthKey, periodBounds, chartSeries, monthSummary, daysLeftInMonth, categoryShares, niceScale } from './calc.js';
 import { icon, renderIcons } from './icons.js';
-import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
+import { pendingRecords, markSynced, addTombstone, mergeRemote, dropReceiptDuplicates } from './sync.js';
 import { csvText, csvRow } from './csv.js';
 import { filterTransactions, countFilters, quickRange, groupByDate } from './txfilter.js';
 import { classifyAiError, splitNextStep, greeting, insightRows, shortDate as advDate, panelState } from './advisor.js';
 import { isEmail, passwordError, authMessage, unsyncedCount, changesText, validateRates, accountView, RATE_CURRENCIES } from './settings.js';
 import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpenses, coverStatus, clampGoalMonths, independenceStatus, paceText, barHeights } from './analytics.js';
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
-import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason } from './importreview.js';
-import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount } from './addflow.js';
+import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason, selectionTotals } from './importreview.js';
+import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount, amountError } from './addflow.js';
 
 // ═══════════════════════════════════════════════════════════
 // FYNPET — FULL STACK ENGINE
@@ -29,15 +29,9 @@ async function initCloudConfig() {
     // Initialize Supabase with values from Netlify environment variables
     const publicKey = cfg.supabasePublicKey || cfg.supabaseAnonKey;
     if (cfg.supabaseUrl && publicKey) {
-      sbClient = supabase.createClient(cfg.supabaseUrl, publicKey);
-      // Listen for sign-in / sign-out events
-      sbClient.auth.onAuthStateChange((event, session) => {
-        // Defer: supabase-js warns against awaiting its own calls inside this callback.
-        if (event === 'SIGNED_IN' && session) setTimeout(() => onSignedIn(session), 0);
-        if (event === 'SIGNED_OUT') setSyncStatus('local', 'Signed out — local only');
-      });
+      const client = getSbClient();
       // Check for existing session (returning user)
-      const { data: { session } } = await sbClient.auth.getSession();
+      const { data: { session } } = await client.auth.getSession();
       if (session) {
         await onSignedIn(session);
       } else {
@@ -49,20 +43,9 @@ async function initCloudConfig() {
       showLocalProfile();
     }
     if (typeof renderSettings === 'function') renderSettings();
-    updateCloudStatus('sb', Boolean(cfg.supabaseUrl && publicKey),
-      cfg.supabaseUrl && publicKey ? '✓ Available — sign in to sync' : '⚠ Supabase URL or public key not set in Netlify');
   } catch(e) {
     showLocalProfile();
-    updateCloudStatus('claude', false, '✕ Server unreachable');
-    updateCloudStatus('sb', false, '✕ Server unreachable');
   }
-}
-
-async function recheckCloudConfig() {
-  updateCloudStatus('claude', null, 'Checking…');
-  updateCloudStatus('sb', null, 'Checking…');
-  sbClient = null;
-  await initCloudConfig();
 }
 
 // Current Supabase access token, or null when signed out / local only.
@@ -101,15 +84,6 @@ async function postAi(body) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error?.message || (res.status === 429 ? 'Too many requests — wait a minute and try again.' : `AI request failed (${res.status}).`));
   return data;
-}
-
-function updateCloudStatus(service, ok, text) {
-  const id = service === 'claude' ? 'claude-status' : 'sb-status';
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = text;
-  el.className = 'sb-key-status ' + (ok === true ? 'ok' : ok === false ? 'err' : 'none');
-  el.style.margin = '0';
 }
 
 // ── CONFIG STORE ──────────────────────────────────────────
@@ -212,6 +186,8 @@ function loadProfileData(p = activeProfile) {
 }
 
 // ── SUPABASE CLIENT ────────────────────────────────────────
+// Exactly one client at a time, and it always carries the auth listener: a client created without it
+// would complete a sign-in that the app never hears about (the dialog would stay on "Signing in...").
 let sbClient = null;
 function getSbClient() {
   if (sbClient) return sbClient;
@@ -219,6 +195,11 @@ function getSbClient() {
   const publicKey = cfg?.supabasePublicKey || cfg?.supabaseAnonKey;
   if (!cfg?.supabaseUrl || !publicKey) return null;
   sbClient = supabase.createClient(cfg.supabaseUrl, publicKey);
+  sbClient.auth.onAuthStateChange((event, session) => {
+    // Defer: supabase-js warns against awaiting its own calls inside this callback.
+    if (event === 'SIGNED_IN' && session) setTimeout(() => onSignedIn(session), 0);
+    if (event === 'SIGNED_OUT') setSyncStatus('local', 'Signed out — local only');
+  });
   return sbClient;
 }
 
@@ -294,8 +275,9 @@ function buildFinancialContext() {
     }
   }
 
-  // Emergency fund
-  const emergencyMonths = emergencyFundMonths(txs, now, exchangeRates()).toFixed(1);
+  // Emergency fund: the same figure and goal the Analytics page shows, so Fyn and the page never disagree.
+  const cover = coverStatus(txs, now, exchangeRates(), CFG.getNum('efGoalMonths', 6));
+  const emergencyMonths = cover.months.toFixed(1);
 
   // FIRE
   const fireTarget = CFG.getNum('fireTarget', 3000000);
@@ -310,7 +292,7 @@ function buildFinancialContext() {
     summary: {
       thisMonth: { income, expenses, savings, savingsRate: savingsRate+'%' },
       allTime: { totalIncome, totalExpenses, totalSaved, netWorth },
-      emergencyFundMonths: emergencyMonths,
+      emergencyFundMonths: emergencyMonths, emergencyGoalMonths: cover.goal,
       fireProgress: firePct+'%',
       fireTarget: `KES ${fireTarget.toLocaleString()}`,
       totalTransactions: txs.length,
@@ -351,7 +333,7 @@ ${ctx.budgetStatus}
 ${ctx.monthlyTrend}
 
 FINANCIAL HEALTH METRICS:
-• Emergency Fund: ${ctx.summary.emergencyFundMonths} months covered (target: 6 months)
+• Emergency Fund: ${ctx.summary.emergencyFundMonths} months covered (target: ${ctx.summary.emergencyGoalMonths} months)
 • FIRE Progress: ${ctx.summary.fireProgress} of ${ctx.summary.fireTarget}
 
 RECENT TRANSACTIONS (last 10):
@@ -515,7 +497,6 @@ function sendAdvisorMessage() {
   askAdvisor(msg);
 }
 function sendQuick(prompt) { document.getElementById('ap-input').value = prompt; sendAdvisorMessage(); }
-async function sendAdvisorMessage_raw(msg) { await askAdvisor(msg); }
 
 function handleAdvisorKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdvisorMessage(); }
@@ -553,7 +534,19 @@ function clearAdvisorHistory() {
     actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Clear history', cls: 'btn-danger', fn: async () => {
       state.advisorHistory = []; Store.set('advisor_history', []); renderHistoryTab();
       const sb = getSbClient();
-      if (sb && activeProfile !== 'local') { const { data: { session } } = await sb.auth.getSession(); if (session) await sb.from('advisor_history').delete().eq('user_id', session.user.id).catch(() => {}); }
+      // Supabase query builders are thenables without .catch(), so the result's `error` is checked instead.
+      if (sb && activeProfile !== 'local') {
+        try {
+          const { data: { session } } = await sb.auth.getSession();
+          if (session) {
+            const { error } = await sb.from('advisor_history').delete().eq('user_id', session.user.id);
+            if (error) throw error;
+          }
+        } catch (e) {
+          console.error('Could not clear advisor history on the account:', e);
+          showToast('Cleared on this device. Could not clear it on your account; try again later.', 'error'); return;
+        }
+      }
       showToast('History cleared', 'info');
     } }] });
 }
@@ -593,10 +586,6 @@ function setSyncStatus(status, label) {
   if (typeof renderAdvisorState === 'function') renderAdvisorState();
 }
 function dismissSyncBanner() { _bannerDismissed = true; document.getElementById('sync-banner').hidden = true; }
-
-async function connectSupabase() {
-  await recheckCloudConfig();
-}
 
 // Syncs this device with the account. Resolves to { ok: true } or { ok: false, error }, never rejects.
 // Calls made while a sync is running are folded into one follow-up run.
@@ -662,7 +651,10 @@ function hasUnsyncedChanges() {
 async function pushToSupabase(sb, userId) {
   for (const table of ['transactions', 'budgets']) {
     for (const tomb of state.tombstones.filter(t => t.table === table)) {
-      const { error } = await sb.from(table).update({ deleted_at: tomb.deletedAt }).eq('id', tomb.id);
+      // A deleted transaction gives up its receipt number, so the same statement can be imported again
+      // (needed until migration 002 is applied; harmless after it).
+      const change = table === 'transactions' ? { deleted_at: tomb.deletedAt, external_ref: null } : { deleted_at: tomb.deletedAt };
+      const { error } = await sb.from(table).update(change).eq('id', tomb.id);
       if (error) throw error;
       state.tombstones = state.tombstones.filter(t => !(t.table === table && t.id === tomb.id));
       Store.set('tombstones', state.tombstones);
@@ -731,10 +723,13 @@ async function pullFromSupabase(sb, meta) {
     record: r.deleted_at ? null : normalizeTx({
       id: r.id, description: r.description, amount: r.amount,
       type: r.type, category: r.category, date: r.date, currency: r.currency, amountKes: r.amount_kes,
-      notes: r.notes||'', source: r.source||'synced', createdAt: r.created_at, updatedAt: r.updated_at,
+      notes: r.notes||'', source: r.source||'synced', createdAt: r.created_at, updatedAt: r.updated_at, syncedAt: r.updated_at,
       externalRef: r.external_ref || undefined, importBatch: r.import_batch || undefined,
     }),
   })), tombsFor('transactions'), { table: 'transactions' });
+  // A receipt saved on another device and imported again here would collide on push; keep the server copy.
+  const receipts = dropReceiptDuplicates(txMerge.records);
+  txMerge.records = receipts.records; txMerge.changed += receipts.dropped.length;
 
   const bMerge = mergeRemote(state.budgets, budgetRows.map(r => ({
     id: r.id, updatedAt: r.updated_at, deletedAt: r.deleted_at,
@@ -753,92 +748,25 @@ async function pullFromSupabase(sb, meta) {
 
 async function syncAdvisorHistory() {
   const sb = getSbClient();
-  if (!sb) return;
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return;
+  if (!sb || activeProfile === 'local') return;
   const last = state.advisorHistory.slice(-1)[0];
   if (!last) return;
-  await sb.from('advisor_history').upsert([{ id:last.id, user_id:session.user.id, prompt:last.prompt, response:last.response, created_at:last.timestamp }], { onConflict:'user_id,id' }).catch(()=>{});
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+    const { error } = await sb.from('advisor_history').upsert([{ id:last.id, user_id:session.user.id, prompt:last.prompt, response:last.response, created_at:last.timestamp }], { onConflict:'user_id,id' });
+    if (error) throw error;
+  } catch (e) {
+    console.warn('Advisor history not saved to the account yet (it is sent again on the next sync):', e?.message || e);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
 // RENDER ENGINE
 // ═══════════════════════════════════════════════════════════
 function renderAll() {
-  renderDashboard();   // gamification moves to Analytics when that page is redesigned
+  renderDashboard();
   if (typeof renderAdvisorState === 'function') renderAdvisorState();
-}
-
-// ─── Gamification ────────────────────────────────────────────
-function calcSavingsStreak(){
-  const now=new Date();
-  let streak=0;
-  for(let i=0;i<12;i++){
-    const ms=monthKey(now,-i);
-    if(state.transactions.some(t=>t.date?.startsWith(ms)&&t.type==='savings'&&t.amount>0))streak++;
-    else break;
-  }
-  return streak;
-}
-
-function renderGamification(){
-  const card=document.getElementById('gamification-card');
-  if(!card)return;
-  if(!state.transactions.length){card.style.display='none';return;}
-  card.style.display='';
-  const streak=calcSavingsStreak();
-  const totalSaved=totalKes(state.transactions.filter(t=>t.type==='savings'));
-  const now=new Date();
-  const thisMs=monthKey(now);
-  const prevMs=monthKey(now,-1);
-  const thisExp=totalKes(state.transactions.filter(t=>t.date?.startsWith(thisMs)&&t.type==='expense'));
-  const prevExp=totalKes(state.transactions.filter(t=>t.date?.startsWith(prevMs)&&t.type==='expense'));
-  const spendDiff=prevExp>0?((thisExp-prevExp)/prevExp*100).toFixed(1):null;
-  const badges=[
-    {icon:'★',lbl:'First Step',desc:'Added a transaction',done:state.transactions.length>0},
-    {icon:'↑',lbl:'Data Rich',desc:'Imported M-Pesa',done:state.transactions.some(t=>t.source==='import')},
-    {icon:'◆',lbl:'Saver',desc:'KES 10k saved',done:totalSaved>=10000},
-    {icon:'⟳',lbl:'Streak',desc:'3-month savings',done:streak>=3},
-    {icon:'◫',lbl:'Planner',desc:'Budget created',done:state.budgets.length>0},
-    {icon:'◈',lbl:'Builder',desc:'KES 100k saved',done:totalSaved>=100000},
-  ];
-  const earned=badges.filter(b=>b.done).length;
-  const spendColor=spendDiff!==null?(parseFloat(spendDiff)>0?'var(--rose)':'var(--teal)'):'var(--ink3)';
-  const spendArrow=spendDiff!==null?(parseFloat(spendDiff)>0?'↑ More':'↓ Less'):'—';
-  card.innerHTML=`<div class="table-card">
-    <div class="tt"><div class="tt-title">Milestones</div><div style="font-size:.75rem;color:var(--ink3);font-family:var(--fm)">${earned}/${badges.length} earned</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)">
-      <div style="padding:14px 18px;border-right:1px solid var(--border)">
-        <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">Savings Streak</div>
-        <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${streak>0?'var(--teal)':'var(--ink3)'};line-height:1">${streak}<span style="font-size:.75rem;font-weight:400;margin-left:4px">mo</span></div>
-        <div style="font-size:.75rem;color:var(--ink3);margin-top:4px">${streak>=3?'Outstanding!':streak>=1?'Keep going!':'Start saving this month'}</div>
-      </div>
-      <div style="padding:14px 18px">
-        <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink3);margin-bottom:6px">vs Last Month</div>
-        <div style="font-family:var(--fm);font-size:1.8rem;font-weight:600;color:${spendColor};line-height:1">${spendDiff!==null?(parseFloat(spendDiff)>0?'+':'')+spendDiff+'%':'—'}</div>
-        <div style="font-size:.75rem;color:var(--ink3);margin-top:4px">${spendDiff!==null?spendArrow+' than last month':'No prior data'}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:14px 18px">
-      ${badges.map(b=>`<div style="text-align:center;padding:10px 4px;border-radius:8px;background:${b.done?'var(--bluelt)':'var(--surface2)'};border:1px solid ${b.done?'rgba(55,48,163,.2)':'var(--border)'};transition:all .2s" title="${b.desc}">
-        <div style="font-size:1rem;margin-bottom:4px;opacity:${b.done?1:.3}">${b.icon}</div>
-        <div style="font-size:.75rem;font-weight:700;color:${b.done?'var(--blue)':'var(--ink3)'};margin-bottom:1px;line-height:1.2">${b.lbl}</div>
-        <div style="font-size:.75rem;color:var(--ink3);line-height:1.2">${b.desc}</div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-}
-
-function _periodFilter(period) {
-  const { from, to } = periodBounds(period);
-  return t => t.date >= from && t.date <= to;
-}
-
-const _periodLabel = { week:'Last 7 days', month:'This month', '3m':'Last 3 months' };
-
-function getStats(period = 'month') {
-  return { ...periodStats(state.transactions, period, new Date(), exchangeRates()),
-    label: _periodLabel[period] || 'This month' };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1106,27 +1034,6 @@ function exchangeRates() {
 }
 function txAmountKes(tx) { return amountKes(tx, exchangeRates()); }
 function totalKes(transactions, options) { return sumKes(transactions, options, exchangeRates()); }
-function txRow(tx,actions=true){
-  const c=CATS[tx.category]||CATS.other;
-  const isPos=tx.type==='income'||tx.type==='savings';
-  const amtClass=isPos?'pos':'neg';
-  const amtSign=isPos?'+':'−';
-  const srcLabel=tx.source==='ai'?'AI':tx.source==='import'?'Import':'Manual';
-  const cur=tx.currency&&tx.currency!=='KES'?tx.currency:'KES';
-  const amtDisplay=`${amtSign}KES ${txAmountKes(tx).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2})}${cur==='KES'?'':`<span class="fx-note">${cur} ${tx.amount.toLocaleString()}</span>`}`;
-  return `<tr>
-    <td><div style="display:flex;align-items:center;gap:10px">
-      <div class="td-ico" style="background:${c.bg};color:${c.color}">${icon(tx.type==='income'?'export':'ledger')}</div>
-      <div><div class="td-main">${escHtml(tx.description)}</div><div class="td-sub">${escHtml(tx.date)}</div></div>
-    </div></td>
-    <td><div class="cat-pill" style="background:${c.bg};color:${c.color}">${c.label}</div><div class="source-note">${srcLabel}</div></td>
-    <td><div class="td-mono ${amtClass}">${amtDisplay}</div></td>
-    ${actions?`<td><div class="row-acts">
-      <button class="ra" data-click="openEditTx" data-click-args="${argsAttr([tx.id])}" title="Edit" aria-label="Edit ${escHtml(tx.description)}">${icon('edit')}</button>
-      <button class="ra del" data-click="confirmDel" data-click-args="${argsAttr(['tx',tx.id])}" title="Delete" aria-label="Delete ${escHtml(tx.description)}">${icon('delete')}</button>
-    </div></td>`:''}
-  </tr>`;
-}
 
 // ═══════════════════════════════════════════════════════════
 // TRANSACTIONS PAGE: filters, list (table on desktop, grouped list on phones), row menu
@@ -1376,7 +1283,8 @@ function saveBudget() {
   const category = document.getElementById('b-cat').value, limit = parseAmount(document.getElementById('b-limit').value), editing = state.ui.editBudgetId;
   setBudgetError('cat', ''); setBudgetError('limit', '');
   if (state.budgets.some(b => b.category === category && b.id !== editing)) { setBudgetError('cat', 'A budget for this category already exists.'); document.getElementById('b-cat').focus(); return; }
-  if (!Number.isFinite(limit) || limit <= 0) { setBudgetError('limit', 'Enter a limit greater than zero.'); document.getElementById('b-limit').focus(); return; }
+  const limitProblem = amountError(limit, 'a limit');
+  if (limitProblem) { setBudgetError('limit', limitProblem); document.getElementById('b-limit').focus(); return; }
   const now = new Date().toISOString();
   if (editing) {
     const idx = state.budgets.findIndex(b => b.id === editing);
@@ -1403,7 +1311,8 @@ function raiseEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveRaise(
 function saveRaise() {
   const b = state.budgets.find(x => x.id === state.ui.raiseId); if (!b) return;
   const value = parseAmount(document.getElementById('raise-limit').value), err = document.getElementById('raise-err');
-  if (!Number.isFinite(value) || value <= b.limit) { err.textContent = `Enter an amount above the current limit (${fmtKes(b.limit)}).`; err.hidden = false; document.getElementById('raise-limit').focus(); return; }
+  const tooBig = amountError(value, 'a limit');
+  if (!Number.isFinite(value) || value <= b.limit || tooBig) { err.textContent = Number.isFinite(value) && value > b.limit ? tooBig : `Enter an amount above the current limit (${fmtKes(b.limit)}).`; err.hidden = false; document.getElementById('raise-limit').focus(); return; }
   b.limit = value; b.updatedAt = new Date().toISOString(); b.dirty = true;
   Store.set('budgets', state.budgets); closeModal('budget-raise');
   showToast(`${(CATS[b.category] || CATS.other).label} limit raised to ${fmtKes(value)}`, 'success');
@@ -1548,7 +1457,7 @@ async function sendAnalyticsQuestion() {
   const q = _anAsk; _anAsk = null; if (!q) return;
   if (!state.ui.advisorOpen) toggleAdvisor();
   setAdvTab('chat', document.querySelector('.ap-tab'));
-  await sendAdvisorMessage_raw(q);
+  await askAdvisor(q);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1683,9 +1592,11 @@ function saveTx(again = false) {
   const amountInput = document.getElementById('tx-amount');
   const amount = parseAmount(amountInput.value);
   setFieldError(''); document.getElementById('tx-error').hidden = true;
-  if (!Number.isFinite(amount) || amount <= 0) { setFieldError('Enter an amount greater than zero.'); amountInput.focus(); return; }
+  const amountProblem = amountError(amount);
+  if (amountProblem) { setFieldError(amountProblem); amountInput.focus(); return; }
   const date = document.getElementById('tx-date').value;
-  if (!date) {
+  // Records with a date outside YYYY-MM-DD (e.g. a 5-digit year typed into the picker) are dropped on the next load.
+  if (!ISO_DATE.test(date) || Number.isNaN(Date.parse(date))) {
     toggleTxDetails(true);
     const box = document.getElementById('tx-error'); box.textContent = 'Choose the transaction date.'; box.hidden = false;
     document.getElementById('tx-date').focus(); return;
@@ -1694,16 +1605,21 @@ function saveTx(again = false) {
   const description = document.getElementById('tx-desc').value.trim() || defaultDescription(category, type);
   const notes = document.getElementById('tx-notes').value.trim();
   const currency = (document.getElementById('tx-currency').value || 'KES').toUpperCase();
-  const savedKes = convertToKes(amount, currency, exchangeRates());
+  let savedKes = convertToKes(amount, currency, exchangeRates());
   const now = new Date().toISOString();
   let undo;
   if (state.ui.editTxId) {
     const idx = state.transactions.findIndex(t => t.id === state.ui.editTxId);
-    if (idx !== -1) {
-      const before = { ...state.transactions[idx] };
-      state.transactions[idx] = { ...before, amount, description, category, type, date, notes, currency, amountKes: savedKes, updatedAt: now, dirty: true };
-      undo = () => undoTx({ restore: before });
+    if (idx === -1) {
+      // Removed meanwhile (e.g. deleted on another device and synced): say so instead of claiming it was saved.
+      const box = document.getElementById('tx-error'); box.textContent = 'This transaction no longer exists. It may have been deleted on another device.'; box.hidden = false;
+      return;
     }
+    const before = { ...state.transactions[idx] };
+    // Same amount and currency: keep the saved KES value, so editing a note never re-values it at today's rate.
+    if (before.amount === amount && (before.currency || 'KES') === currency && Number.isFinite(before.amountKes)) savedKes = before.amountKes;
+    state.transactions[idx] = { ...before, amount, description, category, type, date, notes, currency, amountKes: savedKes, updatedAt: now, dirty: true };
+    undo = () => undoTx({ restore: before });
   } else {
     const id = uid();
     state.transactions.push({ id, amount, description, category, type, date, notes, currency, amountKes: savedKes, source: 'manual', createdAt: now, updatedAt: now, dirty: true });
@@ -1713,7 +1629,7 @@ function saveTx(again = false) {
   if (again === true && !state.ui.editTxId) {
     resetTxForm({ keep: true }); toggleTxDetails(false); renderTxForm(); amountInput.focus();
   } else closeModal('tx-modal');
-  renderAll(); renderTxPage();
+  rerenderCurrentPage();
   showToast(state.ui.editTxId ? 'Transaction updated' : 'Transaction saved', 'success', undo ? { action: { label: 'Undo', run: undo } } : {});
   const sb = getSbClient(); if (sb) syncNow();
 }
@@ -1727,7 +1643,7 @@ function undoTx({ created, restore }) {
     if (idx !== -1) state.transactions[idx] = back; else state.transactions.push(back);
   }
   Store.set('transactions', state.transactions);
-  renderAll(); renderTxPage();
+  rerenderCurrentPage();
   showToast('Undone', 'info');
   const sb = getSbClient(); if (sb) syncNow();
 }
@@ -1811,12 +1727,12 @@ function execDel(){
     state.transactions=state.transactions.filter(t=>t.id!==id);
     Store.set('transactions',state.transactions);
     recordDelete('transactions',id);
-    showToast('Transaction deleted','info');renderAll();renderTxPage();
+    showToast('Transaction deleted','info');rerenderCurrentPage();
   }else{
     state.budgets=state.budgets.filter(b=>b.id!==id);
     Store.set('budgets',state.budgets);
     recordDelete('budgets',id);
-    showToast('Budget deleted','info');renderBudgetsPage();
+    showToast('Budget deleted','info');rerenderCurrentPage();
   }
   closeModal('confirm-modal');
   const sb=getSbClient();if(sb)syncNow();
@@ -2010,9 +1926,8 @@ function renderImportReview() {
   updateReviewFooter();
 }
 function updateReviewFooter() {
-  const chosen = impRows().filter(r => r.include), n = chosen.length;
-  const sum = type => chosen.filter(r => type === 'in' ? r.type === 'income' : r.type !== 'income').reduce((a, r) => a + r.amount, 0);
-  document.getElementById('imp-foot-text').innerHTML = `<b>${n} will be saved</b><span>Money out ${fmtKes(sum('out'))} · Money in ${fmtKes(sum('in'))}</span>`;
+  const { count: n, moneyIn, moneyOut } = selectionTotals(impRows());
+  document.getElementById('imp-foot-text').innerHTML = `<b>${n} will be saved</b><span>Money out ${fmtKes(moneyOut)} · Money in ${fmtKes(moneyIn)}</span>`;
   const btn = document.getElementById('imp-save'); btn.disabled = n === 0; btn.textContent = n === 1 ? 'Save 1 transaction' : `Save ${n} transactions`;
 }
 function impToggleRow(key) {
@@ -2158,10 +2073,10 @@ function authDifferentEmail() {
   setAuthTab('up'); document.getElementById('auth-email').value = ''; document.getElementById('auth-email').focus();
 }
 
+// "Continue without an account": keep the client (and its auth listener) so signing in later still works.
 function skipAuth() {
   closeModal('auth-modal');
-  sbClient = null;
-  setSyncStatus('local', 'Local only');
+  if (activeProfile === 'local') setSyncStatus('local', 'Local only');
 }
 
 async function signOut(force = false) {
@@ -2259,8 +2174,14 @@ function openSetConfirm({ tone = 'danger', icon = 'delete', title, sub, actions 
 }
 function setConfirmAct(i) { const a = _scActions[i]; closeModal('set-confirm'); a?.fn?.(); }
 function clearLocalData() {
-  openSetConfirm({ title: 'Clear data on this device?', sub: 'All transactions and budgets saved in this browser will be removed. Records already synced to your account are not affected.',
-    actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Clear data', cls: 'btn-danger', fn: () => { localStorage.clear(); location.reload(); } }] });
+  const unsynced = unsyncedCount({ signedIn: activeProfile !== 'local', transactions: state.transactions, budgets: state.budgets, tombstones: state.tombstones, lastSyncAt: SyncMeta.get().lastSyncAt });
+  const warning = unsynced > 0 ? ` ${changesText(unsynced)} They will be lost.` : '';
+  openSetConfirm({ title: 'Clear data on this device?', sub: `All transactions and budgets saved in this browser will be removed and you will be signed out here. Records already synced to your account are not affected.${warning}`,
+    actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Clear data', cls: 'btn-danger', fn: async () => {
+      // End the session on the server too, so the stored refresh token cannot be reused.
+      try { if (activeProfile !== 'local') await getSbClient()?.auth.signOut(); } catch (e) { console.error('Sign-out error:', e); }
+      localStorage.clear(); location.reload();
+    } }] });
 }
 function confirmSignOut() {
   const n = unsyncedCount({ signedIn: activeProfile !== 'local', transactions: state.transactions, budgets: state.budgets, tombstones: state.tombstones, lastSyncAt: SyncMeta.get().lastSyncAt });
@@ -2281,6 +2202,10 @@ function switchProfile(p) {
   if (p === 'local') state.ui.email = '';
   localStorage.setItem('fynpet_profile', p);
   Object.assign(state, loadProfileData(p));
+  // The open conversation belongs to the previous account: clear it so the next person cannot read it.
+  const msgs = document.getElementById('ap-messages');
+  if (msgs) { msgs.innerHTML = ''; appendMsg('ai', greeting(CFG.get('name'))); }
+  state.ui.aiLimited = false; state.ui.lastQuestion = '';
   rerenderCurrentPage();
 }
 
@@ -2325,12 +2250,7 @@ function rerenderCurrentPage() {
 // ═══════════════════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════════════════
-function saveConfig(key,val){
-  if(key.startsWith('rate_') && (!Number.isFinite(Number(val)) || Number(val)<=0)) {
-    showToast('Enter an exchange rate greater than zero','error'); return;
-  }
-  CFG.set(key,val);
-}
+// Show/hide for password fields (the M-Pesa statement password).
 function toggleKeyVis(inputId,btn){
   const inp=document.getElementById(inputId);
   inp.type=inp.type==='password'?'text':'password';
@@ -2346,8 +2266,11 @@ function exportCSV(){
   const hdr=['Date','Description','Category','Type','Amount','Currency','Amount (KES)','Source','Notes'];
   const rows=state.transactions.map(t=>[t.date,csvText(t.description),t.category,t.type,t.amount,t.currency||'KES',txAmountKes(t).toFixed(2),t.source,csvText(t.notes)]);
   const csv=[hdr,...rows].map(csvRow).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`fynpet-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
+  // The byte-order mark makes Excel read the file as UTF-8 (names with accents or emoji stay intact).
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`fynpet-${nairobiDate()}.csv`;a.hidden=true;
+  // Revoking straight after click() can cancel the download in some browsers, so wait a moment.
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
   showToast('CSV exported','success');
 }
 
@@ -2476,8 +2399,8 @@ const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
   dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, faSignIn, faAdd, faImport, faAsk, retryAdvisor, clearAdvisorHistory, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
-  openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveBudget,
-  saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
+  openEditTx, replayHistory, runAiAnalysis, runImport, saveBudget,
+  saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
   toggleMobSidebar, toggleKeyVis,
 };
