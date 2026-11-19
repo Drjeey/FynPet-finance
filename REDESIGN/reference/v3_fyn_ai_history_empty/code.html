@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fyn AI - desktop chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              dim: '#111319',
+              bright: '#36393f',
+              lowest: '#0b0e13',
+              low: '#191c21',
+              card: '#161920',
+              high: '#20242c',
+              highest: '#2a2f3a',
+            },
+            lime: {
+              DEFAULT: '#C6F432',
+              hover: '#b5e323',
+              subtle: 'rgba(198, 244, 50, 0.12)',
+            },
+            mint: '#45DFA4',
+            coral: '#FF6B6B',
+            amber: '#F59E0B',
+            slateText: '#A3AEBD',
+            mutedText: '#6C7789',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #0b0e13;
+      color: #F3F4F6;
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+    .num-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Custom scrollbar for chat log */
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #20242c;
+      border-radius: 9999px;
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/></head>
+<body class="w-[1440px] min-h-[900px] h-screen bg-[#0b0e13] text-gray-100 flex overflow-hidden relative select-none">
+<!-- ========================================================= -->
+<!-- BACKGROUND: DASHBOARD SHELL & CONTENT (DIMMED & INACTIVE) -->
+<!-- ========================================================= -->
+<div class="flex-1 flex w-[1440px] h-full filter brightness-[0.38] contrast-[0.92] blur-[0.4px] pointer-events-none select-none">
+<!-- Sidebar -->
+<aside class="w-[240px] bg-[#0E1116] border-r border-white/5 flex flex-col justify-between p-4 shrink-0 h-full">
+<div class="space-y-6">
+<!-- Logo Brand -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-8 h-8 rounded-[7px] bg-[#C6F432] flex items-center justify-center font-extrabold text-[#0A0D12] text-sm tracking-tight shadow-sm shadow-[#C6F432]/20">
+            FP
+          </div>
+<div>
+<div class="font-bold text-sm tracking-tight text-white leading-none">FynPet</div>
+<div class="text-[12px] text-[#A3AEBD] mt-0.5 font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Ask Fyn AI button in sidebar -->
+<div class="w-full h-10 px-3.5 rounded-lg bg-[#C6F432] text-[#0A0D12] font-semibold text-xs flex items-center gap-2 shadow-sm">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+          Ask Fyn AI
+        </div>
+<!-- Navigation Links -->
+<nav class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white font-medium text-xs bg-white/5">
+<svg class="w-4 h-4 text-[#C6F432]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+</svg>
+            Dashboard
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"></path>
+</svg>
+            Transactions
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 3v9h9"></path>
+</svg>
+            Budgets
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 3v18h18"></path>
+<path d="M7 15l4-4 4 4 5-6"></path>
+</svg>
+            Analytics
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="16" rx="2" width="18" x="3" y="4"></rect>
+<path d="M7 8h10M7 12h10M7 16h6"></path>
+</svg>
+            M-Pesa Import
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
+</svg>
+            Settings
+          </div>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="pt-4 border-t border-white/5 space-y-3">
+<div class="flex items-center gap-2 px-2 text-[12px] text-[#A3AEBD]">
+<span class="w-2 h-2 rounded-full bg-[#45DFA4]"></span>
+<span>Saved on this device</span>
+</div>
+<div class="w-full py-2 px-3 text-center rounded-lg border border-white/10 text-xs text-white">
+          Sign in to sync
+        </div>
+</div>
+</aside>
+<!-- Main Dashboard Area (dimmed background) -->
+<main class="flex-1 flex flex-col min-w-0 bg-[#0B0E13] overflow-hidden"><div class="flex flex-col w-full h-full relative overflow-hidden">
+<!-- DIMMED BACKGROUND DASHBOARD WORKSPACE -->
+<div class="flex-1 w-full h-full overflow-y-auto px-8 py-6 space-y-6 opacity-30 pointer-events-none select-none">
+<!-- Top KPI Row -->
+<div class="grid grid-cols-4 gap-5">
+<div class="p-6 rounded-xl bg-surface-container-low shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-2">Net Balance</span>
+<div class="font-display-currency text-headline-md text-primary num-tabular">KES 142,850.00</div>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm text-secondary">+12.4% vs last mo</span>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-surface-container-low shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-2">Monthly Budget</span>
+<div class="font-display-currency text-headline-md text-primary num-tabular">KES 57,000.00</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary-container h-full w-[72%] rounded-full"></div>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-surface-container-low shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-2">M-Pesa Outflow</span>
+<div class="font-display-currency text-headline-md text-primary num-tabular">KES 38,420.00</div>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">34 transfers recorded</span>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-surface-container-low shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-2">Emergency Fund</span>
+<div class="font-display-currency text-headline-md text-primary num-tabular">KES 95,000.00</div>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm text-secondary">Target 80% met</span>
+</div>
+</div>
+</div>
+<!-- Center Chart & Allocation Modules -->
+<div class="grid grid-cols-12 gap-5">
+<div class="col-span-8 p-6 rounded-xl bg-surface-container-low shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary">Cash Flow &amp; Burn Rate</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">30-day rolling inflow vs essential expenditures</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md text-primary">November 2024</span>
+</div>
+<!-- Abstract Chart Graphic -->
+<div class="h-56 w-full flex items-end gap-3 pt-6 pb-2">
+<div class="flex-1 bg-surface-container h-[45%] rounded-t-md"></div>
+<div class="flex-1 bg-surface-container h-[60%] rounded-t-md"></div>
+<div class="flex-1 bg-surface-container h-[35%] rounded-t-md"></div>
+<div class="flex-1 bg-surface-container h-[80%] rounded-t-md"></div>
+<div class="flex-1 bg-surface-container h-[50%] rounded-t-md"></div>
+<div class="flex-1 bg-primary-container/20 h-[90%] rounded-t-md relative">
+<div class="absolute inset-x-0 bottom-0 bg-primary-container h-[65%] rounded-t-md"></div>
+</div>
+<div class="flex-1 bg-surface-container h-[40%] rounded-t-md"></div>
+<div class="flex-1 bg-surface-container h-[70%] rounded-t-md"></div>
+</div>
+</div>
+<div class="col-span-4 p-6 rounded-xl bg-surface-container-low shadow-sm space-y-4">
+<h3 class="font-headline-sm text-headline-sm text-primary">Top Categories</h3>
+<div class="space-y-3 pt-2">
+<div>
+<div class="flex justify-between font-label-md text-label-md mb-1 text-on-surface">
+<span>Food &amp; Groceries</span>
+<span class="font-metric-regular text-body-md text-primary num-tabular">KES 18,200</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[65%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-md text-label-md mb-1 text-on-surface">
+<span>Rent &amp; Utilities</span>
+<span class="font-metric-regular text-body-md text-primary num-tabular">KES 22,000</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[90%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-md text-label-md mb-1 text-on-surface">
+<span>Transport / Fuel</span>
+<span class="font-metric-regular text-body-md text-primary num-tabular">KES 6,400</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-surface-bright h-full w-[35%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FULL CANVAS SCRIM OVERLAY -->
+<div aria-hidden="true" class="absolute inset-0 bg-[#07090D]/75 backdrop-blur-[2px] z-10 cursor-default"></div>
+<!-- FYN AI: RIGHT SLIDE-OVER PANEL (440px) -->
+<aside aria-label="Fyn AI History" class="absolute inset-y-0 right-0 w-[440px] h-full bg-surface flex flex-col z-20 shadow-xl overflow-hidden select-text">
+<!-- 1. TOP HEADER -->
+<header class="h-[68px] px-6 bg-surface-container-low flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3">
+<!-- Lime Spark Icon Container -->
+<div class="w-10 h-10 rounded-xl bg-primary-container/15 flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-body-lg text-primary font-bold tracking-tight">Fyn AI</h2>
+<span class="w-2 h-2 rounded-full bg-secondary" title="Active"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-none mt-1">Answers from your recorded finances</p>
+</div>
+</div>
+<!-- Close Action -->
+<button aria-label="Close Fyn AI panel" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors focus:outline-none focus:bg-surface-container-highest" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</header>
+<!-- 2. PRIVACY CALLOUT -->
+<div class="px-6 pt-4 shrink-0">
+<div class="rounded-xl bg-surface-container p-3.5 flex items-start gap-3 shadow-sm">
+<span class="material-symbols-outlined text-primary-container text-[18px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+          After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.
+        </p>
+</div>
+</div>
+<!-- 3. NAVIGATION TABS (min 44px touch targets) -->
+<div class="px-6 pt-3 shrink-0">
+<nav aria-label="Fyn AI Navigation" class="flex items-center gap-6" role="tablist">
+<!-- Chat Tab (Inactive) -->
+<button aria-selected="false" class="h-11 relative flex items-center font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors focus:outline-none" role="tab" type="button">
+<span>Chat</span>
+</button>
+<!-- Insights Tab (Inactive) -->
+<button aria-selected="false" class="h-11 relative flex items-center font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors focus:outline-none" role="tab" type="button">
+<span>Insights</span>
+</button>
+<!-- History Tab (Active / Selected) -->
+<button aria-selected="true" class="h-11 relative flex items-center font-label-md text-label-md text-primary font-semibold focus:outline-none" role="tab" type="button">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+            History
+          </span>
+<span class="absolute bottom-0 inset-x-0 h-0.5 bg-primary-container rounded-full"></span>
+</button>
+</nav>
+</div>
+<!-- 4. PANEL CONTENT (EMPTY STATE) -->
+<div class="flex-1 flex flex-col items-center justify-center p-6 text-center my-auto">
+<!-- Surface Circle with Centered Clock Icon -->
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant mb-4 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">history</span>
+</div>
+<!-- Heading -->
+<h3 class="font-headline-sm text-body-lg text-primary font-semibold mb-2">
+        No questions yet
+      </h3>
+<!-- Descriptive Body -->
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mb-6">
+        Your questions and Fyn's answers appear here. They are saved on this device.
+      </p>
+<!-- Primary Action CTA -->
+<button class="min-h-[44px] px-6 py-3 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-body-md font-semibold flex items-center justify-center gap-2 hover:brightness-105 active:scale-[0.98] transition-all shadow-sm focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span>Ask a question</span>
+</button>
+</div>
+<!-- 5. PANEL FOOTNOTE -->
+<div class="p-4 bg-surface-container-low/50 shrink-0 text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Fyn provides private local summaries, never automated transactions.
+      </p>
+</div>
+</aside>
+<!-- FIXED BOTTOM RIGHT DESIGN WATERMARK -->
+<div class="fixed bottom-3 right-4 z-50 pointer-events-none">
+<div class="px-3 py-1 rounded-full bg-surface-container-high/90 text-on-surface-variant text-[12px] font-label-md flex items-center gap-2 shadow-lg backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</div></main>
+</div>
+<!-- ========================================================= -->
+<!-- DIMMED SCRIM OVER THE LEFT PORTION (CLICK TO CLOSE)       -->
+<!-- ========================================================= -->
+<div class="absolute inset-y-0 left-0 right-[440px] bg-[#07090D]/65 backdrop-blur-[2px] z-20 cursor-pointer transition-opacity duration-300"></div>
+<!-- ========================================================= -->
+<!-- FYN AI: RIGHT SLIDE-OVER PANEL (440px WIDE, FULL HEIGHT)  -->
+<!-- ========================================================= -->
+<section aria-label="Fyn AI assistant slide-over panel" class="absolute inset-y-0 right-0 w-[440px] h-full bg-[#111319] border-l border-white/10 shadow-2xl flex flex-col z-30 overflow-hidden">
+<!-- 1. HEADER (Top) -->
+<header class="h-[68px] px-5 border-b border-white/5 bg-[#14171F] flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3">
+<!-- Lime Spark Icon Badge -->
+<div class="w-9 h-9 rounded-lg bg-[#C6F432]/15 border border-[#C6F432]/30 flex items-center justify-center text-[#C6F432] shrink-0 shadow-sm shadow-[#C6F432]/10">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-bold text-sm tracking-tight text-white leading-tight">Fyn AI</h2>
+<span class="w-1.5 h-1.5 rounded-full bg-[#45DFA4]"></span>
+</div>
+<p class="text-[12px] text-[#A3AEBD] font-normal leading-tight mt-0.5">Answers from your recorded finances</p>
+</div>
+</div>
+<!-- Close X Button (Strict 44px min touch target) -->
+<button aria-label="Close Fyn AI panel" class="w-11 h-11 rounded-lg flex items-center justify-center text-[#A3AEBD] hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-1 focus:ring-[#C6F432]" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 6L6 18M6 6l12 12"></path>
+</svg>
+</button>
+</header>
+<!-- 2. PRIVACY NOTE (Subtle Box) -->
+<div class="px-5 pt-3.5 shrink-0">
+<div class="rounded-lg bg-[#161920] border border-white/5 p-3 flex items-start gap-2.5 text-[12px] leading-relaxed text-[#A3AEBD]">
+<svg class="w-4 h-4 text-[#C6F432] shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+<path d="M9 12l2 2 4-4"></path>
+</svg>
+<span>After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.</span>
+</div>
+</div>
+<!-- 3. TABS (Chat selected, Insights, History) -->
+<div class="px-5 pt-3 shrink-0">
+<div class="flex items-center border-b border-white/5 gap-6 text-xs font-semibold" role="tablist">
+<!-- Tab: Chat (Selected) -->
+<button aria-selected="true" class="h-11 relative flex items-center text-white focus:outline-none transition-colors" role="tab" type="button">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+            Chat
+          </span>
+<div class="absolute bottom-0 inset-x-0 h-0.5 bg-[#C6F432] rounded-full"></div>
+</button>
+<!-- Tab: Insights -->
+<button aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors" role="tab" type="button">
+<span>Insights</span>
+</button>
+<!-- Tab: History -->
+<button aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors" role="tab" type="button">
+<span>History</span>
+</button>
+</div>
+</div>
+<!-- 4. CONVERSATION LOG (Scrollable middle area) -->
+<div class="flex-1 overflow-y-auto custom-scroll px-5 py-4 space-y-4">
+<!-- Greeting from Fyn -->
+<div class="flex items-start gap-2.5">
+<div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed text-gray-200 shadow-sm">
+          Hi Wanjiru. Ask me about your spending, budgets or savings.
+        </div>
+</div>
+<!-- User Bubble (Lime, Right) -->
+<div class="flex justify-end">
+<div class="max-w-[300px] bg-[#C6F432] text-[#0A0D12] rounded-2xl rounded-tr-sm px-4 py-2.5 text-xs font-semibold leading-relaxed shadow-sm">
+          How am I doing this month?
+        </div>
+</div>
+<!-- Fyn's Detailed Answer (Dark Card, Left) -->
+<div class="flex items-start gap-2.5">
+<div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 text-gray-200 shadow-sm">
+<p class="leading-relaxed">
+            You have spent <span class="font-mono font-semibold text-white num-tabular">KES 41,120</span> of your <span class="font-mono font-semibold text-white num-tabular">KES 57,000</span> monthly budgets (<span class="font-semibold text-white num-tabular">72%</span>) with <span class="font-semibold text-white">12 days left</span>. Entertainment is <span class="font-mono font-semibold text-[#FF6B6B] num-tabular">KES 800</span> over its <span class="font-mono font-semibold text-white num-tabular">KES 5,000</span> limit. Food &amp; Groceries has <span class="font-mono font-semibold text-[#45DFA4] num-tabular">KES 9,500</span> left.
+          </p>
+<!-- Structured Quick Visual Indicator -->
+<div class="bg-[#10131A] rounded-lg p-2.5 border border-white/5 space-y-2">
+<div>
+<div class="flex justify-between items-center text-[12px] mb-1">
+<span class="text-[#A3AEBD]">Food &amp; Groceries</span>
+<span class="font-mono text-[#45DFA4] font-medium num-tabular">KES 9,500 left</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+<div class="h-full bg-[#45DFA4] rounded-full w-[65%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-[12px] mb-1">
+<span class="text-[#A3AEBD]">Entertainment</span>
+<span class="font-mono text-[#FF6B6B] font-medium num-tabular">KES 800 over</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+<div class="h-full bg-[#FF6B6B] rounded-full w-[100%]"></div>
+</div>
+</div>
+</div>
+<!-- Bold Next Step Recommendation Callout -->
+<div class="pt-2 border-t border-white/5">
+<p class="font-bold text-white text-xs leading-snug">
+              Next step: raise the Entertainment limit or pause it until 1 December.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. SUGGESTION CHIPS (One horizontal row that wraps) -->
+<div class="px-5 py-2 shrink-0 border-t border-white/5 bg-[#12151D]">
+<div aria-label="Quick questions" class="flex flex-wrap gap-1.5" role="group">
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Cash flow
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Budget check
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Spending issues
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Savings target
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Action plan
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Where to cut
+        </button>
+</div>
+</div>
+<!-- 6. COMPOSER & FOOTNOTE -->
+<div class="p-5 pt-3 bg-[#14171F] border-t border-white/5 shrink-0 space-y-2.5">
+<!-- Composer Box -->
+<div class="relative bg-[#0E1117] border border-white/10 rounded-xl p-3 focus-within:border-[#C6F432]/60 focus-within:ring-1 focus-within:ring-[#C6F432]/40 transition-all shadow-inner">
+<textarea aria-label="Ask about your finances" class="w-full bg-transparent text-xs text-white placeholder-[#6C7789] resize-none focus:outline-none pr-12 font-medium leading-relaxed" placeholder="Ask about your finances" rows="2"></textarea>
+<!-- Round Lime Send Button with arrow (Strict 44px min touch target) -->
+<button aria-label="Send question to Fyn AI" class="absolute bottom-2.5 right-2.5 w-11 h-11 rounded-full bg-[#C6F432] hover:bg-[#b5e323] active:scale-95 text-[#0A0D12] flex items-center justify-center transition-transform shadow-md shadow-[#C6F432]/20 focus:outline-none focus:ring-2 focus:ring-[#C6F432]/50" type="button">
+<svg class="w-5 h-5 -rotate-45 ml-0.5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="5" x2="19" y1="12" y2="12"></line>
+<polyline points="12 5 19 12 12 19"></polyline>
+</svg>
+</button>
+</div>
+<!-- Disclaimer Note -->
+<p class="text-center text-[12px] text-[#A3AEBD] font-normal leading-tight">
+        Fyn gives general guidance, not regulated financial advice.
+      </p>
+</div>
+</section>
+<!-- ========================================================= -->
+<!-- PREVIEW WATERMARK BADGE                                   -->
+<!-- ========================================================= -->
+<div class="fixed bottom-3 right-4 z-50 pointer-events-none">
+<div class="px-2.5 py-1 rounded-full bg-[#161920]/90 border border-white/15 text-[12px] font-medium text-[#A3AEBD] flex items-center gap-1.5 shadow-lg backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

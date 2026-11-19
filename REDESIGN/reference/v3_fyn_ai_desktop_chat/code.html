@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fyn AI - desktop chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              dim: '#111319',
+              bright: '#36393f',
+              lowest: '#0b0e13',
+              low: '#191c21',
+              card: '#161920',
+              high: '#20242c',
+              highest: '#2a2f3a',
+            },
+            lime: {
+              DEFAULT: '#C6F432',
+              hover: '#b5e323',
+              subtle: 'rgba(198, 244, 50, 0.12)',
+            },
+            mint: '#45DFA4',
+            coral: '#FF6B6B',
+            amber: '#F59E0B',
+            slateText: '#A3AEBD',
+            mutedText: '#6C7789',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0b0e13;
+      color: #F3F4F6;
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+    .num-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Custom scrollbar for chat log */
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #20242c;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="w-[1440px] min-h-[900px] h-screen bg-[#0b0e13] text-gray-100 flex overflow-hidden relative select-none">
+
+  <!-- ========================================================= -->
+  <!-- BACKGROUND: DASHBOARD SHELL & CONTENT (DIMMED & INACTIVE) -->
+  <!-- ========================================================= -->
+  <div class="flex-1 flex w-[1440px] h-full filter brightness-[0.38] contrast-[0.92] blur-[0.4px] pointer-events-none select-none">
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-[#0E1116] border-r border-white/5 flex flex-col justify-between p-4 shrink-0 h-full">
+      <div class="space-y-6">
+        <!-- Logo Brand -->
+        <div class="flex items-center gap-3 px-2 py-1">
+          <div class="w-8 h-8 rounded-[7px] bg-[#C6F432] flex items-center justify-center font-extrabold text-[#0A0D12] text-sm tracking-tight shadow-sm shadow-[#C6F432]/20">
+            FP
+          </div>
+          <div>
+            <div class="font-bold text-sm tracking-tight text-white leading-none">FynPet</div>
+            <div class="text-[12px] text-[#A3AEBD] mt-0.5 font-medium leading-none">KES ledger</div>
+          </div>
+        </div>
+
+        <!-- Ask Fyn AI button in sidebar -->
+        <div class="w-full h-10 px-3.5 rounded-lg bg-[#C6F432] text-[#0A0D12] font-semibold text-xs flex items-center gap-2 shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z" />
+          </svg>
+          Ask Fyn AI
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1">
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white font-medium text-xs bg-white/5">
+            <svg class="w-4 h-4 text-[#C6F432]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+            Dashboard
+          </div>
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Transactions
+          </div>
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 3v9h9" />
+            </svg>
+            Budgets
+          </div>
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3v18h18" />
+              <path d="M7 15l4-4 4 4 5-6" />
+            </svg>
+            Analytics
+          </div>
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M7 8h10M7 12h10M7 16h6" />
+            </svg>
+            M-Pesa Import
+          </div>
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            Settings
+          </div>
+        </nav>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="pt-4 border-t border-white/5 space-y-3">
+        <div class="flex items-center gap-2 px-2 text-[12px] text-[#A3AEBD]">
+          <span class="w-2 h-2 rounded-full bg-[#45DFA4]"></span>
+          <span>Saved on this device</span>
+        </div>
+        <div class="w-full py-2 px-3 text-center rounded-lg border border-white/10 text-xs text-white">
+          Sign in to sync
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard Area (dimmed background) -->
+    <main class="flex-1 flex flex-col min-w-0 bg-[#0B0E13] overflow-hidden">
+      <!-- Top Header -->
+      <header class="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-[#0E1116]/80">
+        <div class="flex items-center gap-3">
+          <h1 class="font-bold text-lg text-white tracking-tight">Dashboard</h1>
+          <span class="text-white/20">/</span>
+          <span class="text-xs text-[#A3AEBD] font-medium">Monday, 16 November 2026</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-64 h-9 rounded-lg bg-white/5 border border-white/10 px-3 flex items-center gap-2 text-xs text-[#A3AEBD]">
+            <svg class="w-3.5 h-3.5 text-[#A3AEBD]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            Search transactions...
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#A3AEBD]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#A3AEBD]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67" />
+            </svg>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+            W
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Mock Content Grid -->
+      <div class="p-8 space-y-6 overflow-y-auto">
+        <!-- Needs Attention Banner -->
+        <div class="bg-[#161920] border border-white/5 rounded-xl p-5 space-y-3">
+          <div class="flex items-center gap-2 text-sm font-semibold text-white">
+            <span>Needs attention</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/10 text-[12px] font-bold text-[#A3AEBD]">3</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-white/5">
+            <div class="flex items-center gap-3 text-xs">
+              <span class="text-[#FF6B6B]">⚠️</span>
+              <span class="text-white">Entertainment is <strong class="text-[#FF6B6B] font-semibold">KES 800</strong> over budget</span>
+            </div>
+            <span class="text-xs px-3 py-1 rounded border border-white/10 text-white font-medium">View budget</span>
+          </div>
+        </div>
+
+        <!-- 2 Column Overview -->
+        <div class="grid grid-cols-2 gap-6">
+          <div class="bg-[#161920] border border-white/5 rounded-xl p-5 h-64 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-white">Cash flow</span>
+              <span class="text-xs text-[#A3AEBD]">November 2026</span>
+            </div>
+            <div class="flex items-end justify-between gap-4 h-36 pt-6">
+              <div class="w-full bg-[#45DFA4]/20 rounded-t h-[65%]"></div>
+              <div class="w-full bg-[#FF6B6B]/20 rounded-t h-[80%]"></div>
+              <div class="w-full bg-[#45DFA4]/20 rounded-t h-[95%]"></div>
+              <div class="w-full bg-[#FF6B6B]/20 rounded-t h-[55%]"></div>
+            </div>
+          </div>
+          <div class="bg-[#161920] border border-white/5 rounded-xl p-5 h-64 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-white">Budgets overview</span>
+              <span class="text-xs text-[#C6F432]">View all</span>
+            </div>
+            <div class="space-y-3 pt-2">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-white">Food & Groceries</span>
+                  <span class="text-[#A3AEBD]">KES 9,500 left</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div class="h-full bg-[#45DFA4] rounded-full w-[65%]"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-white">Entertainment</span>
+                  <span class="text-[#FF6B6B]">KES 800 over</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div class="h-full bg-[#FF6B6B] rounded-full w-[100%]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- DIMMED SCRIM OVER THE LEFT PORTION (CLICK TO CLOSE)       -->
+  <!-- ========================================================= -->
+  <div class="absolute inset-y-0 left-0 right-[440px] bg-[#07090D]/65 backdrop-blur-[2px] z-20 cursor-pointer transition-opacity duration-300"></div>
+
+  <!-- ========================================================= -->
+  <!-- FYN AI: RIGHT SLIDE-OVER PANEL (440px WIDE, FULL HEIGHT)  -->
+  <!-- ========================================================= -->
+  <section class="absolute inset-y-0 right-0 w-[440px] h-full bg-[#111319] border-l border-white/10 shadow-2xl flex flex-col z-30 overflow-hidden" aria-label="Fyn AI assistant slide-over panel">
+
+    <!-- 1. HEADER (Top) -->
+    <header class="h-[68px] px-5 border-b border-white/5 bg-[#14171F] flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-3">
+        <!-- Lime Spark Icon Badge -->
+        <div class="w-9 h-9 rounded-lg bg-[#C6F432]/15 border border-[#C6F432]/30 flex items-center justify-center text-[#C6F432] shrink-0 shadow-sm shadow-[#C6F432]/10">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-sm tracking-tight text-white leading-tight">Fyn AI</h2>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#45DFA4]"></span>
+          </div>
+          <p class="text-[12px] text-[#A3AEBD] font-normal leading-tight mt-0.5">Answers from your recorded finances</p>
+        </div>
+      </div>
+
+      <!-- Close X Button (Strict 44px min touch target) -->
+      <button type="button" aria-label="Close Fyn AI panel" class="w-11 h-11 rounded-lg flex items-center justify-center text-[#A3AEBD] hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-1 focus:ring-[#C6F432]">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- 2. PRIVACY NOTE (Subtle Box) -->
+    <div class="px-5 pt-3.5 shrink-0">
+      <div class="rounded-lg bg-[#161920] border border-white/5 p-3 flex items-start gap-2.5 text-[12px] leading-relaxed text-[#A3AEBD]">
+        <svg class="w-4 h-4 text-[#C6F432] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+        <span>After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.</span>
+      </div>
+    </div>
+
+    <!-- 3. TABS (Chat selected, Insights, History) -->
+    <div class="px-5 pt-3 shrink-0">
+      <div class="flex items-center border-b border-white/5 gap-6 text-xs font-semibold" role="tablist">
+        <!-- Tab: Chat (Selected) -->
+        <button type="button" role="tab" aria-selected="true" class="h-11 relative flex items-center text-white focus:outline-none transition-colors">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+            Chat
+          </span>
+          <div class="absolute bottom-0 inset-x-0 h-0.5 bg-[#C6F432] rounded-full"></div>
+        </button>
+
+        <!-- Tab: Insights -->
+        <button type="button" role="tab" aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors">
+          <span>Insights</span>
+        </button>
+
+        <!-- Tab: History -->
+        <button type="button" role="tab" aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors">
+          <span>History</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. CONVERSATION LOG (Scrollable middle area) -->
+    <div class="flex-1 overflow-y-auto custom-scroll px-5 py-4 space-y-4">
+
+      <!-- Greeting from Fyn -->
+      <div class="flex items-start gap-2.5">
+        <div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z" />
+          </svg>
+        </div>
+        <div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed text-gray-200 shadow-sm">
+          Hi Wanjiru. Ask me about your spending, budgets or savings.
+        </div>
+      </div>
+
+      <!-- User Bubble (Lime, Right) -->
+      <div class="flex justify-end">
+        <div class="max-w-[300px] bg-[#C6F432] text-[#0A0D12] rounded-2xl rounded-tr-sm px-4 py-2.5 text-xs font-semibold leading-relaxed shadow-sm">
+          How am I doing this month?
+        </div>
+      </div>
+
+      <!-- Fyn's Detailed Answer (Dark Card, Left) -->
+      <div class="flex items-start gap-2.5">
+        <div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z" />
+          </svg>
+        </div>
+        <div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 text-gray-200 shadow-sm">
+          <p class="leading-relaxed">
+            You have spent <span class="font-mono font-semibold text-white num-tabular">KES 41,120</span> of your <span class="font-mono font-semibold text-white num-tabular">KES 57,000</span> monthly budgets (<span class="font-semibold text-white num-tabular">72%</span>) with <span class="font-semibold text-white">12 days left</span>. Entertainment is <span class="font-mono font-semibold text-[#FF6B6B] num-tabular">KES 800</span> over its <span class="font-mono font-semibold text-white num-tabular">KES 5,000</span> limit. Food &amp; Groceries has <span class="font-mono font-semibold text-[#45DFA4] num-tabular">KES 9,500</span> left.
+          </p>
+
+          <!-- Structured Quick Visual Indicator -->
+          <div class="bg-[#10131A] rounded-lg p-2.5 border border-white/5 space-y-2">
+            <div>
+              <div class="flex justify-between items-center text-[12px] mb-1">
+                <span class="text-[#A3AEBD]">Food &amp; Groceries</span>
+                <span class="font-mono text-[#45DFA4] font-medium num-tabular">KES 9,500 left</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                <div class="h-full bg-[#45DFA4] rounded-full w-[65%]"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center text-[12px] mb-1">
+                <span class="text-[#A3AEBD]">Entertainment</span>
+                <span class="font-mono text-[#FF6B6B] font-medium num-tabular">KES 800 over</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                <div class="h-full bg-[#FF6B6B] rounded-full w-[100%]"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bold Next Step Recommendation Callout -->
+          <div class="pt-2 border-t border-white/5">
+            <p class="font-bold text-white text-xs leading-snug">
+              Next step: raise the Entertainment limit or pause it until 1 December.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 5. SUGGESTION CHIPS (One horizontal row that wraps) -->
+    <div class="px-5 py-2 shrink-0 border-t border-white/5 bg-[#12151D]">
+      <div class="flex flex-wrap gap-1.5" role="group" aria-label="Quick questions">
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Cash flow
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Budget check
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Spending issues
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Savings target
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Action plan
+        </button>
+        <button type="button" class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0">
+          Where to cut
+        </button>
+      </div>
+    </div>
+
+    <!-- 6. COMPOSER & FOOTNOTE -->
+    <div class="p-5 pt-3 bg-[#14171F] border-t border-white/5 shrink-0 space-y-2.5">
+      <!-- Composer Box -->
+      <div class="relative bg-[#0E1117] border border-white/10 rounded-xl p-3 focus-within:border-[#C6F432]/60 focus-within:ring-1 focus-within:ring-[#C6F432]/40 transition-all shadow-inner">
+        <textarea
+          rows="2"
+          placeholder="Ask about your finances"
+          aria-label="Ask about your finances"
+          class="w-full bg-transparent text-xs text-white placeholder-[#6C7789] resize-none focus:outline-none pr-12 font-medium leading-relaxed"
+        ></textarea>
+
+        <!-- Round Lime Send Button with arrow (Strict 44px min touch target) -->
+        <button
+          type="button"
+          aria-label="Send question to Fyn AI"
+          class="absolute bottom-2.5 right-2.5 w-11 h-11 rounded-full bg-[#C6F432] hover:bg-[#b5e323] active:scale-95 text-[#0A0D12] flex items-center justify-center transition-transform shadow-md shadow-[#C6F432]/20 focus:outline-none focus:ring-2 focus:ring-[#C6F432]/50"
+        >
+          <svg class="w-5 h-5 -rotate-45 ml-0.5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Disclaimer Note -->
+      <p class="text-center text-[12px] text-[#A3AEBD] font-normal leading-tight">
+        Fyn gives general guidance, not regulated financial advice.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- PREVIEW WATERMARK BADGE                                   -->
+  <!-- ========================================================= -->
+  <div class="fixed bottom-3 right-4 z-50 pointer-events-none">
+    <div class="px-2.5 py-1 rounded-full bg-[#161920]/90 border border-white/15 text-[12px] font-medium text-[#A3AEBD] flex items-center gap-1.5 shadow-lg backdrop-blur-md">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+      <span>Sample data - design preview</span>
+    </div>
+  </div>
+
+</body>
+</html>

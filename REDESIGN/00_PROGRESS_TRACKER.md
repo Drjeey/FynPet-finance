@@ -15,7 +15,7 @@ Statuses: NOT STARTED · UNDER AUDIT · AUDIT COMPLETED · STITCH PROMPT PREPARE
 | 5. Budgets | AUDIT COMPLETED | APPROVED (18_REVIEW) | BUILT | VERIFIED (1440/375/320, fake backend) | NOT COMMITTED |
 | 6. Analytics | AUDIT COMPLETED | APPROVED with conditions (20_REVIEW) | BUILT | VERIFIED (1440/320, local server) | NOT COMMITTED |
 | 7. M-Pesa Import (+ parser rework) | AUDIT COMPLETED | DESIGN UNDER REVIEW (upload ok; reading/review/done need revision, see 11_REVIEW; mobile missing) | — | NOT STARTED | NOT STARTED |
-| 8. Fyn AI + consent | AUDIT COMPLETED | DESIGN UNDER REVIEW (chat panel reviewed in 11_REVIEW; tabs, states, consent, mobile missing) | — | NOT STARTED | NOT STARTED |
+| 8. Fyn AI + consent | AUDIT COMPLETED | APPROVED with conditions (24_REVIEW) | BUILT | VERIFIED (geometry at 375/1440, fake backend) | NOT COMMITTED |
 | 9. Settings + sign-in/sync | AUDIT COMPLETED | APPROVED with conditions (22_REVIEW) | BUILT | VERIFIED (1440/375/320, fake backend) | NOT COMMITTED |
 | 10. Light theme | AUDIT COMPLETED | STITCH PROMPT PREPARED (prompt 7, optional) | — | NOT STARTED | NOT STARTED |
 | Administration | Not applicable: no admin features exist | — | — | — | — |

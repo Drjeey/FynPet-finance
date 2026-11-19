@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fyn AI - desktop chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            surface: {
+              DEFAULT: '#111319',
+              dim: '#111319',
+              bright: '#36393f',
+              lowest: '#0b0e13',
+              low: '#191c21',
+              card: '#161920',
+              high: '#20242c',
+              highest: '#2a2f3a',
+            },
+            lime: {
+              DEFAULT: '#C6F432',
+              hover: '#b5e323',
+              subtle: 'rgba(198, 244, 50, 0.12)',
+            },
+            mint: '#45DFA4',
+            coral: '#FF6B6B',
+            amber: '#F59E0B',
+            slateText: '#A3AEBD',
+            mutedText: '#6C7789',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #0b0e13;
+      color: #F3F4F6;
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+    .num-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Custom scrollbar for chat log */
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #20242c;
+      border-radius: 9999px;
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/></head>
+<body class="w-[1440px] min-h-[900px] h-screen bg-[#0b0e13] text-gray-100 flex overflow-hidden relative select-none">
+<!-- ========================================================= -->
+<!-- BACKGROUND: DASHBOARD SHELL & CONTENT (DIMMED & INACTIVE) -->
+<!-- ========================================================= -->
+<div class="flex-1 flex w-[1440px] h-full filter brightness-[0.38] contrast-[0.92] blur-[0.4px] pointer-events-none select-none">
+<!-- Sidebar -->
+<aside class="w-[240px] bg-[#0E1116] border-r border-white/5 flex flex-col justify-between p-4 shrink-0 h-full">
+<div class="space-y-6">
+<!-- Logo Brand -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-8 h-8 rounded-[7px] bg-[#C6F432] flex items-center justify-center font-extrabold text-[#0A0D12] text-sm tracking-tight shadow-sm shadow-[#C6F432]/20">
+            FP
+          </div>
+<div>
+<div class="font-bold text-sm tracking-tight text-white leading-none">FynPet</div>
+<div class="text-[12px] text-[#A3AEBD] mt-0.5 font-medium leading-none">KES ledger</div>
+</div>
+</div>
+<!-- Ask Fyn AI button in sidebar -->
+<div class="w-full h-10 px-3.5 rounded-lg bg-[#C6F432] text-[#0A0D12] font-semibold text-xs flex items-center gap-2 shadow-sm">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+          Ask Fyn AI
+        </div>
+<!-- Navigation Links -->
+<nav class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white font-medium text-xs bg-white/5">
+<svg class="w-4 h-4 text-[#C6F432]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+</svg>
+            Dashboard
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"></path>
+</svg>
+            Transactions
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 3v9h9"></path>
+</svg>
+            Budgets
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 3v18h18"></path>
+<path d="M7 15l4-4 4 4 5-6"></path>
+</svg>
+            Analytics
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="16" rx="2" width="18" x="3" y="4"></rect>
+<path d="M7 8h10M7 12h10M7 16h6"></path>
+</svg>
+            M-Pesa Import
+          </div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3AEBD] font-medium text-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
+</svg>
+            Settings
+          </div>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="pt-4 border-t border-white/5 space-y-3">
+<div class="flex items-center gap-2 px-2 text-[12px] text-[#A3AEBD]">
+<span class="w-2 h-2 rounded-full bg-[#45DFA4]"></span>
+<span>Saved on this device</span>
+</div>
+<div class="w-full py-2 px-3 text-center rounded-lg border border-white/10 text-xs text-white">
+          Sign in to sync
+        </div>
+</div>
+</aside>
+<!-- Main Dashboard Area (dimmed background) -->
+<main class="flex-1 flex flex-col min-w-0 bg-[#0B0E13] overflow-hidden"><div class="flex flex-col w-full h-full relative">
+<!-- DASHBOARD WORKSPACE BEHIND THE OVERLAY (Full fidelity layout) -->
+<div class="flex flex-col w-full h-full p-8 gap-6 overflow-hidden">
+<!-- Top Stats Row -->
+<div class="grid grid-cols-4 gap-5 w-full">
+<div class="bg-surface-container-low rounded-xl p-6 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">Net liquid cash</span>
+<span class="material-symbols-outlined text-secondary text-sm">account_balance_wallet</span>
+</div>
+<div class="text-on-surface font-display-currency text-display-currency tracking-tight">KES 0.00</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-on-surface-variant font-body-sm text-body-sm">Awaiting first sync</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">Monthly outflow</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">trending_down</span>
+</div>
+<div class="text-on-surface font-headline-lg text-headline-lg">KES 0.00</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm">0 entries this period</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">Active budgets</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">pie_chart</span>
+</div>
+<div class="text-on-surface font-headline-lg text-headline-lg">0 / 0</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm">No limits configured</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-label-md text-label-md">M-Pesa sync</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">sync</span>
+</div>
+<div class="text-on-surface font-headline-md text-headline-md">Offline</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm">Local storage only</div>
+</div>
+</div>
+<!-- Main Workspace Split: Chart + Ledger placeholder -->
+<div class="grid grid-cols-12 gap-5 flex-1 min-h-0 w-full">
+<!-- Center Activity Graph Area -->
+<div class="col-span-8 bg-surface-container-low rounded-xl p-6 flex flex-col justify-between">
+<div class="flex items-center justify-between pb-4">
+<div>
+<h3 class="text-on-surface font-headline-sm text-headline-sm">Spending breakdown</h3>
+<p class="text-on-surface-variant font-body-sm text-body-sm mt-0.5">30-day cash movements</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="h-9 px-4 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md flex items-center">Last 30 days</span>
+</div>
+</div>
+<!-- Empty state vector graphic -->
+<div class="h-64 w-full flex flex-col items-center justify-center gap-3">
+<svg class="w-16 h-16 text-surface-container-highest" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+<path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<p class="text-on-surface-variant font-body-md text-body-md">Your cash ledger is empty</p>
+</div>
+<div class="flex items-center justify-between pt-4 bg-surface-container rounded-lg px-4 py-3">
+<span class="text-on-surface-variant font-body-sm text-body-sm">Local encrypted vault active</span>
+<span class="text-secondary font-label-md text-label-md">Device only</span>
+</div>
+</div>
+<!-- Ledger Preview Column -->
+<div class="col-span-4 bg-surface-container-low rounded-xl p-6 flex flex-col justify-between">
+<div>
+<h3 class="text-on-surface font-headline-sm text-headline-sm">Recent transactions</h3>
+<p class="text-on-surface-variant font-body-sm text-body-sm mt-0.5">Automated and manual records</p>
+<div class="mt-6 flex flex-col gap-3">
+<div class="h-14 rounded-lg bg-surface-container flex items-center px-4 justify-between">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">receipt_long</span>
+</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">No records available</span>
+</div>
+</div>
+<div class="h-14 rounded-lg bg-surface-container flex items-center px-4 justify-between">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">upload_file</span>
+</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Import M-Pesa statements</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container">
+<p class="text-on-surface-variant font-body-sm text-body-sm leading-relaxed">
+            All records stay in your browser. Fyn AI uses summaries only when you request an analysis.
+          </p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE-OVER OVERRIDE / INNER EXPANSION -->
+<!-- Target Panel Content replacement for empty data state -->
+<section class="absolute inset-y-0 right-0 w-[440px] h-full bg-[#111319] flex flex-col z-40 shadow-2xl">
+<!-- 1. Header (Top Bar) -->
+<header class="h-[68px] px-5 bg-surface-container-low flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3">
+<!-- Lime Spark Icon Badge -->
+<div class="w-9 h-9 rounded-lg bg-primary-container/15 flex items-center justify-center text-primary-container shrink-0">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface leading-tight">Fyn AI</h2>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm leading-tight mt-0.5">Answers from your recorded finances</p>
+</div>
+</div>
+<!-- Close X Button (44px target) -->
+<button aria-label="Close Fyn AI panel" class="w-11 h-11 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors focus:outline-none" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 6L6 18M6 6l12 12"></path>
+</svg>
+</button>
+</header>
+<!-- 2. Anthropic Privacy Callout Box -->
+<div class="px-5 pt-3.5 shrink-0">
+<div class="rounded-xl bg-surface-container p-3 flex items-start gap-2.5 text-on-surface-variant font-body-sm text-body-sm leading-relaxed">
+<span class="material-symbols-outlined text-primary-container shrink-0 text-base mt-0.5">verified_user</span>
+<span>After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.</span>
+</div>
+</div>
+<!-- 3. Navigation Tabs (≥44px target) -->
+<div class="px-5 pt-3 shrink-0">
+<div class="flex items-center gap-6" role="tablist">
+<!-- Tab: Chat (Selected) -->
+<button aria-selected="true" class="h-11 relative flex items-center text-on-surface font-label-md text-label-md focus:outline-none" role="tab" type="button">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+            Chat
+          </span>
+<div class="absolute bottom-0 inset-x-0 h-0.5 bg-primary-container rounded-full"></div>
+</button>
+<!-- Tab: Insights -->
+<button aria-selected="false" class="h-11 relative flex items-center text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors focus:outline-none" role="tab" type="button">
+<span>Insights</span>
+</button>
+<!-- Tab: History -->
+<button aria-selected="false" class="h-11 relative flex items-center text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors focus:outline-none" role="tab" type="button">
+<span>History</span>
+</button>
+</div>
+</div>
+<!-- 4. Panel Body Content (No Data Yet) -->
+<div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+<!-- Greeting from Fyn -->
+<div class="flex items-start gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-surface-container rounded-2xl rounded-tl-sm px-4 py-3 font-body-md text-body-md text-on-surface leading-relaxed">
+          Hi Wanjiru. Ask me about your spending, budgets or savings.
+        </div>
+</div>
+<!-- Follow-up message bubble card from Fyn (No data state prompt) -->
+<div class="flex items-start gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-surface-container rounded-2xl rounded-tl-sm p-4 space-y-4 text-on-surface">
+<p class="font-body-md text-body-md leading-relaxed">
+            Add a few transactions first and Fyn can answer from your records.
+          </p>
+<!-- Direct CTA buttons -->
+<div class="flex flex-col gap-2.5 pt-1">
+<!-- Solid electric lime button (≥44px height) -->
+<button class="h-11 px-5 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-fixed-dim transition-all focus:outline-none" type="button">
+<span class="text-base font-bold leading-none">+</span>
+<span>Add transaction</span>
+</button>
+<!-- Secondary action button (≥44px height) -->
+<button class="h-11 px-5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-all focus:outline-none" type="button">
+<span class="material-symbols-outlined text-base">upload_file</span>
+<span>Import M-Pesa statement</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. Bottom Composer & Disclaimer -->
+<div class="p-5 pt-3 bg-surface-container-low shrink-0 space-y-3">
+<!-- Active Composer Box -->
+<div class="relative bg-surface-container-lowest rounded-xl p-3 focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<textarea aria-label="Ask about your finances" class="w-full bg-transparent font-body-md text-body-md text-on-surface placeholder-on-surface-variant resize-none focus:outline-none pr-14 leading-relaxed" placeholder="Ask about your finances" rows="2"></textarea>
+<!-- Round Electric Lime Send Button (44px target) -->
+<button aria-label="Send question to Fyn AI" class="absolute bottom-2.5 right-2.5 w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary-fixed-dim active:scale-95 transition-transform focus:outline-none" type="button">
+<svg class="w-5 h-5 -rotate-45 ml-0.5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="5" x2="19" y1="12" y2="12"></line>
+<polyline points="12 5 19 12 12 19"></polyline>
+</svg>
+</button>
+</div>
+<!-- Disclaimer Note -->
+<p class="text-center font-body-sm text-body-sm text-on-surface-variant leading-tight">
+        Fyn gives general guidance, not regulated financial advice.
+      </p>
+</div>
+</section>
+</div></main>
+</div>
+<!-- ========================================================= -->
+<!-- DIMMED SCRIM OVER THE LEFT PORTION (CLICK TO CLOSE)       -->
+<!-- ========================================================= -->
+<div class="absolute inset-y-0 left-0 right-[440px] bg-[#07090D]/65 backdrop-blur-[2px] z-20 cursor-pointer transition-opacity duration-300"></div>
+<!-- ========================================================= -->
+<!-- FYN AI: RIGHT SLIDE-OVER PANEL (440px WIDE, FULL HEIGHT)  -->
+<!-- ========================================================= -->
+<section aria-label="Fyn AI assistant slide-over panel" class="absolute inset-y-0 right-0 w-[440px] h-full bg-[#111319] border-l border-white/10 shadow-2xl flex flex-col z-30 overflow-hidden">
+<!-- 1. HEADER (Top) -->
+<header class="h-[68px] px-5 border-b border-white/5 bg-[#14171F] flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3">
+<!-- Lime Spark Icon Badge -->
+<div class="w-9 h-9 rounded-lg bg-[#C6F432]/15 border border-[#C6F432]/30 flex items-center justify-center text-[#C6F432] shrink-0 shadow-sm shadow-[#C6F432]/10">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-bold text-sm tracking-tight text-white leading-tight">Fyn AI</h2>
+<span class="w-1.5 h-1.5 rounded-full bg-[#45DFA4]"></span>
+</div>
+<p class="text-[12px] text-[#A3AEBD] font-normal leading-tight mt-0.5">Answers from your recorded finances</p>
+</div>
+</div>
+<!-- Close X Button (Strict 44px min touch target) -->
+<button aria-label="Close Fyn AI panel" class="w-11 h-11 rounded-lg flex items-center justify-center text-[#A3AEBD] hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-1 focus:ring-[#C6F432]" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 6L6 18M6 6l12 12"></path>
+</svg>
+</button>
+</header>
+<!-- 2. PRIVACY NOTE (Subtle Box) -->
+<div class="px-5 pt-3.5 shrink-0">
+<div class="rounded-lg bg-[#161920] border border-white/5 p-3 flex items-start gap-2.5 text-[12px] leading-relaxed text-[#A3AEBD]">
+<svg class="w-4 h-4 text-[#C6F432] shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+<path d="M9 12l2 2 4-4"></path>
+</svg>
+<span>After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.</span>
+</div>
+</div>
+<!-- 3. TABS (Chat selected, Insights, History) -->
+<div class="px-5 pt-3 shrink-0">
+<div class="flex items-center border-b border-white/5 gap-6 text-xs font-semibold" role="tablist">
+<!-- Tab: Chat (Selected) -->
+<button aria-selected="true" class="h-11 relative flex items-center text-white focus:outline-none transition-colors" role="tab" type="button">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+            Chat
+          </span>
+<div class="absolute bottom-0 inset-x-0 h-0.5 bg-[#C6F432] rounded-full"></div>
+</button>
+<!-- Tab: Insights -->
+<button aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors" role="tab" type="button">
+<span>Insights</span>
+</button>
+<!-- Tab: History -->
+<button aria-selected="false" class="h-11 relative flex items-center text-[#A3AEBD] hover:text-white focus:outline-none transition-colors" role="tab" type="button">
+<span>History</span>
+</button>
+</div>
+</div>
+<!-- 4. CONVERSATION LOG (Scrollable middle area) -->
+<div class="flex-1 overflow-y-auto custom-scroll px-5 py-4 space-y-4">
+<!-- Greeting from Fyn -->
+<div class="flex items-start gap-2.5">
+<div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed text-gray-200 shadow-sm">
+          Hi Wanjiru. Ask me about your spending, budgets or savings.
+        </div>
+</div>
+<!-- User Bubble (Lime, Right) -->
+<div class="flex justify-end">
+<div class="max-w-[300px] bg-[#C6F432] text-[#0A0D12] rounded-2xl rounded-tr-sm px-4 py-2.5 text-xs font-semibold leading-relaxed shadow-sm">
+          How am I doing this month?
+        </div>
+</div>
+<!-- Fyn's Detailed Answer (Dark Card, Left) -->
+<div class="flex items-start gap-2.5">
+<div class="w-6 h-6 rounded bg-[#C6F432]/20 text-[#C6F432] flex items-center justify-center shrink-0 mt-0.5">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L14.2 8.2L20.4 10.4L14.2 12.6L12 18.8L9.8 12.6L3.6 10.4L9.8 8.2L12 2Z"></path>
+</svg>
+</div>
+<div class="max-w-[340px] bg-[#161A22] border border-white/5 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 text-gray-200 shadow-sm">
+<p class="leading-relaxed">
+            You have spent <span class="font-mono font-semibold text-white num-tabular">KES 41,120</span> of your <span class="font-mono font-semibold text-white num-tabular">KES 57,000</span> monthly budgets (<span class="font-semibold text-white num-tabular">72%</span>) with <span class="font-semibold text-white">12 days left</span>. Entertainment is <span class="font-mono font-semibold text-[#FF6B6B] num-tabular">KES 800</span> over its <span class="font-mono font-semibold text-white num-tabular">KES 5,000</span> limit. Food &amp; Groceries has <span class="font-mono font-semibold text-[#45DFA4] num-tabular">KES 9,500</span> left.
+          </p>
+<!-- Structured Quick Visual Indicator -->
+<div class="bg-[#10131A] rounded-lg p-2.5 border border-white/5 space-y-2">
+<div>
+<div class="flex justify-between items-center text-[12px] mb-1">
+<span class="text-[#A3AEBD]">Food &amp; Groceries</span>
+<span class="font-mono text-[#45DFA4] font-medium num-tabular">KES 9,500 left</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+<div class="h-full bg-[#45DFA4] rounded-full w-[65%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-[12px] mb-1">
+<span class="text-[#A3AEBD]">Entertainment</span>
+<span class="font-mono text-[#FF6B6B] font-medium num-tabular">KES 800 over</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+<div class="h-full bg-[#FF6B6B] rounded-full w-[100%]"></div>
+</div>
+</div>
+</div>
+<!-- Bold Next Step Recommendation Callout -->
+<div class="pt-2 border-t border-white/5">
+<p class="font-bold text-white text-xs leading-snug">
+              Next step: raise the Entertainment limit or pause it until 1 December.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. SUGGESTION CHIPS (One horizontal row that wraps) -->
+<div class="px-5 py-2 shrink-0 border-t border-white/5 bg-[#12151D]">
+<div aria-label="Quick questions" class="flex flex-wrap gap-1.5" role="group">
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Cash flow
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Budget check
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Spending issues
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Savings target
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Action plan
+        </button>
+<button class="h-8 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[12px] font-medium transition-colors flex items-center shrink-0" type="button">
+          Where to cut
+        </button>
+</div>
+</div>
+<!-- 6. COMPOSER & FOOTNOTE -->
+<div class="p-5 pt-3 bg-[#14171F] border-t border-white/5 shrink-0 space-y-2.5">
+<!-- Composer Box -->
+<div class="relative bg-[#0E1117] border border-white/10 rounded-xl p-3 focus-within:border-[#C6F432]/60 focus-within:ring-1 focus-within:ring-[#C6F432]/40 transition-all shadow-inner">
+<textarea aria-label="Ask about your finances" class="w-full bg-transparent text-xs text-white placeholder-[#6C7789] resize-none focus:outline-none pr-12 font-medium leading-relaxed" placeholder="Ask about your finances" rows="2"></textarea>
+<!-- Round Lime Send Button with arrow (Strict 44px min touch target) -->
+<button aria-label="Send question to Fyn AI" class="absolute bottom-2.5 right-2.5 w-11 h-11 rounded-full bg-[#C6F432] hover:bg-[#b5e323] active:scale-95 text-[#0A0D12] flex items-center justify-center transition-transform shadow-md shadow-[#C6F432]/20 focus:outline-none focus:ring-2 focus:ring-[#C6F432]/50" type="button">
+<svg class="w-5 h-5 -rotate-45 ml-0.5 mb-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="5" x2="19" y1="12" y2="12"></line>
+<polyline points="12 5 19 12 12 19"></polyline>
+</svg>
+</button>
+</div>
+<!-- Disclaimer Note -->
+<p class="text-center text-[12px] text-[#A3AEBD] font-normal leading-tight">
+        Fyn gives general guidance, not regulated financial advice.
+      </p>
+</div>
+</section>
+<!-- ========================================================= -->
+<!-- PREVIEW WATERMARK BADGE                                   -->
+<!-- ========================================================= -->
+<div class="fixed bottom-3 right-4 z-50 pointer-events-none">
+<div class="px-2.5 py-1 rounded-full bg-[#161920]/90 border border-white/15 text-[12px] font-medium text-[#A3AEBD] flex items-center gap-1.5 shadow-lg backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C6F432]"></span>
+<span>Sample data - design preview</span>
+</div>
+</div>
+</body></html>

@@ -3,6 +3,7 @@ import { icon, renderIcons } from './icons.js';
 import { pendingRecords, markSynced, addTombstone, mergeRemote } from './sync.js';
 import { csvText, csvRow } from './csv.js';
 import { filterTransactions, countFilters, quickRange, groupByDate } from './txfilter.js';
+import { classifyAiError, splitNextStep, greeting, insightRows, shortDate as advDate, panelState } from './advisor.js';
 import { isEmail, passwordError, authMessage, unsyncedCount, changesText, validateRates, accountView, RATE_CURRENCIES } from './settings.js';
 import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpenses, coverStatus, clampGoalMonths, independenceStatus, paceText, barHeights } from './analytics.js';
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
@@ -405,7 +406,8 @@ function toggleAdvisor() {
     panel.classList.add('open');
     main.classList.add('panel-open');
     backdrop.classList.add('show');
-    document.getElementById('ap-input').focus();
+    renderAdvisorState();
+    const input = document.getElementById('ap-input'); if (!input.disabled) input.focus(); else document.querySelector('#advisor-panel .fa-close').focus();
   } else {
     panel.classList.remove('open');
     main.classList.remove('panel-open');
@@ -416,134 +418,150 @@ function toggleAdvisor() {
 
 function setAdvTab(tab, btn) {
   state.ui.advisorTab = tab;
-  document.querySelectorAll('.ap-tab').forEach(t=>t.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('adv-chat-tab').style.display = tab==='chat' ? 'flex' : 'none';
-  document.getElementById('adv-insights-tab').style.display = tab==='insights' ? 'block' : 'none';
-  document.getElementById('adv-history-tab').style.display = tab==='history' ? 'block' : 'none';
-  if (tab==='insights') renderInsightsTab();
-  if (tab==='history') renderHistoryTab();
+  const buttons = document.querySelectorAll('.ap-tab');
+  buttons.forEach(t => { const on = t === btn; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
+  document.getElementById('adv-chat-tab').hidden = tab !== 'chat';
+  document.getElementById('adv-insights-tab').hidden = tab !== 'insights';
+  document.getElementById('adv-history-tab').hidden = tab !== 'history';
+  if (tab === 'insights') renderInsightsTab();
+  if (tab === 'history') renderHistoryTab();
 }
+function openAdvTab(tab) { setAdvTab(tab, document.querySelector(`.ap-tab[data-tab="${tab}"]`)); }
 
-function appendMsg(role, text, isTyping=false) {
+// What the chat area shows when the user cannot ask yet (signed out, no records, or daily limit reached)
+function renderAdvisorState() {
+  const kind = panelState({ signedIn: activeProfile !== 'local', hasData: state.transactions.some(t => !t.deletedAt), limited: Boolean(state.ui.aiLimited) });
+  const box = document.getElementById('fa-state'), msgs = document.getElementById('ap-messages'), input = document.getElementById('ap-input'), send = document.getElementById('ap-send');
+  const blocked = kind === 'signin' || kind === 'nodata';
+  box.hidden = !blocked; msgs.hidden = blocked; document.getElementById('quick-prompts').hidden = blocked;
+  if (kind === 'signin') box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>Sign in to use Fyn AI</h3><p class="muted">Your records stay on this device. Signing in lets Fyn answer from your recorded finances.</p>
+    <div class="fa-state-acts"><button class="btn-primary" data-click="faSignIn" data-click-args='["in"]'>Sign in</button><button class="btn-secondary" data-click="faSignIn" data-click-args='["up"]'>Create account</button></div>`;
+  else if (kind === 'nodata') box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>No records yet</h3><p class="muted">Add a few transactions first and Fyn can answer from your records.</p>
+    <div class="fa-state-acts"><button class="btn-primary" data-click="faAdd"><span data-icon="plus" aria-hidden="true"></span>Add transaction</button><button class="btn-secondary" data-click="faImport">Import M-Pesa statement</button></div>`;
+  if (blocked) renderIcons(box);
+  const off = kind !== '' || state.ui.aiBusy;
+  input.disabled = off; send.disabled = off;
+  input.placeholder = kind === 'signin' ? 'Sign in to ask questions' : kind === 'nodata' ? 'Add records to ask questions' : kind === 'limit' ? 'Daily question limit reached' : state.ui.aiBusy ? 'Wait for the answer' : 'Ask about your finances';
+}
+function faSignIn(tab) { toggleAdvisor(); openAuth(tab); }
+function faAdd() { toggleAdvisor(); openAddTx(); }
+function faImport() { toggleAdvisor(); goPage('mpesa', null); }
+
+function appendMsg(role, text, isTyping = false) {
   const msgs = document.getElementById('ap-messages');
   const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const time = new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
-  const userName = CFG.get('name') ? CFG.get('name').charAt(0).toUpperCase() : 'Y';
+  div.className = `fa-msg ${role}`;
+  const spark = '<span class="fa-av" data-icon="spark" aria-hidden="true"></span>';
   if (isTyping) {
     div.id = 'typing-msg';
-    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.75rem">Ai</div><div class="msg-bubble ai"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    div.innerHTML = `${spark}<div class="fa-bub ai"><span class="fa-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="fa-typing-lbl">Fyn is reading your summary</span></div>`;
   } else if (role === 'ai') {
-    div.innerHTML = `<div class="msg-av ai" style="font-family:var(--fm);font-size:.75rem">Ai</div><div><div class="msg-bubble ai">${formatMsg(text)}</div><div class="msg-time">${time}</div></div>`;
+    const { body, next } = splitNextStep(text);
+    div.innerHTML = `${spark}<div class="fa-bub ai">${formatMsg(body)}${next ? `<p class="fa-next"><b>Next step:</b> ${escHtml(next)}</p>` : ''}</div>`;
   } else {
-    div.innerHTML = `<div><div class="msg-bubble user">${escHtml(text)}</div><div class="msg-time">${time}</div></div><div class="msg-av user" style="font-family:var(--fm)">${userName}</div>`;
+    div.innerHTML = `<div class="fa-bub user">${escHtml(text)}</div>`;
   }
   msgs.appendChild(div);
+  renderIcons(div);
   msgs.scrollTop = msgs.scrollHeight;
   return div;
 }
-
-function removeTyping() {
-  document.getElementById('typing-msg')?.remove();
+function appendNotice(kind, message, retry = false) {
+  const msgs = document.getElementById('ap-messages');
+  const div = document.createElement('div');
+  div.className = `fa-notice ${kind}`; div.setAttribute('role', 'alert');
+  const action = kind === 'consent' ? '<button class="btn-secondary" data-click="reviewAndTurnOn">Review and turn on</button>' : retry ? '<button class="btn-secondary" data-click="retryAdvisor">Try again</button>' : '';
+  div.innerHTML = `<p>${escHtml(message)}</p>${action}`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  return div;
 }
+function removeTyping() { document.getElementById('typing-msg')?.remove(); }
 
-async function sendAdvisorMessage() {
-  const inp = document.getElementById('ap-input');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  inp.value = ''; inp.style.height = '';
-  document.getElementById('ap-send').disabled = true;
-
-  appendMsg('user', msg);
-  const typing = appendMsg('ai', '', true);
-
+// Asks Fyn. `retry` re-asks the last question without showing the question twice.
+async function askAdvisor(msg, { retry = false } = {}) {
+  if (state.ui.aiBusy) return;
+  renderAdvisorState();
+  if (panelState({ signedIn: activeProfile !== 'local', hasData: state.transactions.some(t => !t.deletedAt), limited: Boolean(state.ui.aiLimited) })) return;
+  state.ui.lastQuestion = msg;
+  if (!retry) appendMsg('user', msg);
+  state.ui.aiBusy = true; renderAdvisorState();
+  appendMsg('ai', '', true);
   const result = await callClaude(msg);
   removeTyping();
-  appendMsg('ai', result.text);
-  document.getElementById('ap-send').disabled = false;
-
-  // Save to history
-  state.advisorHistory.push({
-    id: uid(), prompt: msg, response: result.text,
-    timestamp: new Date().toISOString(), context: buildFinancialContext().summary
-  });
-  Store.set('advisor_history', state.advisorHistory.slice(-100));
-  syncAdvisorHistory();
+  state.ui.aiBusy = false;
+  if (!result.error) {
+    appendMsg('ai', result.text);
+    state.advisorHistory.push({ id: uid(), prompt: msg, response: result.text, timestamp: new Date().toISOString(), context: buildFinancialContext().summary });
+    Store.set('advisor_history', state.advisorHistory.slice(-100));
+    syncAdvisorHistory();
+  } else {
+    const kind = classifyAiError(result.text);
+    if (kind === 'signin') { /* the state card explains it */ }
+    else if (kind === 'consent') appendNotice('consent', 'Fyn AI is off until you agree. You can turn it on again below.');
+    else if (kind === 'limit') { state.ui.aiLimited = true; appendNotice('limit', "You have used today's Fyn AI questions. They reset at midnight UTC."); }
+    else if (kind === 'busy') appendNotice('error', 'Fyn is busy right now. Try again in a minute.', true);
+    else if (kind === 'network') appendNotice('error', 'Could not reach the server. Check your connection and try again.', true);
+    else appendNotice('error', result.text || 'Something went wrong. Please try again.', true);
+  }
+  renderAdvisorState();
 }
+function retryAdvisor() { document.querySelector('#ap-messages .fa-notice:last-child')?.remove(); const q = state.ui.lastQuestion; if (q) askAdvisor(q, { retry: true }); }
 
-function sendQuick(prompt) {
-  document.getElementById('ap-input').value = prompt;
-  sendAdvisorMessage();
+function sendAdvisorMessage() {
+  const inp = document.getElementById('ap-input');
+  const msg = inp.value.trim();
+  if (!msg || inp.disabled) return;
+  inp.value = ''; inp.style.height = '';
+  askAdvisor(msg);
 }
+function sendQuick(prompt) { document.getElementById('ap-input').value = prompt; sendAdvisorMessage(); }
+async function sendAdvisorMessage_raw(msg) { await askAdvisor(msg); }
 
 function handleAdvisorKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdvisorMessage(); }
 }
 function autoResize(el) {
   el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
 }
 
 // ─── Insights tab ──────────────────────────────────────────
 function renderInsightsTab() {
-  const ctx = buildFinancialContext();
-  const s = ctx.summary;
-  const factors = [
-    { label:'SR', name:'Savings Rate', val:`${s.thisMonth.savingsRate}`, sub:'Target: 20%+', status: parseFloat(s.thisMonth.savingsRate)>=20?'ok':parseFloat(s.thisMonth.savingsRate)>=10?'warn':'bad' },
-    { label:'EF', name:'Emergency Fund', val:`${s.emergencyFundMonths} months`, sub:'Target: 6 months', status: parseFloat(s.emergencyFundMonths)>=6?'ok':parseFloat(s.emergencyFundMonths)>=3?'warn':'bad' },
-    { label:'NW', name:'Net Balance', val:`KES ${s.allTime.netWorth.toLocaleString()}`, sub:'Income minus expenses', status: s.allTime.netWorth>=0?'ok':'bad' },
-    { label:'FI', name:'FIRE Progress', val:`${s.fireProgress}`, sub:`of ${s.fireTarget}`, status: parseFloat(s.fireProgress)>=50?'ok':parseFloat(s.fireProgress)>=20?'warn':'bad' },
-  ];
-  const statusColors = {
-    ok:  { bg:'var(--teallt)',  color:'var(--teal)',  label:'Good' },
-    warn:{ bg:'var(--amberlt)', color:'var(--amber)', label:'Fair' },
-    bad: { bg:'var(--roselt)',  color:'var(--rose)',  label:'Low'  },
-  };
+  const s = buildFinancialContext().summary;
+  const rows = insightRows({ savingsRate: s.thisMonth.savingsRate, emergencyMonths: s.emergencyFundMonths, netCashFlow: s.thisMonth.income - s.thisMonth.expenses, independencePct: s.fireProgress }, n => fmtKes(n));
   document.getElementById('adv-insights-tab').innerHTML = `
-    <div class="ins-section">
-      <div class="ins-sec-title">Financial Health</div>
-      ${factors.map(f=>{
-        const sc = statusColors[f.status];
-        return `<div class="ins-metric-card">
-          <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${sc.color};background:${sc.bg};border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${f.label}</div>
-          <div class="imc-info"><div class="imc-name">${f.name}</div><div class="imc-val ${f.status}">${f.val}</div><div class="imc-sub">${f.sub}</div></div>
-          <div class="imc-status" style="background:${sc.bg};color:${sc.color};font-family:var(--fm);font-size:.75rem">${sc.label}</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="ins-section">
-      <div class="ins-sec-title">This Month</div>
-      ${[
-        {label:'Inc', n:'Income',   v:`KES ${s.thisMonth.income.toLocaleString()}`,   c:'good', color:'var(--teal)'},
-        {label:'Exp', n:'Expenses', v:`KES ${s.thisMonth.expenses.toLocaleString()}`, c:'bad',  color:'var(--rose)'},
-        {label:'Sav', n:'Saved',    v:`KES ${s.thisMonth.savings.toLocaleString()}`,  c:'good', color:'var(--blue)'},
-      ].map(m=>`<div class="ins-metric-card">
-        <div style="font-family:var(--fm);font-size:.75rem;font-weight:700;color:${m.color};background:${m.color}18;border-radius:4px;padding:3px 5px;flex-shrink:0;min-width:28px;text-align:center">${m.label}</div>
-        <div class="imc-info"><div class="imc-name">${m.n}</div><div class="imc-val ${m.c}">${m.v}</div></div>
-      </div>`).join('')}
-    </div>
-    <div style="padding:0 0 12px">
-      <button class="btn-primary" style="width:100%;justify-content:center" data-click="runAiAnalysis">Generate AI Analysis</button>
-    </div>`;
+    <ul class="fa-rows">${rows.map(r => `<li class="fa-row"><div><b>${escHtml(r.title)}</b><span class="fa-fig">${escHtml(r.figure)}</span></div><span class="chip ${r.tone === 'good' ? 'ok' : r.tone === 'bad' ? 'bad' : 'warn'}">${escHtml(r.word)}</span></li>`).join('')}</ul>
+    <button class="btn-primary fa-wide" data-click="runAiAnalysis"><span data-icon="spark" aria-hidden="true"></span>Generate AI analysis</button>
+    <p class="muted fa-small">Sends a summary of your records to Fyn AI after you agree.</p>`;
+  renderIcons(document.getElementById('adv-insights-tab'));
 }
 
 // ─── History tab ────────────────────────────────────────────
 function renderHistoryTab() {
-  const hist = state.advisorHistory;
-  const el = document.getElementById('adv-history-tab');
-  if (!hist.length) { el.innerHTML = '<div class="empty" style="padding:30px"><div class="empty-icon" style="font-family:var(--fm);font-size:1.8rem;color:var(--ink3)">∅</div><div class="empty-title">No history yet</div><div class="empty-sub">Your advisor conversations will appear here.</div></div>'; return; }
-  el.innerHTML = hist.slice().reverse().map(h=>`
-    <div class="history-item" data-click="replayHistory" data-click-args="${argsAttr([h.id])}">
-      <div class="hi-prompt">${escHtml(h.prompt)}</div>
-      <div class="hi-meta"><span class="hi-topic">AI</span>${new Date(h.timestamp).toLocaleDateString()}</div>
-    </div>`).join('');
+  const hist = state.advisorHistory, el = document.getElementById('adv-history-tab');
+  if (!hist.length) {
+    el.innerHTML = `<div class="fa-state"><div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>No questions yet</h3><p class="muted">Your questions and Fyn's answers appear here. They are saved on this device.</p><div class="fa-state-acts"><button class="btn-primary" data-click="faAsk">Ask a question</button></div></div>`;
+  } else {
+    el.innerHTML = `<ul class="fa-rows hist">${hist.slice().reverse().map(h => `<li><button class="fa-hrow" data-click="replayHistory" data-click-args="${argsAttr([h.id])}"><span class="fa-hq">${escHtml(h.prompt)}</span><span class="fa-hd">${escHtml(advDate(h.timestamp))}</span><span class="fa-chev" data-icon="chevron" aria-hidden="true"></span></button></li>`).join('')}</ul>
+      <div class="fa-clear"><button class="link" data-click="clearAdvisorHistory">Clear history</button></div>`;
+  }
+  renderIcons(el);
+}
+function faAsk() { openAdvTab('chat'); const i = document.getElementById('ap-input'); if (!i.disabled) i.focus(); }
+function clearAdvisorHistory() {
+  openSetConfirm({ title: 'Clear history?', sub: 'Your saved questions and answers will be removed from this device and from your account. This cannot be undone.',
+    actions: [{ label: 'Cancel', cls: 'btn-secondary' }, { label: 'Clear history', cls: 'btn-danger', fn: async () => {
+      state.advisorHistory = []; Store.set('advisor_history', []); renderHistoryTab();
+      const sb = getSbClient();
+      if (sb && activeProfile !== 'local') { const { data: { session } } = await sb.auth.getSession(); if (session) await sb.from('advisor_history').delete().eq('user_id', session.user.id).catch(() => {}); }
+      showToast('History cleared', 'info');
+    } }] });
 }
 
 function replayHistory(id) {
-  const item = state.advisorHistory.find(h=>h.id===id);
+  const item = state.advisorHistory.find(h => h.id === id);
   if (!item) return;
-  setAdvTab('chat', document.querySelector('.ap-tab'));
+  openAdvTab('chat');
   appendMsg('user', item.prompt);
   appendMsg('ai', item.response);
 }
@@ -551,17 +569,8 @@ function replayHistory(id) {
 // ─── Full AI analysis ───────────────────────────────────────
 async function runAiAnalysis() {
   if (!state.ui.advisorOpen) toggleAdvisor();
-  setAdvTab('chat', document.querySelector('.ap-tab'));
-  await sendAdvisorMessage_raw('Give me a complete financial analysis: cash flow health, top spending problems, budget performance, savings trajectory, and a prioritised 3-step action plan for the next 30 days.');
-}
-async function sendAdvisorMessage_raw(msg) {
-  appendMsg('user', msg);
-  appendMsg('ai', '', true);
-  const result = await callClaude(msg);
-  removeTyping();
-  appendMsg('ai', result.text);
-  state.advisorHistory.push({ id:uid(), prompt:msg, response:result.text, timestamp:new Date().toISOString() });
-  Store.set('advisor_history', state.advisorHistory.slice(-100));
+  openAdvTab('chat');
+  await askAdvisor('Give me a complete financial analysis: cash flow health, top spending problems, budget performance, savings trajectory, and a prioritised 3-step action plan for the next 30 days.');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -581,6 +590,7 @@ function setSyncStatus(status, label) {
   if (typeof renderAttention === 'function') renderAttention();
   if (typeof renderMore === 'function') renderMore();
   if (typeof renderSettings === 'function') renderSettings();
+  if (typeof renderAdvisorState === 'function') renderAdvisorState();
 }
 function dismissSyncBanner() { _bannerDismissed = true; document.getElementById('sync-banner').hidden = true; }
 
@@ -756,6 +766,7 @@ async function syncAdvisorHistory() {
 // ═══════════════════════════════════════════════════════════
 function renderAll() {
   renderDashboard();   // gamification moves to Analytics when that page is redesigned
+  if (typeof renderAdvisorState === 'function') renderAdvisorState();
 }
 
 // ─── Gamification ────────────────────────────────────────────
@@ -2464,7 +2475,7 @@ function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, faSignIn, faAdd, faImport, faAsk, retryAdvisor, clearAdvisorHistory, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, recheckCloudConfig, replayHistory, runAiAnalysis, runImport, saveBudget,
   saveConfig, saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,
@@ -2542,14 +2553,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Fetch config (Supabase URL/key, AI readiness) from the Netlify function on boot
   initCloudConfig();
 
-  // Prime the advisor welcome message (no API call — just a greeting)
-  const ctx = buildFinancialContext();
-  const hasData = ctx.summary.totalTransactions > 0;
-  let welcomeMsg;
-  if (hasData) {
-    welcomeMsg = `Hi **${ctx.userName}**!  I have your financial data loaded — **${ctx.summary.totalTransactions} transactions** on record.\n\nThis month: Income **KES ${ctx.summary.thisMonth.income.toLocaleString()}**, Expenses **KES ${ctx.summary.thisMonth.expenses.toLocaleString()}**, Savings rate **${ctx.summary.thisMonth.savingsRate}**.\n\nAsk me anything or tap a quick prompt below.`;
-  } else {
-    welcomeMsg = `Hi **${ctx.userName}**!  I'm Fyn, your AI financial advisor.\n\nNo transactions yet. Add some manually or **import your M-Pesa statement** to get started. Once you have data, I'll give you personalised financial advice.`;
-  }
-  appendMsg('ai', welcomeMsg);
+  appendMsg('ai', greeting(CFG.get('name')));
+  renderAdvisorState();
 });

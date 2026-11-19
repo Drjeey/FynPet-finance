@@ -1141,42 +1141,41 @@ thead { position:sticky; top:0; z-index:10; }
 </div><!-- /main -->
 
 <!-- ═══ AI ADVISOR PANEL ═══════════════════════════════════ -->
-<div id="advisor-panel">
-  <div class="ap-header">
-    <div>
-      <div class="ap-title-row"><div class="ai-pulse"></div><div class="ap-title">Fyn AI</div></div>
-      <div class="ap-sub">Your recorded finances · Anthropic AI</div>
-    </div>
-    <button class="ap-close" aria-label="Close Fyn AI" data-click="toggleAdvisor"><span data-icon="close" aria-hidden="true"></span></button>
-  </div>
-  <p class="advisor-disclosure">After consent, your question and financial context are sent to Anthropic through Netlify. Phone numbers are removed first.</p><div class="ap-tabs">
-    <button class="ap-tab on" data-click="setAdvTab" data-click-args='["chat","$el"]'>Chat</button>
-    <button class="ap-tab" data-click="setAdvTab" data-click-args='["insights","$el"]'>Insights</button>
-    <button class="ap-tab" data-click="setAdvTab" data-click-args='["history","$el"]'>History</button>
+<div id="advisor-panel" role="dialog" aria-label="Fyn AI">
+  <header class="fa-head">
+    <span class="fa-logo" data-icon="spark" aria-hidden="true"></span>
+    <div class="fa-ttl"><b>Fyn AI</b><small>Answers from your recorded finances</small></div>
+    <button class="fa-close" aria-label="Close Fyn AI" data-click="toggleAdvisor"><span data-icon="close" aria-hidden="true"></span></button>
+  </header>
+  <p class="fa-note"><span data-icon="info" aria-hidden="true"></span><span>After you agree, your question and a summary of your records are sent to Anthropic through our server. Kenyan phone numbers are removed first.</span></p>
+  <div class="fa-tabs" role="tablist" aria-label="Fyn AI sections">
+    <button class="ap-tab on" role="tab" aria-selected="true" data-tab="chat" data-click="setAdvTab" data-click-args='["chat","$el"]'>Chat</button>
+    <button class="ap-tab" role="tab" aria-selected="false" data-tab="insights" data-click="setAdvTab" data-click-args='["insights","$el"]'>Insights</button>
+    <button class="ap-tab" role="tab" aria-selected="false" data-tab="history" data-click="setAdvTab" data-click-args='["history","$el"]'>History</button>
   </div>
 
-  <!-- Chat tab -->
-  <div id="adv-chat-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
-    <div class="ap-messages" id="ap-messages" aria-live="polite" aria-label="Conversation"></div>
-    <div class="quick-prompts" id="quick-prompts">
+  <div id="adv-chat-tab" class="fa-pane">
+    <div class="fa-msgs" id="ap-messages" aria-live="polite" aria-label="Conversation"></div>
+    <div class="fa-state" id="fa-state" hidden></div>
+    <div class="fa-chips" id="quick-prompts">
       <button class="qp-btn" data-click="sendQuick" data-click-args='["Analyse my cash flow this month"]'>Cash flow</button>
       <button class="qp-btn" data-click="sendQuick" data-click-args='["Am I on track with my budgets?"]'>Budget check</button>
       <button class="qp-btn" data-click="sendQuick" data-click-args='["What are my top 3 spending problems?"]'>Spending issues</button>
-      <button class="qp-btn" data-click="sendQuick" data-click-args='["How much should I save each month to reach my FIRE target?"]'>FIRE advice</button>
+      <button class="qp-btn" data-click="sendQuick" data-click-args='["How much should I save each month to reach my long-term target?"]'>Savings target</button>
       <button class="qp-btn" data-click="sendQuick" data-click-args='["Give me a 3-month action plan to improve my finances"]'>Action plan</button>
       <button class="qp-btn" data-click="sendQuick" data-click-args='["Which categories should I cut to save more?"]'>Where to cut</button>
     </div>
-    <div class="ap-input-wrap">
-      <textarea class="ap-textarea" id="ap-input" aria-label="Ask Fyn AI" placeholder="Ask about your finances…" rows="1" data-keydown="handleAdvisorKey" data-keydown-args='["$event"]' data-input="autoResize" data-input-args='["$el"]'></textarea>
-      <button class="ap-send" id="ap-send" aria-label="Send message" data-click="sendAdvisorMessage"><span data-icon="send" aria-hidden="true"></span></button>
+    <div class="fa-composer">
+      <div class="fa-input">
+        <textarea id="ap-input" aria-label="Ask Fyn AI" placeholder="Ask about your finances" rows="1" data-keydown="handleAdvisorKey" data-keydown-args='["$event"]' data-input="autoResize" data-input-args='["$el"]'></textarea>
+        <button class="fa-send" id="ap-send" aria-label="Send message" data-click="sendAdvisorMessage"><span data-icon="send" aria-hidden="true"></span></button>
+      </div>
+      <p class="fa-disc">Fyn gives general guidance, not regulated financial advice.</p>
     </div>
   </div>
 
-  <!-- Insights tab -->
-  <div id="adv-insights-tab" class="insights-tab-content" style="display:none;overflow-y:auto"></div>
-
-  <!-- History tab -->
-  <div id="adv-history-tab" style="display:none;overflow-y:auto;flex:1"></div>
+  <div id="adv-insights-tab" class="fa-pane fa-scroll" hidden></div>
+  <div id="adv-history-tab" class="fa-pane fa-scroll" hidden></div>
 </div>
 
 </div><!-- /layout -->
@@ -1414,7 +1413,7 @@ thead { position:sticky; top:0; z-index:10; }
   </div>
 </div>
 
-<div class="modal-overlay" id="ai-consent-modal"><div class="modal" style="max-width:420px"><div class="modal-hdr"><h2 class="modal-title" id="consent-title">Before you use AI</h2><button class="modal-close" aria-label="Close without agreeing" data-click="answerAiConsent" data-click-args='[false]'><span data-icon="close" aria-hidden="true"></span></button></div><div class="modal-body consent-body"><p>FynPet uses Anthropic to answer questions and extract transactions from M-Pesa statements.</p><section><h3>Advisor questions</h3><p>Your profile name, monthly totals, budgets and up to 10 recent transaction summaries are sent through Netlify to Anthropic.</p></section><section><h3>Statement import</h3><p>The PDF opens locally. Extracted text, including dates, amounts and merchant or counterparty names, is sent through Netlify to Anthropic after consent.</p></section><section><h3>Your choice</h3><p>Phone numbers are removed before Anthropic processing. You can use manual records and CSV export without AI. Turn off consent in Settings at any time.</p></section></div><div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>Agree and continue</button></div></div></div>
+<div class="modal-overlay" id="ai-consent-modal"><div class="modal add-modal raise-modal" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-hdr"><h2 class="modal-title" id="consent-title">Before you use AI</h2><button class="modal-close" aria-label="Close without agreeing" data-click="answerAiConsent" data-click-args='[false]'><span data-icon="close" aria-hidden="true"></span></button></div><div class="modal-body consent-body"><p class="muted">FynPet uses Anthropic to answer questions and extract transactions from M-Pesa statements.</p><section class="disc"><h3>Advisor questions</h3><p class="muted">Your name, monthly totals, budgets and up to 10 recent transactions are sent through our server to Anthropic.</p></section><section class="disc"><h3>Statement import</h3><p class="muted">The PDF opens on your device. Extracted text, including dates, amounts and merchant or sender names, is sent the same way after you agree.</p></section><p class="disc-note">Your choice: nothing is sent until you agree. You can turn this off in Settings.</p></div><div class="modal-acts"><button class="btn-secondary" data-click="answerAiConsent" data-click-args='[false]'>Not now</button><button class="btn-primary" data-click="answerAiConsent" data-click-args='[true]'>Agree and continue</button></div></div></div>
 
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal confirm-modal">
