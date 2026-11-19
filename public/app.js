@@ -785,12 +785,6 @@ const fmtMoney = n => {
   return value.toLocaleString('en-KE', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
 };
 const fmtKes = n => 'KES ' + fmtMoney(n);
-const fmtKesCompact = n => {
-  const a = Math.abs(n);
-  if (a >= 1e6) return `KES ${parseFloat((n / 1e6).toFixed(1))}M`;
-  if (a >= 1e4) return `KES ${parseFloat((n / 1e3).toFixed(1))}k`;
-  return fmtKes(n);
-};
 const axisLabel = n => n >= 1e6 ? `${parseFloat((n / 1e6).toFixed(2))}M` : n >= 1e3 ? `${parseFloat((n / 1e3).toFixed(2))}k` : String(n);
 const nairobiFmt = (date, options) => new Intl.DateTimeFormat('en-KE', { timeZone: 'Africa/Nairobi', ...options }).format(date);
 const monthLong = (offset = 0, now = new Date()) => nairobiFmt(new Date(`${monthKey(now, offset)}-01T12:00:00Z`), { month: 'long' });
@@ -1012,11 +1006,15 @@ function renderDonut() {
     const len = Math.max((s.total / total) * C - GAP, 1), arc = `<circle class="seg-arc" cx="88" cy="88" r="${R}" stroke="${(CATS[s.key] || CATS.other).color}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}"/>`;
     offset += (s.total / total) * C; return arc;
   }).join('');
-  host.innerHTML = `<svg viewBox="0 0 176 176" aria-hidden="true"><circle class="track" cx="88" cy="88" r="${R}"/>${arcs}</svg><div class="donut-center"><small>${total > 0 ? 'Total spent' : 'Spent'}</small><b>${total > 0 ? fmtKesCompact(total) : 'KES 0'}</b></div>`;
-  host.setAttribute('aria-label', total > 0 ? 'Spending this month: ' + shares.map(s => `${(CATS[s.key] || CATS.other).label} ${s.pct}%`).join(', ') : 'No spending recorded this month');
+  // The ring's hole is about 120px wide: show whole shillings, or 36.7k / 1.2M, with a small "KES" in front.
+  // The exact total stays in the hover title and the screen-reader label.
+  const centre = total >= 1e6 ? `${parseFloat((total / 1e6).toFixed(1))}M` : total >= 1e4 ? `${parseFloat((total / 1e3).toFixed(1))}k` : Math.round(total).toLocaleString('en-KE');
+  host.innerHTML = `<svg viewBox="0 0 176 176" aria-hidden="true"><circle class="track" cx="88" cy="88" r="${R}"/>${arcs}</svg><div class="donut-center"${total > 0 ? ` title="${fmtKes(total)}"` : ''}><small>${total > 0 ? 'Total spent' : 'Spent'}</small><b><span class="cur">KES</span>${total > 0 ? centre : '0'}</b></div>`;
+  host.setAttribute('aria-label', total > 0 ? `Spending this month: ${fmtKes(total)}. ` + shares.map(s => `${(CATS[s.key] || CATS.other).label} ${s.pct}%`).join(', ') : 'No spending recorded this month');
+  // Amounts drop the repeated "KES" (the card is all shillings) so category names get the room and are never cut off.
   legend.innerHTML = total > 0 ? shares.map(s => {
     const cat = CATS[s.key] || CATS.other;
-    return `<li><span class="sw" style="background:${cat.color}"></span><span class="nm">${escHtml(cat.label)}</span><span class="pc">${s.pct}%</span><span class="am">${fmtKes(s.total)}</span></li>`;
+    return `<li aria-label="${escHtml(`${cat.label}: ${s.pct}%, ${fmtKes(s.total)}`)}"><span class="sw" style="background:${cat.color}"></span><span class="nm">${escHtml(cat.label)}</span><span class="pc">${s.pct}%</span><span class="am">${fmtMoney(s.total)}</span></li>`;
   }).join('') : '<li class="empty-note">No spending recorded this month.</li>';
 }
 
