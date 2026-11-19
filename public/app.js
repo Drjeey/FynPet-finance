@@ -190,6 +190,11 @@ function loadProfileData(p = activeProfile) {
 // Exactly one client at a time, and it always carries the auth listener: a client created without it
 // would complete a sign-in that the app never hears about (the dialog would stay on "Signing in...").
 let sbClient = null;
+// True when this deployment has an account service, so sign-in buttons can actually work.
+function signInAvailable() {
+  const cfg = window._cloudConfig;
+  return Boolean(cfg?.supabaseUrl && (cfg?.supabasePublicKey || cfg?.supabaseAnonKey));
+}
 function getSbClient() {
   if (sbClient) return sbClient;
   const cfg = window._cloudConfig;
@@ -417,14 +422,15 @@ function renderAdvisorState() {
   const box = document.getElementById('fa-state'), msgs = document.getElementById('ap-messages'), input = document.getElementById('ap-input'), send = document.getElementById('ap-send');
   const blocked = kind === 'signin' || kind === 'nodata';
   box.hidden = !blocked; msgs.hidden = blocked; document.getElementById('quick-prompts').hidden = blocked;
-  if (kind === 'signin') box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>Sign in to use Fyn AI</h3><p class="muted">Your records stay on this device. Signing in lets Fyn answer from your recorded finances.</p>
+  if (kind === 'signin' && !signInAvailable()) box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>Fyn AI is not available here</h3><p class="muted">Fyn AI needs an account, and sign-in is not set up in this version. Your records are saved on this device.</p>`;
+  else if (kind === 'signin') box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>Sign in to use Fyn AI</h3><p class="muted">Your records stay on this device. Signing in lets Fyn answer from your recorded finances.</p>
     <div class="fa-state-acts"><button class="btn-primary" data-click="faSignIn" data-click-args='["in"]'>Sign in</button><button class="btn-secondary" data-click="faSignIn" data-click-args='["up"]'>Create account</button></div>`;
   else if (kind === 'nodata') box.innerHTML = `<div class="empty-ico"><span data-icon="spark" aria-hidden="true"></span></div><h3>No records yet</h3><p class="muted">Add a few transactions first and Fyn can answer from your records.</p>
     <div class="fa-state-acts"><button class="btn-primary" data-click="faAdd"><span data-icon="plus" aria-hidden="true"></span>Add transaction</button><button class="btn-secondary" data-click="faImport">Import M-Pesa statement</button></div>`;
   if (blocked) renderIcons(box);
   const off = kind !== '' || state.ui.aiBusy;
   input.disabled = off; send.disabled = off;
-  input.placeholder = kind === 'signin' ? 'Sign in to ask questions' : kind === 'nodata' ? 'Add records to ask questions' : kind === 'limit' ? 'Daily question limit reached' : state.ui.aiBusy ? 'Wait for the answer' : 'Ask about your finances';
+  input.placeholder = kind === 'signin' ? (signInAvailable() ? 'Sign in to ask questions' : 'Fyn AI is not available here') : kind === 'nodata' ? 'Add records to ask questions' : kind === 'limit' ? 'Daily question limit reached' : state.ui.aiBusy ? 'Wait for the answer' : 'Ask about your finances';
 }
 function faSignIn(tab) { toggleAdvisor(); openAuth(tab); }
 function faAdd() { toggleAdvisor(); openAddTx(); }
@@ -773,7 +779,12 @@ function renderAll() {
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD (Midnight Ledger). Every figure comes from calc.js and the saved records.
 // ═══════════════════════════════════════════════════════════
-const fmtKes = n => 'KES ' + Number(n).toLocaleString('en-KE', { maximumFractionDigits: 2 });
+// Money reads as whole shillings, or with both cent digits: "KES 2,880.50", never "KES 2,880.5".
+const fmtMoney = n => {
+  const value = Math.round(Number(n) * 100) / 100, whole = Number.isInteger(value);
+  return value.toLocaleString('en-KE', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
+};
+const fmtKes = n => 'KES ' + fmtMoney(n);
 const fmtKesCompact = n => {
   const a = Math.abs(n);
   if (a >= 1e6) return `KES ${parseFloat((n / 1e6).toFixed(1))}M`;
@@ -907,6 +918,11 @@ function drawMainChart(period = _chartPeriod, { animate = false } = {}) {
   ctx.font = '12px Inter, sans-serif';
   const pL = Math.ceil(ctx.measureText(`KES ${axisLabel(top)}`).width) + 20, pR = 8, pT = 14, pB = 30, cW = W - pL - pR, cH = H - pT - pB, gap = cW / n;
   _chartGeom = { pL, gap, n, pT, cH, top, W, H, income, expenses, labels };
+  // Axis labels must not run into each other on narrow screens: "13–16" shortens to "13", and if that still
+  // does not fit, every other label is drawn. The tooltip and the table keep the full range.
+  const fits = list => list.every(text => ctx.measureText(text).width <= gap - 8);
+  const ticks = fits(labels) ? labels : period === 'month' ? labels.map(label => label.split('–')[0]) : labels;
+  const tickEvery = fits(ticks) ? 1 : 2;
   const bw = Math.min(gap * 0.28, 30);
   cancelAnimationFrame(_chartAnim);
   const paint = t => {
@@ -928,7 +944,7 @@ function drawMainChart(period = _chartPeriod, { animate = false } = {}) {
         ctx.beginPath(); ctx.roundRect(x, pT + cH - h, bw, h, [4, 4, 0, 0]); ctx.fill(); ctx.globalAlpha = 1;
       });
       ctx.fillStyle = sel ? '#f4f6f8' : COLORS.text; ctx.font = `${sel ? 600 : 400} 12px Inter, sans-serif`; ctx.textAlign = 'center';
-      ctx.fillText(label, cx, H - 12);
+      if (sel || i % tickEvery === 0) ctx.fillText(ticks[i], cx, H - 12);
     });
   };
   if (animate && hasData && !reducedMotion()) {
@@ -944,7 +960,8 @@ function updateChartText(series, period, hasData) {
   const totalExp = expenses.reduce((a, b) => a + b, 0);
   if (totalExp > 0) {
     const at = labels[expenses.indexOf(Math.max(...expenses))];
-    summary.textContent = `Expenses were highest ${period === 'week' ? 'on' : period === '3m' ? 'in' : 'between'} ${chartTitleFor(period, at)}.`;
+    // Word joiners keep a range like "1–4" on one line.
+    summary.textContent = `Expenses were highest ${period === 'week' ? 'on' : period === '3m' ? 'in' : 'between'} ${chartTitleFor(period, at).replace('–', '⁠–⁠')}.`;
   } else summary.textContent = hasData ? 'No expenses recorded in this period.' : '';
   table.innerHTML = '<caption>Income and expenses by period</caption><thead><tr><th scope="col">Period</th><th scope="col">Income</th><th scope="col">Expenses</th></tr></thead><tbody>' +
     labels.map((l, i) => `<tr><th scope="row">${escHtml(chartTitleFor(period, l))}</th><td>${fmtKes(income[i])}</td><td>${fmtKes(expenses[i])}</td></tr>`).join('') + '</tbody>';
@@ -1056,7 +1073,7 @@ function pageList(current, total) {
 function txTypeAmount(tx) {
   const cls = tx.type === 'income' ? 'in' : tx.type === 'savings' ? 'sav' : tx.type === 'transfer' ? 'neu' : 'out';
   const sign = tx.type === 'income' ? '+' : '-', foreign = tx.currency && tx.currency !== 'KES';
-  return `<span class="rtx-amt ${cls}">${sign}${fmtKes(txAmountKes(tx))}</span>${foreign ? `<small class="fx">${escHtml(tx.currency)} ${Number(tx.amount).toLocaleString('en-KE')}</small>` : ''}`;
+  return `<span class="rtx-amt ${cls}">${sign}${fmtKes(txAmountKes(tx))}</span>${foreign ? `<small class="fx">${escHtml(tx.currency)} ${fmtMoney(tx.amount)}</small>` : ''}`;
 }
 
 function renderTxPage() {
@@ -1657,7 +1674,7 @@ function openTxDetail(id) {
   const amt = document.getElementById('td-amt');
   amt.className = 'detail-amt ' + (income ? 'in' : tx.type === 'savings' ? 'sav' : 'out');
   amt.textContent = `${income ? '+' : '-'}${fmtKes(txAmountKes(tx))}`;
-  if (tx.currency && tx.currency !== 'KES') amt.insertAdjacentHTML('beforeend', `<small>${escHtml(tx.currency)} ${Number(tx.amount).toLocaleString('en-KE')}</small>`);
+  if (tx.currency && tx.currency !== 'KES') amt.insertAdjacentHTML('beforeend', `<small>${escHtml(tx.currency)} ${fmtMoney(tx.amount)}</small>`);
   document.getElementById('td-name').textContent = tx.description;
   document.getElementById('td-cat').innerHTML = `<span class="sw" style="background:${cat.color}"></span>${escHtml(cat.label)}`;
   document.getElementById('td-date').textContent = nairobiFmt(new Date(`${tx.date}T12:00:00Z`), { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1676,10 +1693,12 @@ function renderMore() {
   document.getElementById('more-chip').textContent = signedIn ? 'Signed in' : 'Local only';
   document.getElementById('more-chip').className = 'chip ' + (signedIn ? 'up' : '');
   document.getElementById('more-av').textContent = (CFG.get('name') || 'Y').charAt(0).toUpperCase();
-  document.getElementById('more-foot').hidden = signedIn;
+  document.getElementById('more-foot').hidden = signedIn || !signInAvailable();
   card.innerHTML = signedIn
     ? `<div class="ms-head"><span class="sync-dot ${dot}"></span><b>Signed in${state.ui.email ? ' as ' + escHtml(state.ui.email) : ''}</b></div><p>${escHtml(label)}</p><div class="ms-acts"><button class="btn-secondary" data-click="syncNow">Sync now</button><button class="btn-danger-sm" data-click="confirmSignOut">Sign out</button></div>`
-    : `<div class="ms-head"><span class="sync-dot local"></span><b>Saved on this device</b></div><p>Sign in to back up your records and use them on another device.</p><button class="btn-secondary" data-click="openAuth" data-click-args='["in"]'>Sign in to sync</button>`;
+    : signInAvailable()
+      ? `<div class="ms-head"><span class="sync-dot local"></span><b>Saved on this device</b></div><p>Sign in to back up your records and use them on another device.</p><button class="btn-secondary" data-click="openAuth" data-click-args='["in"]'>Sign in to sync</button>`
+      : `<div class="ms-head"><span class="sync-dot local"></span><b>Saved on this device</b></div><p>Sign-in is not available here, so your records stay on this device.</p>`;
 }
 
 // The phone layout calls the first page "Home"; larger screens call it "Dashboard".
@@ -2157,9 +2176,10 @@ function saveProfile() {
 }
 
 function renderSettings() {
-  const foot = document.querySelector('.sb-foot .btn-secondary'); if (foot) foot.hidden = activeProfile !== 'local';
+  const available = signInAvailable();
+  const foot = document.querySelector('.sb-foot .btn-secondary'); if (foot) foot.hidden = activeProfile !== 'local' || !available;
   const host = document.getElementById('set-acct'); if (!host) return;
-  const cfg = window._cloudConfig, available = Boolean(cfg?.supabaseUrl && (cfg?.supabasePublicKey || cfg?.supabaseAnonKey));
+  const cfg = window._cloudConfig;
   const signedIn = activeProfile !== 'local';
   const dot = document.getElementById('sync-dot').className.replace('sync-dot', '').trim() || 'local';
   const view = accountView({ signedIn, email: state.ui.email, dot, label: document.getElementById('sync-label').textContent, available });
@@ -2167,8 +2187,9 @@ function renderSettings() {
   chip.textContent = view.state === 'synced' ? view.headline : view.state === 'syncing' ? 'Syncing...' : 'Not synced'; chip.className = 'chip ' + (view.state === 'synced' ? 'up' : view.state === 'problem' ? 'warn' : '');
   const aiLine = signedIn ? (cfg?.aiEnabled ? 'Fyn AI is available on your account.' : 'Fyn AI is not set up in this environment.') : '';
   if (!signedIn) {
+    // Where sign-in cannot work (no account service configured), say so and offer no buttons that would do nothing.
     host.innerHTML = `<p class="set-status"><span class="sync-dot local"></span>${escHtml(view.headline)}</p><p class="muted">${escHtml(view.note)}</p>
-      <div class="set-acts"><button class="btn-primary" data-click="openAuth" data-click-args='["in"]' ${available ? '' : 'disabled'}>Sign in</button><button class="btn-secondary" data-click="openAuth" data-click-args='["up"]' ${available ? '' : 'disabled'}>Create account</button></div>`;
+      ${available ? `<div class="set-acts"><button class="btn-primary" data-click="openAuth" data-click-args='["in"]'>Sign in</button><button class="btn-secondary" data-click="openAuth" data-click-args='["up"]'>Create account</button></div>` : ''}`;
   } else {
     const problem = view.state === 'problem';
     host.innerHTML = `<p class="set-status"><span class="sync-dot ${problem ? 'syncing' : 'connected'}"></span>${escHtml(problem ? view.headline : view.headline)}</p>

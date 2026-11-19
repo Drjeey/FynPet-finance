@@ -12,6 +12,8 @@
   --border:#252e3b; --border2:#3a4658; --border3:#4a566a;
   /* text: nothing dimmer than --ink2 for readable text; --ink4 is for decoration only */
   --ink:#f4f6f8; --ink2:#a3aebd; --ink3:#a3aebd; --ink4:#7c8797;
+  /* placeholder hint: 5.0:1 on raised inputs (--ink4 is 4.45:1 there), still clearly dimmer than typed text */
+  --ink-ph:#8590a0;
   /* accent (actions and selection only) */
   --accent:#c6f432; --on-accent:#0a0d12;
   --blue:#c6f432; --blue2:#b3dc2c; --blue3:#d6f866;
@@ -33,7 +35,10 @@ body { font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 input, textarea, select { color:var(--ink); }
 input, select, textarea { background:var(--surface2); border-color:var(--border); }
-input::placeholder, textarea::placeholder { color:var(--ink2); opacity:.8; }
+input::placeholder, textarea::placeholder, .form-input::placeholder { color:var(--ink-ph); opacity:1; }
+/* No single-word last lines in headings; tidier rags in short copy. */
+h1, h2, h3, .ph-title, .modal-title { text-wrap:balance; }
+p, li, small, .muted { text-wrap:pretty; }
 input { caret-color:var(--accent); }
 ::-webkit-calendar-picker-indicator { filter:invert(.8); }
 
@@ -242,8 +247,10 @@ input { caret-color:var(--accent); }
   .tb-title em { display:none; }
 }
 @media (max-width:560px) {
-  .attention-list li { flex-wrap:wrap; }
-  .attention-list .btn-secondary { margin-left:56px; }
+  /* Icon stays beside its text; the action sits under the text, aligned with it. */
+  .attention-list li { display:grid; grid-template-columns:40px minmax(0, 1fr); column-gap:16px; row-gap:10px; align-items:start; }
+  .attention-list .att-text { align-self:center; }
+  .attention-list .btn-secondary { grid-column:2; justify-self:start; margin-left:0; }
   .seg .pb { min-height:44px; }
 }
 
@@ -718,6 +725,10 @@ body[data-page="transactions"] .tb-search { display:none; }
 .set-hd { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .set-hd h2 { font:700 20px var(--fd); margin:0; letter-spacing:-.01em; }
 .set-acts { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+/* The account block renders into one wrapper, so it needs its own rhythm: status and note together, actions apart. */
+#set-acct { display:grid; gap:6px; }
+#set-acct .set-acts { margin-top:12px; }
+#set-acct .set-email { margin-top:6px; }
 .set-acts button { min-height:44px; }
 .set-status { display:flex; align-items:center; gap:10px; font:600 15px var(--fb); color:var(--ink); }
 .set-status .sync-dot { flex:0 0 auto; }
@@ -837,7 +848,7 @@ body[data-page="transactions"] .tb-search { display:none; }
 .fa-input { display:flex; align-items:flex-end; gap:10px; padding:8px 8px 8px 16px; background:var(--surface2); border:1px solid var(--border2); border-radius:22px; }
 .fa-input:focus-within { border-color:var(--accent); }
 .fa-input textarea { flex:1; min-width:0; background:transparent !important; border:0 !important; outline:0; box-shadow:none !important; resize:none; color:var(--ink); font:400 16px/1.5 var(--fb); min-height:44px; max-height:140px; padding:10px 0; }
-.fa-input textarea::placeholder { color:var(--ink4); }
+.fa-input textarea::placeholder { color:var(--ink-ph); }
 .fa-input textarea:disabled { color:var(--ink4); }
 .fa-send { width:44px; height:44px; border-radius:50%; background:var(--accent); color:var(--on-accent); border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
 .fa-send:disabled { opacity:.35; cursor:default; }
