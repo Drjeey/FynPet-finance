@@ -1,6 +1,16 @@
+<p align="center">
+  <img src="docs/readme/banner.png" alt="FynPet: personal finance for Kenya. Transactions, budgets, analytics, M-Pesa import and Fyn AI." width="100%">
+</p>
+
 # FynPet — Financial Intelligence
 
 A personal finance app for Kenya: transactions, budgets, analytics, M-Pesa statement import and an AI advisor powered by Claude.
+
+<p align="center">
+  <img src="docs/readme/screens.png" alt="FynPet mobile screens: Home, Add transaction, Transactions, Budgets, Analytics and M-Pesa import" width="100%">
+  <br>
+  <sub>Mobile screens, shown with sample data.</sub>
+</p>
 
 - **Front end:** one static page, `public/index.html` (vanilla HTML/CSS/JS with browser ES modules; no bundler).
 - **Server:** Netlify Functions in `netlify/functions/`. They hold the secrets and call Anthropic.
