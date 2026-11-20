@@ -9,6 +9,7 @@ import { monthlyRows, hasAnyData as anHasData, savingsSentence, avgMonthlyExpens
 import { budgetRows, budgetSummary, lastMonthSpent, categoryChoices, suggestRaise } from './budgets.js';
 import { splitChunks, dedupeWithinFile, classifyRows, statementTotals, reconcile, importStatus, failureReason, selectionTotals } from './importreview.js';
 import { parseStatement } from './mpesa.js';
+import { makeDisplay, rateLines, rateText, formatAmount, DISPLAY_CURRENCIES, CURRENCY_NAMES } from './display.js';
 import { quickCategories, categoryForDescription, defaultCategory, defaultDescription, parseAmount, amountError } from './addflow.js';
 
 // ═══════════════════════════════════════════════════════════
@@ -772,6 +773,7 @@ async function syncAdvisorHistory() {
 // RENDER ENGINE
 // ═══════════════════════════════════════════════════════════
 function renderAll() {
+  renderFxPill();
   renderDashboard();
   if (typeof renderAdvisorState === 'function') renderAdvisorState();
 }
@@ -794,21 +796,24 @@ const CAT_ICON = { food:'basket', transport:'car', utilities:'bolt', entertainme
 
 let _heroCounted = false;
 function renderHero() {
-  const now = new Date(), s = monthSummary(state.transactions, now, exchangeRates());
+  const now = new Date(), s = monthSummary(state.transactions, now, exchangeRates()), D = disp();
   const hasAny = state.transactions.length > 0;
   const netEl = document.getElementById('hero-net');
-  const text = value => (value < 0 ? '-' : '') + fmtKes(Math.abs(value));
-  netEl.classList.toggle('neg', s.net < 0);
-  if (!_heroCounted && s.net !== 0 && !reducedMotion()) {
+  const net = D.diff(s.income, s.expenses);
+  const text = value => (value < 0 ? '-' : '') + D.fmt(Math.abs(value));
+  netEl.classList.toggle('neg', net < 0);
+  if (!_heroCounted && net !== 0 && !reducedMotion()) {
     _heroCounted = true;
-    const start = performance.now(), end = Math.abs(s.net), sign = s.net < 0 ? -1 : 1;
+    const start = performance.now(), end = Math.abs(net), sign = net < 0 ? -1 : 1;
     const tick = t => {
       const p = Math.min(1, (t - start) / 700), eased = 1 - (1 - p) ** 3;
-      netEl.textContent = text(sign * Math.round(end * eased));
-      if (p < 1) requestAnimationFrame(tick); else netEl.textContent = text(s.net);
+      netEl.textContent = text(sign * (D.active ? D.round(end * eased) : Math.round(end * eased)));
+      if (p < 1) requestAnimationFrame(tick); else netEl.textContent = text(net);
     };
     requestAnimationFrame(tick);
-  } else { _heroCounted = _heroCounted || s.net !== 0; netEl.textContent = text(s.net); }
+  } else { _heroCounted = _heroCounted || net !== 0; netEl.textContent = text(net); }
+  const recorded = document.getElementById('hero-recorded');
+  if (recorded) { recorded.hidden = !D.active || !hasAny; recorded.textContent = D.active ? `${s.net < 0 ? '-' : ''}${fmtKes(Math.abs(s.net))} recorded` : ''; }
 
   const delta = document.getElementById('hero-delta');
   if (hasAny && s.netChangePct !== null) {
@@ -820,7 +825,7 @@ function renderHero() {
   if (!hasAny) {
     sub.textContent = 'Add your first transaction or import a statement to see your month.'; split.hidden = true; return;
   }
-  sub.innerHTML = `<span><span class="k">Income</span><b>${fmtKes(s.income)}</b></span><span><span class="k">Spent</span><b>${fmtKes(s.expenses)}</b></span>`;
+  sub.innerHTML = `<span><span class="k">Income</span><b>${D.money(s.income)}</b></span><span><span class="k">Spent</span><b>${D.money(s.expenses)}</b></span>`;
   if (s.income > 0 || s.expenses > 0) {
     split.hidden = false;
     const spent = s.income > 0 ? s.spentPct : 100;
@@ -839,7 +844,7 @@ function attentionItems(now = new Date()) {
     .map(b => ({ b, spent: totalKes(state.transactions, { type: 'expense', category: b.category, ...bounds }) }))
     .filter(x => x.spent > x.b.limit).sort((a, b) => (b.spent - b.b.limit) - (a.spent - a.b.limit));
   if (over.length === 1) {
-    items.push({ kind: 'bad', icon: 'alert', html: `<b>${escHtml((CATS[over[0].b.category] || CATS.other).label)}</b> is <span class="over">${fmtKes(over[0].spent - over[0].b.limit)} over</span> budget`, label: 'View budget', action: 'goPage', args: ['budgets', null] });
+    items.push({ kind: 'bad', icon: 'alert', html: `<b>${escHtml((CATS[over[0].b.category] || CATS.other).label)}</b> is <span class="over">${disp().fmt(disp().diff(over[0].spent, over[0].b.limit))} over</span> budget`, label: 'View budget', action: 'goPage', args: ['budgets', null] });
   } else if (over.length > 1) {
     items.push({ kind: 'bad', icon: 'alert', html: `<b>${over.length} budgets</b> are over their limit`, label: 'View budgets', action: 'goPage', args: ['budgets', null] });
   }
@@ -877,20 +882,20 @@ function renderBudgetStatus() {
     const spent = totalKes(state.transactions, { type: 'expense', category: b.category, ...bounds });
     return { b, spent, pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
   }).sort((a, b) => b.pct - a.pct);
-  const shown = rows.slice(0, 3);
+  const shown = rows.slice(0, 3), D = disp();
   el.innerHTML = shown.map(({ b, spent, pct }) => {
-    const label = escHtml((CATS[b.category] || CATS.other).label), over = spent > b.limit, left = Math.max(b.limit - spent, 0);
+    const label = escHtml((CATS[b.category] || CATS.other).label), over = spent > b.limit, left = Math.max(D.diff(b.limit, spent), 0);
     const tone = over ? 'bad' : pct >= 80 ? 'warn' : '';
-    const perDay = left > 0 ? Math.round(left / daysLeft) : 0;
-    const leftText = over ? `<b>${fmtKes(spent - b.limit)} over</b>` : `<b>${fmtKes(left)} left</b>${perDay > 0 ? ` · about ${fmtKes(perDay)} a day` : ''}`;
-    const note = over ? `Exceeded by ${Math.round(((spent - b.limit) / b.limit) * 100)}%` : `${Math.round(pct)}% used of ${fmtKes(b.limit)}`;
+    const perDay = left > 0 ? (D.active ? D.round(left / daysLeft) : Math.round(left / daysLeft)) : 0;
+    const leftText = over ? `<b>${D.fmt(D.diff(spent, b.limit))} over</b>` : `<b>${D.fmt(left)} left</b>${perDay > 0 ? ` · about ${D.fmt(perDay)} a day` : ''}`;
+    const note = over ? `Exceeded by ${Math.round(((spent - b.limit) / b.limit) * 100)}%` : `${Math.round(pct)}% used of ${D.money(b.limit)}`;
     return `<div class="bud"><div class="bud-top"><span class="bud-name">${label}</span><span class="bud-left ${over ? 'over' : ''}">${leftText}</span></div>
       <div class="bud-track" role="progressbar" aria-label="${label} budget" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, Math.round(pct))}"><div class="bud-fill ${tone}${over ? ' pulse' : ''}" style="width:${Math.min(100, pct)}%"></div></div>
       <div class="bud-note ${over ? 'over' : ''}">${note}</div></div>`;
   }).join('');
   const top = rows.slice().sort((a, b) => b.b.limit - a.b.limit)[0];
   const lastSpent = totalKes(state.transactions, { type: 'expense', category: top.b.category, ...periodBounds('month', now, true) });
-  el.insertAdjacentHTML('beforeend', `<div class="bud-foot"><span>${lastSpent > 0 ? `Last month you spent ${fmtKes(lastSpent)} on ${escHtml((CATS[top.b.category] || CATS.other).label)}.` : ''}</span><button class="link" data-click="goPage" data-click-args='["budgets",null]'>${rows.length > 3 ? `View all ${rows.length} budgets` : 'View all budgets'}</button></div>`);
+  el.insertAdjacentHTML('beforeend', `<div class="bud-foot"><span>${lastSpent > 0 ? `Last month you spent ${D.money(lastSpent)} on ${escHtml((CATS[top.b.category] || CATS.other).label)}.` : ''}</span><button class="link" data-click="goPage" data-click-args='["budgets",null]'>${rows.length > 3 ? `View all ${rows.length} budgets` : 'View all budgets'}</button></div>`);
 }
 
 // ─── Cash flow chart (canvas, with hover/keyboard tooltip and a text alternative) ───
@@ -902,7 +907,8 @@ function drawMainChart(period = _chartPeriod, { animate = false } = {}) {
   _chartPeriod = period;
   const c = document.getElementById('main-canvas'); if (!c) return;
   const W = c.clientWidth, H = c.clientHeight; if (!W || !H) return;
-  const series = chartSeries(state.transactions, period, new Date(), exchangeRates());
+  const raw = chartSeries(state.transactions, period, new Date(), exchangeRates()), D = disp();
+  const series = { ...raw, income: raw.income.map(D.conv), expenses: raw.expenses.map(D.conv) };
   const { labels, income, expenses } = series, n = labels.length;
   const hasData = [...income, ...expenses].some(v => v > 0);
   const dpr = window.devicePixelRatio || 1;
@@ -910,7 +916,7 @@ function drawMainChart(period = _chartPeriod, { animate = false } = {}) {
   const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const { step, top } = niceScale(Math.max(...income, ...expenses, 0));
   ctx.font = '12px Inter, sans-serif';
-  const pL = Math.ceil(ctx.measureText(`KES ${axisLabel(top)}`).width) + 20, pR = 8, pT = 14, pB = 30, cW = W - pL - pR, cH = H - pT - pB, gap = cW / n;
+  const pL = Math.ceil(ctx.measureText(`${D.code} ${axisLabel(top)}`).width) + 20, pR = 8, pT = 14, pB = 30, cW = W - pL - pR, cH = H - pT - pB, gap = cW / n;
   _chartGeom = { pL, gap, n, pT, cH, top, W, H, income, expenses, labels };
   // Axis labels must not run into each other on narrow screens: "13–16" shortens to "13", and if that still
   // does not fit, every other label is drawn. The tooltip and the table keep the full range.
@@ -925,7 +931,7 @@ function drawMainChart(period = _chartPeriod, { animate = false } = {}) {
     for (let i = 0; i <= 3; i++) {
       const y = pT + cH * (1 - i / 3);
       ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
-      ctx.fillStyle = COLORS.text; ctx.textAlign = 'right'; ctx.fillText(hasData ? `KES ${axisLabel(step * i)}` : (i === 0 ? 'KES 0' : ''), pL - 10, y);
+      ctx.fillStyle = COLORS.text; ctx.textAlign = 'right'; ctx.fillText(hasData ? `${D.code} ${axisLabel(step * i)}` : (i === 0 ? `${D.code} 0` : ''), pL - 10, y);
     }
     if (!hasData) { ctx.fillStyle = COLORS.text; ctx.textAlign = 'center'; ctx.fillText('No activity yet. Add transactions to see your cash flow.', pL + cW / 2, pT + cH / 2); return; }
     labels.forEach((label, i) => {
@@ -958,7 +964,7 @@ function updateChartText(series, period, hasData) {
     summary.textContent = `Expenses were highest ${period === 'week' ? 'on' : period === '3m' ? 'in' : 'between'} ${chartTitleFor(period, at).replace('–', '⁠–⁠')}.`;
   } else summary.textContent = hasData ? 'No expenses recorded in this period.' : '';
   table.innerHTML = '<caption>Income and expenses by period</caption><thead><tr><th scope="col">Period</th><th scope="col">Income</th><th scope="col">Expenses</th></tr></thead><tbody>' +
-    labels.map((l, i) => `<tr><th scope="row">${escHtml(chartTitleFor(period, l))}</th><td>${fmtKes(income[i])}</td><td>${fmtKes(expenses[i])}</td></tr>`).join('') + '</tbody>';
+    labels.map((l, i) => `<tr><th scope="row">${escHtml(chartTitleFor(period, l))}</th><td>${disp().fmt(income[i])}</td><td>${disp().fmt(expenses[i])}</td></tr>`).join('') + '</tbody>';
 }
 
 function showChartTip(index) {
@@ -966,7 +972,7 @@ function showChartTip(index) {
   if (!g || index < 0 || index >= g.n) { tip.hidden = true; if (_chartSel !== -1) { _chartSel = -1; drawMainChart(_chartPeriod); } return; }
   _chartSel = index; drawMainChart(_chartPeriod);
   const cx = g.pL + index * g.gap + g.gap / 2, tall = Math.max(g.income[index], g.expenses[index]);
-  tip.innerHTML = `<b>${escHtml(chartTitleFor(_chartPeriod, g.labels[index]))}</b><span class="i">Income ${fmtKes(g.income[index])}</span><br><span class="e">Expenses ${fmtKes(g.expenses[index])}</span>`;
+  tip.innerHTML = `<b>${escHtml(chartTitleFor(_chartPeriod, g.labels[index]))}</b><span class="i">Income ${disp().fmt(g.income[index])}</span><br><span class="e">Expenses ${disp().fmt(g.expenses[index])}</span>`;
   tip.hidden = false;
   tip.style.left = Math.min(Math.max(cx, 90), g.W - 90) + 'px';
   tip.style.top = Math.max(g.pT + g.cH * (1 - tall / g.top) - 10, 70) + 'px';
@@ -998,8 +1004,10 @@ function renderDonut() {
   const host = document.getElementById('donut'), legend = document.getElementById('donut-legend'); if (!host) return;
   const now = new Date(), bounds = periodBounds('month', now);
   document.getElementById('donut-period-sub').textContent = `${monthLong(0, now)} ${monthKey(now).slice(0, 4)}`;
-  const totals = categoryTotals(state.transactions, { type: 'expense', ...bounds }, exchangeRates());
-  const shares = categoryShares(totals, 5), total = Object.values(totals).reduce((a, b) => a + b, 0);
+  const D = disp();
+  // Each category is converted once; the total is the sum of the shown amounts, so the legend adds up.
+  const totals = Object.fromEntries(Object.entries(categoryTotals(state.transactions, { type: 'expense', ...bounds }, exchangeRates())).map(([k, v]) => [k, D.conv(v)]));
+  const shares = categoryShares(totals, 5), total = Object.values(totals).reduce((t, v) => t + Math.round(v * D.unit), 0) / D.unit;
   const R = 70, C = 2 * Math.PI * R, GAP = shares.length > 1 ? 3 : 0;
   let offset = 0;
   const arcs = shares.map(s => {
@@ -1008,13 +1016,13 @@ function renderDonut() {
   }).join('');
   // The ring's hole is about 120px wide: show whole shillings, or 36.7k / 1.2M, with a small "KES" in front.
   // The exact total stays in the hover title and the screen-reader label.
-  const centre = total >= 1e6 ? `${parseFloat((total / 1e6).toFixed(1))}M` : total >= 1e4 ? `${parseFloat((total / 1e3).toFixed(1))}k` : Math.round(total).toLocaleString('en-KE');
-  host.innerHTML = `<svg viewBox="0 0 176 176" aria-hidden="true"><circle class="track" cx="88" cy="88" r="${R}"/>${arcs}</svg><div class="donut-center"${total > 0 ? ` title="${fmtKes(total)}"` : ''}><small>${total > 0 ? 'Total spent' : 'Spent'}</small><b><span class="cur">KES</span>${total > 0 ? centre : '0'}</b></div>`;
-  host.setAttribute('aria-label', total > 0 ? `Spending this month: ${fmtKes(total)}. ` + shares.map(s => `${(CATS[s.key] || CATS.other).label} ${s.pct}%`).join(', ') : 'No spending recorded this month');
+  const centre = total >= 1e6 ? `${parseFloat((total / 1e6).toFixed(1))}M` : total >= 1e4 ? `${parseFloat((total / 1e3).toFixed(1))}k` : D.active ? D.num(total) : Math.round(total).toLocaleString('en-KE');
+  host.innerHTML = `<svg viewBox="0 0 176 176" aria-hidden="true"><circle class="track" cx="88" cy="88" r="${R}"/>${arcs}</svg><div class="donut-center"${total > 0 ? ` title="${D.fmt(total)}"` : ''}><small>${total > 0 ? 'Total spent' : 'Spent'}</small><b><span class="cur">${D.code}</span>${total > 0 ? centre : '0'}</b></div>`;
+  host.setAttribute('aria-label', total > 0 ? `Spending this month: ${D.fmt(total)}. ` + shares.map(s => `${(CATS[s.key] || CATS.other).label} ${s.pct}%`).join(', ') : 'No spending recorded this month');
   // Amounts drop the repeated "KES" (the card is all shillings) so category names get the room and are never cut off.
   legend.innerHTML = total > 0 ? shares.map(s => {
     const cat = CATS[s.key] || CATS.other;
-    return `<li aria-label="${escHtml(`${cat.label}: ${s.pct}%, ${fmtKes(s.total)}`)}"><span class="sw" style="background:${cat.color}"></span><span class="nm">${escHtml(cat.label)}</span><span class="pc">${s.pct}%</span><span class="am">${fmtMoney(s.total)}</span></li>`;
+    return `<li aria-label="${escHtml(`${cat.label}: ${s.pct}%, ${D.fmt(s.total)}`)}"><span class="sw" style="background:${cat.color}"></span><span class="nm">${escHtml(cat.label)}</span><span class="pc">${s.pct}%</span><span class="am">${D.num(s.total)}</span></li>`;
   }).join('') : '<li class="empty-note">No spending recorded this month.</li>';
 }
 
@@ -1022,10 +1030,13 @@ function renderRecentTx() {
   const el = document.getElementById('recent-tx'); if (!el) return;
   const recent = [...state.transactions].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
   if (!recent.length) { el.innerHTML = '<li class="empty-note">No transactions yet.</li>'; return; }
+  const D = disp();
   el.innerHTML = recent.map(t => {
     const cat = CATS[t.category] || CATS.other, source = t.source === 'import' ? 'Imported' : 'Manual';
     const cls = t.type === 'income' ? 'in' : t.type === 'savings' ? 'sav' : 'out', sign = t.type === 'income' ? '+' : '-';
-    const amount = `${sign}${fmtKes(txAmountKes(t))}`, spoken = `${fmtKes(txAmountKes(t))} ${t.type === 'income' ? 'received' : 'spent'}`;
+    // In KES the row looks as it always has; in another currency the original sits beneath when it differs.
+    const orig = D.active ? txOriginal(t, D) : '';
+    const amount = `${sign}${D.fmt(txShown(t, D))}${orig ? `<small class="fx">${escHtml(orig)}</small>` : ''}`, spoken = `${D.fmt(txShown(t, D))} ${t.type === 'income' ? 'received' : 'spent'}${orig ? `, entered as ${orig}` : ''}`;
     return `<li><button class="rtx" data-click="openTxDetail" data-click-args="${argsAttr([t.id])}" aria-haspopup="dialog" aria-label="${escHtml(`${t.description}, ${cat.label}, ${shortDate(t.date)}, ${source}, ${spoken}. Open details.`)}">
       <span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[t.category] || 'dots')}</span>
       <span><span class="rtx-name" style="display:block">${escHtml(t.description)}</span><span class="rtx-meta" style="display:block">${escHtml(cat.label)} · ${shortDate(t.date)} · ${source}</span></span>
@@ -1049,6 +1060,12 @@ function exchangeRates() {
   }));
 }
 function txAmountKes(tx) { return amountKes(tx, exchangeRates()); }
+// Display currency (Settings → "Show amounts in"). Changes only what is shown; saved records stay as they are.
+function disp() { return makeDisplay(CFG.get('displayCurrency') || 'KES', exchangeRates()); }
+// One transaction's amount in the shown currency: the exact entered amount when it was entered in that currency.
+function txShown(tx, D = disp()) { return tx.currency === D.code && D.active ? D.round(Number(tx.amount)) : D.conv(txAmountKes(tx)); }
+// The original amount beneath a converted one, when it was entered in another currency.
+function txOriginal(tx, D = disp()) { const cur = tx.currency || 'KES'; return cur === D.code ? '' : `${cur} ${formatAmount(tx.amount, cur)}`; }
 function totalKes(transactions, options) { return sumKes(transactions, options, exchangeRates()); }
 
 // ═══════════════════════════════════════════════════════════
@@ -1070,13 +1087,14 @@ function pageList(current, total) {
 }
 function txTypeAmount(tx) {
   const cls = tx.type === 'income' ? 'in' : tx.type === 'savings' ? 'sav' : tx.type === 'transfer' ? 'neu' : 'out';
-  const sign = tx.type === 'income' ? '+' : '-', foreign = tx.currency && tx.currency !== 'KES';
-  return `<span class="rtx-amt ${cls}">${sign}${fmtKes(txAmountKes(tx))}</span>${foreign ? `<small class="fx">${escHtml(tx.currency)} ${fmtMoney(tx.amount)}</small>` : ''}`;
+  const sign = tx.type === 'income' ? '+' : '-', D = disp(), orig = txOriginal(tx, D);
+  return `<span class="rtx-amt ${cls}">${sign}${D.fmt(txShown(tx, D))}</span>${orig ? `<small class="fx">${escHtml(orig)}</small>` : ''}`;
 }
 
 function renderTxPage() {
   const all = state.transactions.length, rows = filterTransactions(state.transactions, txFilters()), active = txFiltersActive();
-  document.getElementById('tx-count-sub').textContent = active ? `${rows.length} of ${all} shown` : `${all} transaction${all === 1 ? '' : 's'}`;
+  const shownIn = disp().active ? ` · shown in ${disp().code}` : '';
+  document.getElementById('tx-count-sub').textContent = (active ? `${rows.length} of ${all} shown` : `${all} transaction${all === 1 ? '' : 's'}`) + shownIn;
   document.querySelectorAll('#tx-filter-row .pb').forEach(b => {
     const on = readArgs(b, 'click')[0] === state.ui.txFilter; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
   });
@@ -1137,7 +1155,7 @@ function txDesktopRow(tx) {
 function txPhoneRow(tx) {
   const cat = CATS[tx.category] || CATS.other, source = tx.source === 'import' ? 'Imported' : 'Manual';
   return `<li><button class="rtx" data-click="openTxDetail" data-click-args="${argsAttr([tx.id])}" aria-haspopup="dialog"
-    aria-label="${escHtml(`${tx.description}, ${cat.label}, ${shortDate(tx.date)}, ${source}, ${fmtKes(txAmountKes(tx))}. Open details.`)}">
+    aria-label="${escHtml(`${tx.description}, ${cat.label}, ${shortDate(tx.date)}, ${source}, ${disp().fmt(txShown(tx))}${txOriginal(tx) ? `, entered as ${txOriginal(tx)}` : ''}. Open details.`)}">
     <span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[tx.category] || 'dots')}</span>
     <span><span class="rtx-name" style="display:block">${escHtml(tx.description)}</span><span class="rtx-meta" style="display:block">${escHtml(cat.label)} · ${source}</span></span>
     <span class="rtx-amt-wrap">${txTypeAmount(tx)}</span></button></li>`;
@@ -1229,11 +1247,14 @@ function openTxMenu(id, button) {
 // BUDGETS PAGE
 // ═══════════════════════════════════════════════════════════
 function renderBudgetsPage() {
-  const now = new Date(), rows = budgetRows(state.budgets, state.transactions, now, exchangeRates()), summary = budgetSummary(rows, now);
+  const now = new Date(), rows = budgetRows(state.budgets, state.transactions, now, exchangeRates()), summary = budgetSummary(rows, now), D = disp();
+  // Shown figures: each limit and spent total is converted once; left, over and per-day come from those, so the page adds up.
+  const days = daysLeftInMonth(now), perDayOf = left => left > 0 ? (D.active ? D.round(left / days) : Math.round(left / days)) : 0;
+  const shownLeft = Math.round((D.sum(rows.map(r => r.budget.limit)) - D.sum(rows.map(r => r.spent))) * D.unit) / D.unit;
   document.getElementById('bud-month').textContent = monthLong(0, now);
   const line = document.getElementById('budget-summary');
   line.hidden = !rows.length;
-  if (rows.length) line.innerHTML = `<b>${summary.over ? `${fmtKes(-summary.left)} over` : `${fmtKes(summary.left)} left`}</b> across ${summary.count} budget${summary.count === 1 ? '' : 's'}<span class="dotsep">·</span><b>${summary.pctUsed}%</b> used${summary.perDay > 0 ? `<span class="dotsep">·</span>about <b>${fmtKes(summary.perDay)}</b> a day` : ''}`;
+  if (rows.length) line.innerHTML = `<b>${shownLeft < 0 ? `${D.fmt(-shownLeft)} over` : `${D.fmt(shownLeft)} left`}</b> across ${summary.count} budget${summary.count === 1 ? '' : 's'}<span class="dotsep">·</span><b>${summary.pctUsed}%</b> used${perDayOf(shownLeft) > 0 ? `<span class="dotsep">·</span>about <b>${D.fmt(perDayOf(shownLeft))}</b> a day` : ''}`;
   const grid = document.getElementById('budget-grid');
   if (!rows.length) {
     grid.innerHTML = `<div class="card tx-empty"><span class="empty-ico">${icon('wallet')}</span><h3>No budgets yet</h3><p class="muted">Set a monthly limit for a category to see how much is left.</p><button class="btn-primary" data-click="openAddBudget"><span data-icon="plus" aria-hidden="true"></span>Create budget</button></div>`;
@@ -1242,16 +1263,17 @@ function renderBudgetsPage() {
   const sorted = rows.slice().sort((a, b) => b.pct - a.pct);
   grid.innerHTML = sorted.map(row => {
     const b = row.budget, cat = CATS[b.category] || CATS.other, label = escHtml(cat.label), id = argsAttr([b.id]);
-    const big = row.over ? `<b>${fmtKes(row.spent - b.limit)}</b> over` : `<b>${fmtKes(row.left)}</b> left`;
-    const sub = row.over ? `Limit exceeded by ${row.overPct}%` : row.perDay > 0 ? `about ${fmtKes(row.perDay)} a day` : 'No days left to spend it';
+    const left = D.diff(b.limit, row.spent), perDay = row.over ? 0 : perDayOf(left);
+    const big = row.over ? `<b>${D.fmt(-left)}</b> over` : `<b>${D.fmt(left)}</b> left`;
+    const sub = row.over ? `Limit exceeded by ${row.overPct}%` : perDay > 0 ? `about ${D.fmt(perDay)} a day` : 'No days left to spend it';
     const chip = row.tone === 'warn' ? `${Math.round(row.pct)}% · ${Math.max(0, 100 - Math.round(row.pct))}% remaining` : `${Math.round(row.pct)}%`;
     return `<article class="bcard ${row.over ? 'is-over' : ''}" aria-label="${label} budget">
-      <header><span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[b.category] || 'dots')}</span><div class="bc-id"><h3>${label}</h3><span class="muted">Monthly limit ${fmtKes(b.limit)}</span></div>
+      <header><span class="rtx-ico" style="color:${cat.color}">${icon(CAT_ICON[b.category] || 'dots')}</span><div class="bc-id"><h3>${label}</h3><span class="muted">${D.active ? `Limit set in ${fmtKes(b.limit)}` : `Monthly limit ${fmtKes(b.limit)}`}</span></div>
         <button type="button" class="ib dots" aria-label="Actions for ${label} budget" aria-haspopup="menu" aria-expanded="false" data-click="openBudgetMenu" data-click-args="${argsAttr([b.id, '$el'])}"><span data-icon="dots" aria-hidden="true"></span></button></header>
       <div class="bc-big ${row.over ? 'over' : ''}">${big}</div>
       <div class="bc-sub ${row.over ? 'over' : ''}">${sub}</div>
       <div class="bud-track" role="progressbar" aria-label="${label} budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, Math.round(row.pct))}"><div class="bud-fill ${row.tone === 'ok' ? '' : row.tone}" style="width:${Math.min(100, row.pct)}%"></div></div>
-      <footer><span>Spent ${fmtKes(row.spent)} of ${fmtKes(b.limit)}</span><span class="chip ${row.tone}">${chip}</span></footer>
+      <footer><span>Spent ${D.money(row.spent)} of ${D.money(b.limit)}</span><span class="chip ${row.tone}">${chip}</span></footer>
       ${row.over ? `<div class="bc-acts"><button type="button" class="btn-secondary" data-click="openRaiseLimit" data-click-args="${id}">Raise limit</button><button type="button" class="btn-secondary" data-click="viewBudgetTx" data-click-args="${argsAttr([b.category])}">View transactions</button></div>` : ''}</article>`;
   }).join('') + (categoryChoices(state.budgets).some(c => !c.taken) ? `<button type="button" class="bcard add" data-click="openAddBudget"><span class="add-plus">${icon('plus')}</span><b>Add a budget</b><small>Create a spending limit for a new category</small></button>` : '');
   renderIcons(grid);
@@ -1270,6 +1292,14 @@ function updateBudgetHint() {
   const category = document.getElementById('b-cat').value, spent = lastMonthSpent(state.transactions, category, new Date(), exchangeRates());
   const hint = document.getElementById('b-hint'); hint.hidden = !(spent > 0); hint.dataset.amount = String(Math.round(spent));
   if (spent > 0) document.getElementById('b-hint-text').textContent = `Last month you spent ${fmtKes(spent)} on ${(CATS[category] || CATS.other).label}.`;
+  updateBudgetFx();
+}
+// "About USD 92.31 at your saved rate." under the KES limit, when amounts are shown in another currency.
+function updateBudgetFx() {
+  const D = disp(), el = document.getElementById('b-fx'); if (!el) return;
+  const value = parseAmount(document.getElementById('b-limit').value);
+  el.hidden = !D.active || !(value > 0);
+  el.textContent = D.active && value > 0 ? `About ${D.money(value)} at your saved rate.` : '';
 }
 function openAddBudget() {
   const free = categoryChoices(state.budgets).find(c => !c.taken);
@@ -1289,11 +1319,11 @@ function openEditBudget(id) {
   openModal('budget-modal');
 }
 function budgetCatChanged() { setBudgetError('cat', ''); updateBudgetHint(); }
-function budgetLimitInput() { numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); }
+function budgetLimitInput() { numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); updateBudgetFx(); }
 function budgetEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveBudget(); } }
 function useLastMonth() {
   const amount = Number(document.getElementById('b-hint').dataset.amount) || 0;
-  if (amount > 0) { document.getElementById('b-limit').value = String(amount); numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); document.getElementById('b-limit').focus(); }
+  if (amount > 0) { document.getElementById('b-limit').value = String(amount); numericOnly(document.getElementById('b-limit')); setBudgetError('limit', ''); updateBudgetFx(); document.getElementById('b-limit').focus(); }
 }
 function saveBudget() {
   const category = document.getElementById('b-cat').value, limit = parseAmount(document.getElementById('b-limit').value), editing = state.ui.editBudgetId;
@@ -1371,7 +1401,10 @@ function renderAnalytics() {
   document.getElementById('an-empty').hidden = has;
   document.getElementById('an-body').hidden = !has;
   if (!has) return;
-  const rows = monthlyRows(state.transactions, anNow(), exchangeRates());
+  const D = disp();
+  // Each month's totals are converted once; net comes from the converted figures so every row adds up.
+  const rows = monthlyRows(state.transactions, anNow(), exchangeRates()).map(r => D.active
+    ? { ...r, income: D.conv(r.income), expenses: D.conv(r.expenses), saved: D.conv(r.saved), net: D.diff(r.income, r.expenses) } : r);
   renderSavingChart(rows);
   const cover = coverStatus(state.transactions, anNow(), exchangeRates(), CFG.getNum('efGoalMonths', 6));
   document.getElementById('an-cover-months').textContent = cover.months.toFixed(1) + ' months';
@@ -1382,8 +1415,10 @@ function renderAnalytics() {
   document.getElementById('an-cover-goal-l').textContent = `${cover.goal} months`;
   document.getElementById('an-cover-note').textContent = cover.met ? `You have reached your goal of ${cover.goal} months.` : 'Aim for 3 to 6 months.';
   const goal = independenceStatus(state.transactions, anNow(), exchangeRates(), CFG.getNum('fireTarget', 3000000));
-  document.getElementById('an-goal-saved').textContent = fmtKes(goal.saved);
-  document.getElementById('an-goal-of').textContent = ` of ${fmtKes(goal.target)}`;
+  document.getElementById('an-goal-saved').textContent = D.money(goal.saved);
+  document.getElementById('an-goal-of').textContent = ` of ${D.money(goal.target)}`;
+  const goalKes = document.getElementById('an-goal-kes'); goalKes.hidden = !D.active; goalKes.textContent = D.active ? `Goal set in ${fmtKes(goal.target)}` : '';
+  const exportNote = document.getElementById('an-export-note'); exportNote.hidden = !D.active;
   document.getElementById('an-goal-pct').textContent = goal.pct.toFixed(1) + '%';
   setBar('an-goal', goal.pct, goal.pct.toFixed(1) + ' percent');
   document.getElementById('an-goal-pace').textContent = paceText(goal.years);
@@ -1392,14 +1427,14 @@ function renderAnalytics() {
 function renderSavingChart(rows) {
   const heights = barHeights(rows), cur = rows[rows.length - 1];
   document.getElementById('an-chart').innerHTML = rows.map((r, i) => `
-    <button type="button" class="an-col${r.current ? ' cur' : ''}" data-click="anSelBar" data-click-args='[${i}]' aria-label="${escHtml(r.title)}: saved ${fmtKes(r.saved)}${r.rate != null ? ', savings rate ' + Math.round(r.rate) + '%' : ''}">
-      <span class="an-tip" role="tooltip"><b>${escHtml(r.title)}</b>Saved ${fmtKes(r.saved)}<br>Savings rate ${r.rate != null ? Math.round(r.rate) + '%' : 'no income'}</span>
+    <button type="button" class="an-col${r.current ? ' cur' : ''}" data-click="anSelBar" data-click-args='[${i}]' aria-label="${escHtml(r.title)}: saved ${disp().fmt(r.saved)}${r.rate != null ? ', savings rate ' + Math.round(r.rate) + '%' : ''}">
+      <span class="an-tip" role="tooltip"><b>${escHtml(r.title)}</b>Saved ${disp().fmt(r.saved)}<br>Savings rate ${r.rate != null ? Math.round(r.rate) + '%' : 'no income'}</span>
       <span class="an-bar"><i style="height:${heights[i]}%"></i></span>
       <span class="an-lbl">${escHtml(r.label)}</span>
     </button>`).join('');
-  document.getElementById('an-sentence').textContent = savingsSentence(cur, fmtKes);
+  document.getElementById('an-sentence').textContent = savingsSentence(cur, disp().fmt);
   document.getElementById('an-sav-table').innerHTML = `<table class="txt an-table"><thead><tr><th>Month</th><th class="r">Saved</th><th class="r">Savings rate</th></tr></thead><tbody>${
-    [...rows].reverse().map(r => `<tr><td>${escHtml(r.title)}</td><td class="r nw">${fmtKes(r.saved)}</td><td class="r nw">${r.rate != null ? Math.round(r.rate) + '%' : '-'}</td></tr>`).join('')}</tbody></table>`;
+    [...rows].reverse().map(r => `<tr><td>${escHtml(r.title)}</td><td class="r nw">${disp().fmt(r.saved)}</td><td class="r nw">${r.rate != null ? Math.round(r.rate) + '%' : '-'}</td></tr>`).join('')}</tbody></table>`;
 }
 function anToggleTable() {
   const btn = document.getElementById('an-toggle'), on = btn.getAttribute('aria-pressed') !== 'true';
@@ -1410,7 +1445,7 @@ function anSelBar(i) {
   document.querySelectorAll('#an-chart .an-col').forEach((c, k) => c.classList.toggle('sel', k === i && !c.classList.contains('sel')));
 }
 function renderMonthlySummary(rows) {
-  const list = [...rows].reverse(), tone = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+  const list = [...rows].reverse(), tone = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '', fmtKes = disp().fmt;
   const signed = n => (n > 0 ? '+' : n < 0 ? '-' : '') + fmtKes(Math.abs(n));
   document.getElementById('monthly-table').innerHTML = list.map(r => `<tr>
     <td class="nw"><b>${escHtml(r.title)}</b>${r.current ? ' <span class="chip ok">This month</span>' : ''}</td>
@@ -1671,8 +1706,14 @@ function openTxDetail(id) {
   const cat = CATS[tx.category] || CATS.other, income = tx.type === 'income';
   const amt = document.getElementById('td-amt');
   amt.className = 'detail-amt ' + (income ? 'in' : tx.type === 'savings' ? 'sav' : 'out');
-  amt.textContent = `${income ? '+' : '-'}${fmtKes(txAmountKes(tx))}`;
-  if (tx.currency && tx.currency !== 'KES') amt.insertAdjacentHTML('beforeend', `<small>${escHtml(tx.currency)} ${fmtMoney(tx.amount)}</small>`);
+  const D = disp(), orig = txOriginal(tx, D), cur = tx.currency || 'KES';
+  amt.textContent = `${income ? '+' : '-'}${D.fmt(txShown(tx, D))}`;
+  if (orig) amt.insertAdjacentHTML('beforeend', `<small>${escHtml(orig)}</small>`);
+  // "Entered as": the amount as typed and the KES value fixed when it was saved.
+  const entered = document.getElementById('td-entered-row');
+  entered.hidden = !D.active && cur === 'KES';
+  const savedOn = tx.createdAt ? ` on ${shortDate(String(tx.createdAt).slice(0, 10))}` : '';
+  document.getElementById('td-entered').textContent = cur === 'KES' ? fmtKes(tx.amount) : `${cur} ${formatAmount(tx.amount, cur)} · saved as ${fmtKes(txAmountKes(tx))}${savedOn}`;
   document.getElementById('td-name').textContent = tx.description;
   document.getElementById('td-cat').innerHTML = `<span class="sw" style="background:${cat.color}"></span>${escHtml(cat.label)}`;
   document.getElementById('td-date').textContent = nairobiFmt(new Date(`${tx.date}T12:00:00Z`), { day: 'numeric', month: 'long', year: 'numeric' });
@@ -2142,8 +2183,40 @@ async function signOut(force = false) {
 const RATE_LABEL = { USD: 'US dollar', EUR: 'Euro', GBP: 'British pound', TZS: 'Tanzanian shilling', UGX: 'Ugandan shilling' };
 function loadSettingsPage() {
   document.getElementById('cfg-name').value = CFG.get('name') || '';
-  renderRateList(); renderSettings();
+  renderDisplaySettings(); renderRateList(); renderSettings();
 }
+
+// ─── Display currency (Settings card, top-bar pill, phone sheet) ───
+const currencyLabel = code => `${code} - ${CURRENCY_NAMES[code]}${code === 'KES' ? ' (default)' : ''}`;
+function renderDisplaySettings() {
+  const D = disp(), select = document.getElementById('cfg-display'); if (!select) return;
+  select.innerHTML = DISPLAY_CURRENCIES.map(c => `<option value="${c}"${c === D.code ? ' selected' : ''}>${escHtml(currencyLabel(c))}</option>`).join('');
+  const lines = rateLines(D.code, exchangeRates());
+  document.getElementById('fx-worked').hidden = !lines.length;
+  document.getElementById('fx-worked-list').innerHTML = lines.map(l => `<div><dt>${escHtml(l.left)} =</dt><dd>${escHtml(l.right)}</dd></div>`).join('');
+}
+function renderFxPill() {
+  const pill = document.getElementById('fx-pill'); if (!pill) return;
+  const D = disp(), rate = rateText(D.rate);
+  pill.hidden = !D.active;
+  document.getElementById('fx-pill-code').textContent = D.code;
+  const text = `Shown in ${D.code} at your saved rate, 1 ${D.code} = KES ${rate}. Change in Settings.`;
+  pill.title = D.active ? text : ''; pill.setAttribute('aria-label', D.active ? text : '');
+}
+function setDisplayCurrency(code) {
+  const next = DISPLAY_CURRENCIES.includes(code) ? code : 'KES';
+  if (next === (CFG.get('displayCurrency') || 'KES')) return;
+  CFG.set('displayCurrency', next);
+  renderDisplaySettings(); renderFxPill(); rerenderCurrentPage();
+  showToast(`Showing amounts in ${disp().code}`, 'success');
+}
+function openFxSheet() {
+  const D = disp();
+  document.getElementById('fx-options').innerHTML = DISPLAY_CURRENCIES.map(c => `<button type="button" class="fx-opt" role="radio" aria-checked="${c === D.code}" data-click="fxPick" data-click-args='["${c}"]'><b>${c}</b><span>${escHtml(CURRENCY_NAMES[c])}${c === 'KES' ? ' (default)' : ''}</span><i class="fx-radio" aria-hidden="true"></i></button>`).join('');
+  openModal('fx-sheet');
+}
+function fxPick(code) { closeModal('fx-sheet'); setDisplayCurrency(code); }
+function fxEditRates() { closeModal('fx-sheet'); goPage('settings', null); setTimeout(() => document.getElementById('set-h-fx')?.scrollIntoView({ block: 'start' }), 60); }
 function renderRateList() {
   const rates = exchangeRates();
   document.getElementById('rate-list').innerHTML = RATE_CURRENCIES.map(code => `
@@ -2161,6 +2234,7 @@ function saveRates() {
   });
   if (!ok) { document.getElementById(`rate-${RATE_CURRENCIES.find(c => errors[c])}`).focus(); return; }
   RATE_CURRENCIES.forEach(c => CFG.set('rate_' + c, String(values[c])));
+  renderDisplaySettings(); renderFxPill(); rerenderCurrentPage();
   showToast('Exchange rates saved', 'success');
 }
 function profileEnter(e) { if (e.key === 'Enter') { e.preventDefault(); saveProfile(); } }
@@ -2440,7 +2514,7 @@ function submitOnEnter(e){if(e.key==='Enter')submitAuth()}
 const ACTIONS = {
   syncNow: () => syncNow({ interactive: true }),
   answerAiConsent, autoResize, choosePdf, clearFile, clearLocalData, closeModal, confirmDel, confirmSignOut, dzDrag, dzDrop, openModal, revokeAiConsent,
-  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, faSignIn, faAdd, faImport, faAsk, retryAdvisor, clearAdvisorHistory, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
+  dismissSyncBanner, exportCSV, setTxType, toggleMoreTypes, setTxCat, toggleCatSelect, toggleTxDetails, txAmountInput, txDescInput, txCurrencyChanged, txEnterSaves, toastAction, openAddChoice, chooseAdd, openTxDetail, detailEdit, detailDelete, openAuth, togglePassword, authInput, authBackToSignIn, authDifferentEmail, rateInput, saveRates, setDisplayCurrency, openFxSheet, fxPick, fxEditRates, saveProfile, profileEnter, reviewAndTurnOn, aiDisclosureOff, setConfirmAct, faSignIn, faAdd, faImport, faAsk, retryAdvisor, clearAdvisorHistory, anToggleTable, anSelBar, openGoalDialog, goalInput, goalEnter, saveGoal, openTargetDialog, targetInput, targetEnter, useSuggestedTarget, saveTarget, askFynAbout, confirmAsk, openTxMenu, openTxFilters, txQuickRange, txResetFilters, txApplyFilters, txClearAll, txRemoveCat, txRemoveDates, txLoadMore, openBudgetMenu, baEdit, baDelete, openRaiseLimit, saveRaise, raiseInput, raiseEnter, viewBudgetTx, budgetCatChanged, budgetLimitInput, budgetEnter, useLastMonth, impCancel, impBack, impToggleRow, impSetCategory, impSave, impReset, impRetry, goPage, handleAdvisorKey, handlePDF, mobGoPage, openAddBudget, openAddTx, openEditBudget,
   openEditTx, replayHistory, runAiAnalysis, runImport, saveBudget,
   saveTx, searchTx, searchGlobalTx, sendAdvisorMessage, sendQuick, setAdvTab, setAuthTab, setChartPeriod,
   setTxFilter, setTxPage, skipAuth, submitAuth, submitOnEnter, toggleAdvisor,

@@ -18,6 +18,7 @@ Statuses: NOT STARTED · UNDER AUDIT · AUDIT COMPLETED · STITCH PROMPT PREPARE
 | 8. Fyn AI + consent | AUDIT COMPLETED | APPROVED with conditions (24_REVIEW) | BUILT | VERIFIED (geometry at 375/1440, fake backend) | NOT COMMITTED |
 | 9. Settings + sign-in/sync | AUDIT COMPLETED | APPROVED with conditions (22_REVIEW) | BUILT | VERIFIED (1440/375/320, fake backend) | NOT COMMITTED |
 | 10. Light theme | AUDIT COMPLETED | STITCH PROMPT PREPARED (prompt 7, optional) | — | NOT STARTED | NOT STARTED |
+| 11. Display currency (new feature) | Not applicable (new) | APPROVED with conditions (26_REVIEW_DISPLAY_CURRENCY.md, export 7, 2026-11-19) | Approved | BUILT (public/display.js) | VERIFIED (1440/375, local server, sample data); NOT COMMITTED |
 | Administration | Not applicable: no admin features exist | — | — | — | — |
 
 Audit scope note: code review plus `npm test` and `npm audit`. No live browser, sync, AI or real-statement testing was done (see report).
@@ -35,6 +36,8 @@ Audit scope note: code review plus `npm test` and `npm audit`. No live browser, 
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-11-19 | Display currency changes only what is shown: records stay in their entry currency with fixed KES values, budgets stay in KES, conversions use the person's saved rates (cross pairs derived from them), and each screen adds up in the shown currency | Keeps saved history and budgets unchanged; no live-rate claims (PRODUCT.md) |
+| 2026-11-19 | Display-currency designs (export 7) approved with conditions; picker and "back to KES" frames rejected as not needed; build conditions in 26_REVIEW_DISPLAY_CURRENCY.md | Patterns clear; Stitch drift handled as build corrections |
 | 2026-11-16 | All UI is designed in Google Stitch only; Claude writes prompts and reviews | User's rule |
 | 2026-11-16 | Dashboard hero is net cash flow, not "balance" | FynPet has no accounts; a balance would be invented |
 | 2026-11-16 | Lime accent kept separate from income green | Brand and "good" must not look the same |

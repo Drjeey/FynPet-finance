@@ -840,6 +840,7 @@ thead { position:sticky; top:0; z-index:10; }
   <div id="topbar">
     <button class="mob-ham" aria-label="Open navigation" data-click="toggleMobSidebar"><span data-icon="menu" aria-hidden="true"></span></button>
     <span class="tb-mark" aria-hidden="true">FP</span><div class="tb-title" id="tb-title">Dashboard <em id="tb-date-label"></em></div>
+    <button type="button" class="fx-pill" id="fx-pill" hidden aria-haspopup="dialog" data-click="openFxSheet"><span id="fx-pill-code">USD</span><span data-icon="info" aria-hidden="true"></span></button>
     <div class="tb-search"><span class="tb-search-icon" data-icon="search" aria-hidden="true"></span><input type="text" aria-label="Search transactions" placeholder="Search transactions…" data-input="searchGlobalTx" data-input-args='["$value"]'></div>
     <button class="ib tb-export" aria-label="Export CSV" title="Export CSV" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span></button>
     <button class="ib tb-ai" aria-label="Open Fyn AI" title="Fyn AI" data-click="toggleAdvisor"><span data-icon="spark" aria-hidden="true"></span></button>
@@ -863,6 +864,7 @@ thead { position:sticky; top:0; z-index:10; }
         <div class="hero-main">
           <div class="hero-top"><h2 class="eyebrow" id="hero-title">This month</h2><span class="chip up" id="hero-delta" hidden></span></div>
           <div class="hero-figure"><span class="hero-num" id="hero-net">KES 0</span><span class="hero-cap">net cash flow</span></div>
+          <p class="hero-recorded" id="hero-recorded" hidden></p>
           <p class="hero-sub" id="hero-sub"></p>
           <div class="hero-split" id="hero-split" hidden>
             <div class="split-bar" role="img" id="split-bar" aria-label=""><span class="split-spent" id="split-spent"></span><span class="split-kept" id="split-kept"></span></div>
@@ -1000,13 +1002,14 @@ thead { position:sticky; top:0; z-index:10; }
           <header class="an-hd"><h2 id="an-h-goal">How close am I to my goal?</h2></header>
           <p class="an-big"><b id="an-goal-saved">KES 0</b><span id="an-goal-of"> of KES 3,000,000</span><em id="an-goal-pct">0%</em></p>
           <div class="an-bar-wrap"><div class="an-track" role="progressbar" aria-label="Progress toward your target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="an-goal-track"><i id="an-goal-fill"></i></div></div>
+          <p class="muted" id="an-goal-kes" hidden></p>
           <p class="an-pace" id="an-goal-pace"></p>
           <p class="muted">A common rule is 25 times your yearly expenses.</p>
           <footer class="an-ft"><button class="btn-secondary an-small" data-click="openTargetDialog">Change target</button><button class="btn-secondary an-small" data-click="askFynAbout" data-click-args='["goal"]'><span data-icon="spark" aria-hidden="true"></span>Ask Fyn about this</button></footer>
         </section>
 
         <section class="card an-card" aria-labelledby="an-h-month">
-          <header class="an-hd"><h2 id="an-h-month">Monthly summary</h2><button class="btn-secondary an-small" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span>Export CSV</button></header>
+          <header class="an-hd"><h2 id="an-h-month">Monthly summary</h2><span class="muted an-export-note" id="an-export-note" hidden>Exports in the currency each transaction was entered in, plus KES.</span><button class="btn-secondary an-small" data-click="exportCSV"><span data-icon="export" aria-hidden="true"></span>Export CSV</button></header>
           <div class="txt-wrap an-desk"><table class="txt an-table"><thead><tr><th>Month</th><th class="r">Income</th><th class="r">Expenses</th><th class="r">Saved</th><th class="r">Net</th><th class="r">Savings rate</th></tr></thead><tbody id="monthly-table"></tbody></table></div>
           <div class="an-cards" id="monthly-cards"></div>
           <p class="muted an-note">Saved is money moved to savings. Net is income minus expenses.</p>
@@ -1080,6 +1083,14 @@ thead { position:sticky; top:0; z-index:10; }
           <p class="muted">Used in greetings and your avatar.</p>
           <div class="form-grp"><label class="form-lbl" for="cfg-name">Your name</label><input class="form-input" type="text" id="cfg-name" maxlength="40" autocomplete="given-name" data-keydown="profileEnter" data-keydown-args='["$event"]'></div>
           <div class="set-acts"><button class="btn-primary" data-click="saveProfile">Save</button></div>
+        </section>
+
+        <section class="card set-card" aria-labelledby="set-h-disp">
+          <header class="set-hd"><h2 id="set-h-disp">Display currency</h2></header>
+          <p class="muted">Choose the currency your totals are shown in.</p>
+          <div class="form-grp"><label class="form-lbl" for="cfg-display">Show amounts in</label><select class="form-input" id="cfg-display" data-change="setDisplayCurrency" data-change-args='["$value"]'></select></div>
+          <p class="set-info"><span data-icon="info" aria-hidden="true"></span><span>Converted at your saved rates below, not live rates. Transactions keep the currency they were entered in, and budgets are still tracked in KES.</span></p>
+          <div class="fx-worked" id="fx-worked" hidden><b>Worked out from your rates</b><dl id="fx-worked-list"></dl></div>
         </section>
 
         <section class="card set-card" aria-labelledby="set-h-fx">
@@ -1233,10 +1244,22 @@ thead { position:sticky; top:0; z-index:10; }
         <div><dt>Category</dt><dd id="td-cat"></dd></div>
         <div><dt>Date</dt><dd id="td-date"></dd></div>
         <div><dt>Source</dt><dd id="td-src"></dd></div>
+        <div id="td-entered-row" hidden><dt>Entered as</dt><dd id="td-entered"></dd></div>
         <div><dt>Notes</dt><dd id="td-notes"></dd></div>
       </dl>
     </div>
     <div class="modal-acts detail-acts"><button class="btn-secondary" data-click="detailEdit">Edit</button><button class="btn-danger-sm" data-click="detailDelete">Delete</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fx-sheet">
+  <div class="modal choice-modal" role="dialog" aria-modal="true" aria-labelledby="fx-sheet-title">
+    <div class="modal-hdr"><div class="modal-title" id="fx-sheet-title">Show amounts in</div><button class="modal-close" aria-label="Close" data-click="closeModal" data-click-args='["fx-sheet"]'><span data-icon="close" aria-hidden="true"></span></button></div>
+    <div class="modal-body">
+      <div class="fx-options" id="fx-options" role="radiogroup" aria-labelledby="fx-sheet-title"></div>
+      <p class="muted fx-note" id="fx-sheet-note">Converted at your saved rates, not live rates.</p>
+      <button type="button" class="link" data-click="fxEditRates">Edit exchange rates</button>
+    </div>
   </div>
 </div>
 
@@ -1308,6 +1331,7 @@ thead { position:sticky; top:0; z-index:10; }
     <div class="modal-body">
       <div class="form-grp"><label class="form-lbl" for="b-cat">Category</label><select class="form-input" id="b-cat" data-change="budgetCatChanged" aria-describedby="b-cat-err"></select><p class="field-err" id="b-cat-err" role="alert" hidden></p></div>
       <div class="form-grp"><label class="form-lbl" for="b-limit">Monthly limit (KES)</label><input class="form-input" type="text" id="b-limit" inputmode="decimal" autocomplete="off" placeholder="0" aria-describedby="b-limit-err b-hint" data-input="budgetLimitInput" data-keydown="budgetEnter" data-keydown-args='["$event"]'><p class="field-err" id="b-limit-err" role="alert" hidden></p>
+        <p class="field-hint" id="b-fx" hidden></p>
         <p class="field-hint" id="b-hint" hidden><span id="b-hint-text"></span> <button type="button" class="link" data-click="useLastMonth">Use this amount</button></p></div>
     </div>
     <div class="modal-acts"><button class="btn-secondary" data-click="closeModal" data-click-args='["budget-modal"]'>Cancel</button><button class="btn-primary" id="b-save-btn" data-click="saveBudget"><span data-icon="check" aria-hidden="true"></span><span id="b-save-label">Create budget</span></button></div>
