@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "npm run build && netlify dev",
-    "check": "node --check public/app.js && node --check public/icons.js && node --check public/calc.js && node --check public/sync.js && node --check public/csv.js && node --check public/addflow.js && node --check public/importreview.js && node --check public/txfilter.js && node --check public/budgets.js && node --check public/analytics.js && node --check public/settings.js && node --check public/advisor.js && node --check public/mpesa.js && node --check public/display.js && node --check netlify/functions/ai.mjs && node --check netlify/functions/config.mjs",
+    "check": "node --check public/app.js && node --check public/icons.js && node --check public/calc.js && node --check public/sync.js && node --check public/csv.js && node --check public/addflow.js && node --check public/importreview.js && node --check public/txfilter.js && node --check public/budgets.js && node --check public/analytics.js && node --check public/settings.js && node --check public/advisor.js && node --check public/mpesa.js && node --check public/display.js && node --check public/sw.js && node --check netlify/functions/ai.mjs && node --check netlify/functions/config.mjs",
     "test": "node --test --experimental-test-module-mocks \"tests/**/*.test.mjs\""
   },
   "engines": {

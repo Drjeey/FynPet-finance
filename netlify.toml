@@ -27,3 +27,15 @@
   for = "/vendor/*"
   [headers.values]
     Cache-Control = "public, max-age=86400"
+
+# The service worker must be re-checked on every visit so a new deploy reaches installed apps quickly.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "no-cache"

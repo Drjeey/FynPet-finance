@@ -37,6 +37,7 @@ Audit scope note: code review plus `npm test` and `npm audit`. No live browser, 
 | Date | Decision | Reason |
 |---|---|---|
 | 2026-11-19 | Display currency changes only what is shown: records stay in their entry currency with fixed KES values, budgets stay in KES, conversions use the person's saved rates (cross pairs derived from them), and each screen adds up in the shown currency | Keeps saved history and budgets unchanged; no live-rate claims (PRODUCT.md) |
+| 2026-11-20 | FynPet made installable (PWA): manifest, service worker (network-first app shell; never caches /api or Supabase), PNG icons generated from the FP mark; signed-in profile kept on screen when opened offline | User: "it's supposed to be a PWA". No install button in the UI yet (would need a Stitch design) |
 | 2026-11-19 | Display-currency designs (export 7) approved with conditions; picker and "back to KES" frames rejected as not needed; build conditions in 26_REVIEW_DISPLAY_CURRENCY.md | Patterns clear; Stitch drift handled as build corrections |
 | 2026-11-16 | All UI is designed in Google Stitch only; Claude writes prompts and reviews | User's rule |
 | 2026-11-16 | Dashboard hero is net cash flow, not "balance" | FynPet has no accounts; a balance would be invented |

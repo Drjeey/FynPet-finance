@@ -23,6 +23,13 @@ import { quickCategories, categoryForDescription, defaultCategory, defaultDescri
 const API = { config: '/api/config', ai: '/api/ai' };
 
 async function initCloudConfig() {
+  // Opened with no connection (for example from the home screen): keep the signed-in person's records on screen
+  // instead of switching to the local profile. Changes stay on this device and sync once the connection is back.
+  if (!navigator.onLine && activeProfile !== 'local') {
+    setSyncStatus('local', 'Offline. Changes are saved on this device');
+    window.addEventListener('online', () => initCloudConfig(), { once: true });
+    return;
+  }
   try {
     const res = await fetch(API.config);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2544,6 +2551,11 @@ let _resizeTimer;window.addEventListener('resize',()=>{clearTimeout(_resizeTimer
 // ═══════════════════════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════════════════════
+// Installable app: the service worker caches the app shell so FynPet opens offline (public/sw.js).
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   renderIcons();
   document.getElementById('advisor-panel').inert=true;
